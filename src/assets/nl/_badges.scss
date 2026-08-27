@@ -1,0 +1,19 @@
+.nl {
+	.badge {
+		height: 16px;
+		font-size: 12px;
+		letter-spacing: .015rem;
+		&.bg-success, &.bg-warning {
+            color: $nl-white;
+		}
+		&.bg-secondary {
+			background-color: $nl-grey-20;
+		}
+		&.badge-lg {
+			    height: 20px;
+				font-size: 14px;
+				padding-bottom: 0;
+				padding-top: 4px;
+		}
+	}
+}

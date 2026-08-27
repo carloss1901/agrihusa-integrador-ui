@@ -1,0 +1,97 @@
+.nl {
+	.joyride-step__holder{
+        font-family: 'Calibri', Arial, sans-serif !important;
+        font-style: normal;
+        font-weight: normal;
+    }
+	.joyride-step__container {
+		border-radius: 8px;
+		border: none;
+		box-shadow: $box-shadow-lg !important;
+		height: auto !important;
+		width: 300px !important;
+		padding: 0.5rem !important;
+		.joyride-step__body {
+			font-size: 0.86rem;
+			color: $nl-grey-30;
+		}
+		.joyride-step__close {
+			top: 8px !important;
+			right: 18px !important;
+		}
+		& .joyride-button {
+			font-size: 16px;
+			text-transform: capitalize !important;
+			border-radius: 4px;
+			border-color: $dgpmi-primary !important;
+			background-color: $dgpmi-primary !important;
+			&:hover {
+				color: white !important;
+				border: 2px solid $dgpmi-primary-dark !important;
+				background-color: $dgpmi-primary-dark !important;
+			}
+		}
+		& .joyride-step__prev-button .joyride-button {
+			font-size: 16px;
+			color: $nl-grey-30 !important;
+			background-color: transparent !important;
+			border-color: transparent !important;
+			&:hover {
+				color: $nl-grey-30 !important;
+				border-color: transparent !important;
+				background-color: $nl-grey-10 !important;
+			}
+		}
+		.joyride-step__title {
+			line-height: 24px;
+		}
+	}
+	#joyride-step-wellcome {
+		.joyride-step__container {
+			width: 600px !important;
+			min-width: 600px !important;
+			padding: 0.75rem !important;
+			& .joyride-button {
+				transform: translateY(-20px);
+				position: relative;
+				color: transparent !important;
+				&::after {
+					content: "Empezar";
+					color: white;
+					position: absolute;
+					left: 50%;
+					transform: translateX(-50%);
+				}
+			}
+			& .joyride-step__counter-container {
+				display: none !important;
+			}
+			& .joyride-step__body {
+				padding-bottom: 0 !important;
+			}
+			& .joyride-step__header {
+				display: none !important;
+			}
+		}
+	}
+	// CONTENIDO CERTIFICADO
+	#joyride-step-sixthStep {
+		top: 50% !important;
+		transform: translateY(-50%) !important;
+		.joyride-step__container {
+			width: 270px !important;
+			max-width: 270px !important;
+		}
+	}
+	.header_tour {
+		z-index: 1 !important;
+	}
+	.tour-image {
+		width: 250px;
+		height: 235px;
+		transform: translateY(15px);
+	}
+	.tour-hr {
+		border-top: none !important;
+	}
+}

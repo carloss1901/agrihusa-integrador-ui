@@ -1,0 +1,117 @@
+.nl {
+	.table-heading,
+	.table-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 48px;
+		padding-left: 1rem !important;
+		padding-right: 1rem !important;
+	}
+	.table-sticky {
+		height: 200px;
+		&.table-sticky--height {
+			height: 440px;
+		}
+		overflow-y: auto;
+		thead {
+			th {
+				top: 0;
+				position: sticky;
+				background-color: $nl-white;
+			}
+		}
+	}
+	.table {
+		&.table-consult {
+			tbody>tr {
+				&:hover {
+					color: $nl-black;
+					background: transparent;
+				}
+			}
+		}
+		thead {
+			th {
+				height: 48px;
+				font-size: 12px;
+				color: $nl-grey-40;
+				border: none;
+				background-color: $nl-grey-20;
+				height: $nl-medium-large;
+				text-transform: uppercase;
+				font-weight: 700;
+				line-height: 2;
+			}
+		}
+		tbody > tr {
+			cursor: pointer;
+			&:hover {
+				//color: $dgpmi-primary !important; //$nl-red;
+				background: $active-row; //$nl-red-ligth;
+			}
+			&.active {
+				background: $dgpmi-primary-light; //$nl-red-ligth;
+				> td {
+					color: $dgpmi-primary; //$nl-red;
+				}
+			}
+		}
+		td,
+		th {
+			vertical-align: middle;
+			height: 40px;
+
+			&.monto,
+			&.monto>input {
+				text-align: right !important;
+			}
+		}
+		&.table-sm {
+			td,
+			th {
+				height: auto;
+				padding: 0.2rem 0.25rem !important;
+			}
+		}
+		&.table-consulta {
+			tbody>tr {
+				cursor: inherit;
+
+				&:hover {
+					color: $nl-black;
+					background: transparent;
+				}
+			}
+		}
+	}
+
+	.table > :not(caption) > * > * {
+		background-color: transparent;
+	}
+
+	.no-results {
+		padding: 2rem 1.5rem;
+		text-align: center;
+
+		&__icon {
+			font-size: 1.75rem;
+			color: $nl-grey-30;
+		}
+
+		&__text {
+			font-size: 15px;
+			color: $nl-grey-30;
+			margin-bottom: 0;
+		}
+	}
+
+	.table-no-pointer {
+    tbody > tr {
+      cursor: default !important;
+      &:hover {
+        background: transparent !important;
+      }
+    }
+  }
+}

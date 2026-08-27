@@ -1,0 +1,54 @@
+.box_icon {
+  height: 38px;
+  width: 38px;
+  min-width: 38px;
+  display: flex;
+  color: $nl-grey-30;
+  align-items: center;
+  justify-content: center;
+  background: $nl-grey-10;
+  border-radius: $border-radius-lg;
+  margin-right: 0.75rem;
+  &_sm {
+    height: 32px;
+    width: 32px;
+    min-width: 32px;
+  }
+  &_lg {
+    height: 46px;
+    width: 46px;
+    min-width: 46px;
+  }
+  &_xl {
+    height: 52px;
+    width: 52px;
+    min-width: 52px;
+  }
+}
+.nl {
+  .icon-xs {
+    font-size: 14px !important;
+  }
+
+  .icon-sm {
+    font-size: 16px !important;
+  }
+
+  .icon-md {
+    font-size: 18px !important;
+  }
+
+  .icon-lg {
+    font-size: 20px !important;
+  }
+
+  .icon-xl {
+    font-size: 24px !important;
+  }
+}
+.feather.down {
+  transform: rotate(90deg);
+}
+.feather.up {
+  transform: rotate(90deg) scaleX(-1);
+}

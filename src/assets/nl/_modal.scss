@@ -1,0 +1,55 @@
+.nl {
+  .modal {
+    z-index: 1040 !important;
+    &-dialog {
+      margin: 0 auto;
+    }
+    &-content {
+      border: none;
+      box-shadow: $box-shadow-lg;
+      border-radius: $border-radius-lg;
+      z-index: 1050;
+    }
+    &-backdrop.show {
+      opacity: 1;
+      background-color: rgba(63, 64, 71, 0.25);
+    }
+    &-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $nl-black;
+      line-height: 130%;
+    }
+    &-subtitle {
+      font-size: 1rem;
+    }
+    &-subtitle {
+      color: $nl-grey-30;
+      line-height: normal;
+    }
+    .btn {
+      transition: none;
+      &-close {
+        $size: 32px;
+        background-color: transparent;
+        border-radius: 50%;
+        color: #fff;
+        text-align: center;
+        opacity: 1;
+        span {
+          display: block;
+          font-weight: normal;
+          height: $size;
+          width: $size;
+          padding-top: 0.2rem;
+        }
+        &:not(:disabled):hover {
+          opacity: 0.75;
+        }
+      }
+    }
+  }
+  .modal-backdrop {
+    z-index: 1040 !important;
+  }
+}

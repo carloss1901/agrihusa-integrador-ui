@@ -1,0 +1,33 @@
+<div id="agrihusaApp">
+  <div class="agrihusa-header" *ngIf="isAuthenticated">
+    <header>
+      <app-header
+        (onToggleSideNav)="toggleMenu($event)"
+        (onLogout)="logout()"
+      ></app-header>
+    </header>
+    <div class="agrihusaApp-content-container">
+      <aside class="agrihusaApp-content_sidebar" [class.d-none]="!menuVisible">
+        <section>
+          <app-menu
+            (onToggleSideNav)="toggleMenu($event)"
+            (onSelectItem)="onSelectMenu($event)"
+          ></app-menu>
+        </section>
+      </aside>
+      <main class="agrihusaApp-content_main">
+        <section class="agrihusaApp-content_placeholder">
+          <p class="eyebrow">Layout base</p>
+          <h1>{{ selectedMenuLabel }}</h1>
+          <p>
+            Este espacio queda libre para integrar microfrontends o vistas futuras.
+          </p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div *ngIf="!isAuthenticated">
+    <app-login (onLogin)="login()"></app-login>
+  </div>
+</div>

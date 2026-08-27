@@ -1,0 +1,38 @@
+.nl {
+  .breadcrumb {
+    margin: 0;
+		font-style: normal;
+		font-weight: normal;
+		font-size: 14px;
+		line-height: 130%;
+		color: $nl-grey-30;
+		padding: 0.72rem 0;
+		background-color: transparent;
+
+    &-item {
+      padding-left: 0.5rem;
+
+      + .breadcrumb-item::before {
+        content: "\e931";
+        color: $nl-grey-30;
+        font-size: 100%;
+        font-family: "feather", sans-serif;
+        font-weight: 600;
+      }
+
+      &.active {
+        font-weight: bold;
+        color: $nl-black !important;
+      }
+    }
+
+    a {
+      color: $nl-grey-30;
+      text-decoration: none;
+
+      &:hover {
+        color: $dgpmi-primary;
+      }
+    }
+  }
+}

@@ -1,0 +1,112 @@
+// Colores
+$nl-black: #141415;
+$nl-white: #ffffff;
+$nl-red: #ED3237;
+$nl-red-dark: #CF2C30;
+$nl-red-ligth: #FFD6D7;
+$nl-orange: #F59E3F;
+$nl-orange-light: #FEF3E7;
+$nl-green: #93C249;
+$nl-green-light: #F2F7E8;
+$nl-blue: #0594B9;
+$nl-blue-light: #CDE6EC;
+$nl-gris: #606062;
+$nl-grey-10: #F5F6FA;
+$nl-grey-20: #D2D3D5;
+$nl-grey-30: #828283;
+$nl-grey-40: #373739;
+
+$dgpmi-primary: #00632a;
+$dgpmi-primary-dark: #003B19;
+$dgpmi-primary-light: #e0f3e7;
+$active-row: #E0F2F6;
+$nl-focus: #80bdff;
+// Espaciado
+$nl-extra-small:              8px;
+$nl-small:                    16px;
+$nl-small-extra:              24px;
+$nl-medium:                   32px;
+$nl-medium-large:             40px;
+$nl-large:                    72px;
+// Botones
+$nl-btn-small:                28px;
+$nl-btn-regular:              32px;
+$nl-btn-large:                38px;
+// Configuración bootstrap 5
+$theme-colors: (
+  "primary":    $dgpmi-primary,
+  "secondary":  $nl-grey-10,
+  "success":    $nl-green,
+  "info":       $nl-blue,
+  "warning":    $nl-orange,
+  "danger":     $nl-red,
+);
+// Breakpoints
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 1100px,
+  xl: 1200px
+);
+
+$container-max-widths: (
+  sm: 540px,
+  md: 960px,
+  lg: 960px,
+  xl: 1100px
+);
+// Colores
+$success:                   	$nl-green;
+$info:          				      $nl-blue;
+$warning:       				      $nl-orange;
+$danger:        				      $nl-red;
+// Radio, Checkbox, Switch
+$form-check-input-checked-bg-color:       $dgpmi-primary;
+$form-check-input-checked-border-color:   $form-check-input-checked-bg-color;
+// Texto
+$font-size-base:               .875rem;
+$text-muted:                   $nl-grey-30;
+// Navs
+$nav-link-padding-y:           .344rem;
+// Border
+$border-radius:                4px;
+$border-radius-sm:             6px;
+$border-radius-lg:             8px;
+$border-color:                 $nl-grey-10;
+$border-radius-badge:          50px;
+// Shadow
+$component-active-bg:          $dgpmi-primary;
+$box-shadow:                   0px 1px 5px rgba(0, 0, 0, 0.1);
+$box-shadow-sm:                0px 3px 7px rgba(0, 0, 0, 0.08);
+$box-shadow-lg:                0px 10px 15px rgba(0, 0, 0, 0.1), 0px 4px 6px rgba(0, 0, 0, 0.05);
+// Hr
+$hr-border-color:              $nl-grey-10;
+// Tables
+$table-cell-padding:           .55rem;
+$table-cell-padding-sm:        .3rem;
+$table-color:                  $nl-black;
+$table-th-font-weight:         400;
+// Input
+$input-border-color:           $nl-grey-20 !important;
+$input-disabled-bg:            $nl-grey-10;
+$input-placeholder-color:      $nl-grey-30;
+
+$input-border-radius:          $border-radius;
+$input-border-radius-lg:       $border-radius;
+$input-border-radius-sm:       $border-radius;
+
+$input-height: 				         32px;
+$input-height-sm: 			       28px;
+$input-height-lg: 			       38px;
+
+$input-font-size: 			       14px;
+$input-font-size-sm: 		       14px;
+$input-font-size-lg: 		       16px;
+// Dropdown
+$dropdown-divider-bg:          $nl-grey-10;
+// Buttons
+$btn-link-color:               $dgpmi-primary;
+$btn-link-hover-color:         $dgpmi-primary-dark;
+// Link
+$link-color:                   $dgpmi-primary;

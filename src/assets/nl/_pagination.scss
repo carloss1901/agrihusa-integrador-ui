@@ -1,0 +1,60 @@
+.nl {
+	.content-pagination {
+		display: flex;
+		align-items: center;
+		.page-item {
+			display: none;
+			&:first-child, &:last-child {
+				display: inline-block;
+				.page-link {
+					display: flex;
+					align-items: center;
+				}
+			}
+		}
+	}
+	.pagination {
+		margin-bottom: 0;
+		.page-item {
+			&.disabled {
+				.page-link { 
+					background-color: transparent;
+					color: $nl-grey-20;
+					cursor: not-allowed;
+				}
+			}
+		}
+		.page-link {
+			height: 32px;
+			width: 32px;
+			box-shadow: none;
+			border: none;
+			color: $nl-grey-30;
+			&:hover {
+				color: $dgpmi-primary;
+				background-color: transparent;
+			}
+			.feather {
+				font-size: 16px;
+			}
+		}
+		&.pagination-sm {
+			.page-link {
+				height: 28px;
+				width: 28px;
+				.feather {
+					font-size: 14px;
+				}
+			}
+		}
+		&.pagination-lg {
+			.page-link {
+				height: 38px;
+				width: 38px;
+				.feather {
+					font-size: 18px;
+				}
+			}
+		}
+	}
+}

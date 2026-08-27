@@ -1,0 +1,46 @@
+$color-active-row: #ebf5f9; //#ffcdd2
+$color-hover-row: #ebf5f9; //#ffebee
+$spacio-separacion: 1.125rem;
+
+.rounded-top-0 {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+
+.nl {
+	.nav-tabs {
+		@extend .border-bottom;
+	}
+}
+
+.nl .acc-body-padding-0 {
+	.accordion-body {
+		padding: 0 !important;
+	}
+}
+
+.nl .modal {
+	&-title {
+		font-size: 1.18rem;
+		text-transform: uppercase;
+	}
+
+	&-footer {
+		padding: 1rem;
+
+		.btn {
+			margin: 0;
+
+			&:not(:last-child) {
+				margin-right: 0.5rem;
+			}
+		}
+	}
+}
+.no-click {
+	pointer-events: none;
+}
+
+.z-index-1 {
+	z-index: 1;
+}

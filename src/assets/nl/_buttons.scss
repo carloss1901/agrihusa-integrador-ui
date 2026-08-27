@@ -1,0 +1,136 @@
+.nl {
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 14px;
+		height: $nl-btn-regular;
+		border-radius: $border-radius-sm;
+		.feather {
+			font-size: 16px;
+		}
+		&.btn-sm {
+			font-size: 12px;
+			height: $nl-btn-small;
+			.feather {
+				font-size: 14px;
+			}
+		}
+		&.btn-lg {
+			font-size: 16px;
+			height: $nl-btn-large;
+			.feather {
+				font-size: 18px;
+			}
+		}
+		&.btn-primary {
+			color: white !important;
+		}
+		&.btn-secondary {
+			color: $nl-grey-30;
+			&:hover, &:active, &:focus {
+				background-color: $nl-grey-20 !important;
+				border-color: $nl-grey-20 !important;
+			}
+			&:active {
+				color: $nl-grey-30 !important;
+			}
+			&.disabled, &:disabled {
+				pointer-events: none;
+			}
+		}
+		&.btn-outline-primary {
+			&:hover, &:focus, &:active {
+				color: $nl-white !important;
+				background-color: $dgpmi-primary !important;
+			}
+		}
+		&.btn-outline-secondary {
+			color: $nl-grey-40;
+    		border-color: $nl-grey-20;
+			&:hover, &:active, &:focus {
+				background-color: $nl-grey-10 !important;
+				// border-color: $nl-grey-10 !important;
+			}
+			&:active {
+				color: $nl-grey-30 !important;
+			}
+			&.disabled, &:disabled {
+				color: $nl-grey-20;
+				pointer-events: none;
+			}
+		}
+		&.btn-outline-light {
+			color: $nl-grey-40;
+			background-color: transparent;
+			border-color: transparent;
+			&:hover {
+				color: $dgpmi-primary;
+			}
+			&:focus, &:active, &:active {
+				color: $dgpmi-primary !important;
+				background-color: transparent !important;
+				box-shadow: none !important;
+				border-color: transparent !important;
+			}
+			&.btn-icon {
+				.feather {
+					font-size: 18px;
+				}
+				&.btn-sm {
+					.feather {
+						font-size: 16px;
+					}
+				}
+				&.btn-lg {
+					.feather {
+						font-size: 20px;
+					}
+				}
+			}
+			&.disabled, &:disabled {
+				pointer-events: none;
+				color: $nl-grey-20;
+				background-color: transparent;
+			}
+		}
+		&-icon {
+			width: $nl-btn-regular;
+			&.btn-sm {
+				width: $nl-btn-small;
+			}
+			&.btn-lg {
+				width: $nl-btn-large;
+			}
+		}
+		&-menu {
+			cursor: pointer;
+			background-color: $dgpmi-primary-dark;
+			width: 44px;
+			height: 44px;
+			border-radius: 50%;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			@include transition (all 0.3s cubic-bezier(0.0,0.0,0.2,1));
+		}
+		&.disabled, &:disabled {
+			opacity: .5;
+		}
+	}
+
+	.btn-cancel {
+		@extend .btn;
+		@extend .btn-secondary;
+		@extend .w-auto;
+		
+		display: inline-flex !important;
+		color: #141415 !important;
+		appearance: none;
+		border: 1px solid #d2d3d5 !important;
+		height: 32px !important;
+	}
+	
+}
+
+

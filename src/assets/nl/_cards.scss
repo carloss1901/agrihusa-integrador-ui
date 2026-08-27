@@ -1,0 +1,28 @@
+.nl-card {
+  box-shadow: $box-shadow;
+  background-color: $nl-white;
+  border-radius: $border-radius-lg;
+  &-header {
+    display: flex;
+    align-items: center;
+    min-height: 45px;
+  }
+
+  &.padding {
+    padding: 1rem;
+  }
+}
+
+.rounded-bottom-card {
+	border-bottom-left-radius: $border-radius-lg;
+	border-bottom-right-radius: $border-radius-lg;
+}
+
+.rounded-top-card {
+	border-top-left-radius: $border-radius-lg;
+	border-top-right-radius: $border-radius-lg;
+}
+
+.box-shadow-card {
+	box-shadow: $box-shadow;
+}

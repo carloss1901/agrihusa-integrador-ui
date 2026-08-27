@@ -1,0 +1,12 @@
+.nl {
+	.form-check-label {
+		line-height: 170%;
+		&::before {
+        	border-width: 2px;
+		}
+		
+	}   
+}
+.custom-checkbox .form-check-input:checked ~ .form-check-label::after {
+	background-size: 10px;
+}

@@ -1,0 +1,89 @@
+.agrihusa-sidebar::-webkit-scrollbar {
+  width: 0;
+}
+
+.agrihusa-sidebar::-webkit-scrollbar-thumb {
+  background-color: #fff;
+}
+
+#agrihusa-aside-menu {
+  padding-top: 10px;
+  padding-bottom: 0;
+  height: calc(100vh - 54px);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.content-header-menu {
+  height: 50px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #969494;
+  margin-bottom: 10px;
+}
+
+.menu-collapse-icon {
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+#agrihusa-aside-menu .accordion-item {
+  margin-bottom: 0 !important;
+  border-radius: 0 !important;
+  border: 0;
+}
+
+#agrihusa-aside-menu .accordion-button {
+  padding: 10px 15px 10px 5px !important;
+  background-color: #606062 !important;
+  color: white !important;
+  height: 40px;
+  font-size: 13px;
+  box-shadow: none !important;
+}
+
+#agrihusa-aside-menu .accordion-button span {
+  padding-left: 10px !important;
+}
+
+#agrihusa-aside-menu .accordion-button::after {
+  filter: brightness(10);
+}
+
+#agrihusa-aside-menu .accordion-body {
+  background-color: #606062 !important;
+  padding: 0 !important;
+}
+
+#agrihusa-aside-menu .accordion-body ul {
+  padding-left: 15px !important;
+  list-style-type: none !important;
+  margin-bottom: 0 !important;
+}
+
+#agrihusa-aside-menu .accordion-body ul li {
+  cursor: pointer;
+  color: white;
+  display: flex;
+}
+
+#agrihusa-aside-menu .accordion-body ul li span {
+  max-height: 40px;
+  width: 80%;
+  line-height: 40px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 15px;
+  font-size: 13px;
+}
+
+#agrihusa-aside-menu .accordion-body ul li.active {
+  background-color: #49494d !important;
+}
+

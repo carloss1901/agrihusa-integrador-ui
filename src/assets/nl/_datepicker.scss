@@ -1,0 +1,26 @@
+.nl {
+	.dropdown-menu{
+		border:none;
+		box-shadow: $box-shadow-lg;
+		.ngb-dp-header {
+			background-color: $nl-grey-10;
+			.form-select {
+				border: 1px solid $nl-grey-20;
+				border-radius: $border-radius;
+			}
+		}
+		.ngb-dp-weekdays {
+			background-color: $nl-grey-10;
+			border-bottom: 1px solid $nl-grey-20;
+			.ngb-dp-weekday {
+				color: $dgpmi-primary;
+			}
+		}
+		.btn-link {
+			color: $nl-grey-30;
+		}
+		.btn-light:hover, .btn-light:focus, .btn-light:not(:disabled):not(.disabled):active, .btn-light:not(:disabled):not(.disabled).active {
+			background-color: $nl-grey-10;
+		}
+	}
+}

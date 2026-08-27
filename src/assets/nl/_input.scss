@@ -1,0 +1,103 @@
+.nl {
+	.form-group {
+		margin-bottom: 0.5rem;
+		label {
+			font-size: 14px;
+			line-height: 100%;
+			color: $nl-grey-30;
+			margin-bottom: 0.35rem;
+		}
+	}
+	.form-group-search {
+		position: relative;
+		> .form-control.form-icon {
+			padding-right: 2.25rem;
+		}
+		> .btn {
+			position: absolute;
+			top: 0;
+			right: 4px;
+		}
+		.no-dropdown::after {
+			display: none;
+		}
+	}
+	.form-control {
+		color: $nl-black;
+		height: $input-height;
+		&.form-control-sm {
+			height: $input-height-sm;
+		}
+		&.form-control-lg {
+			height: $input-height-lg;
+		}
+		&:focus {
+			border-color: lighten($nl-blue, 25%) !important;
+			box-shadow: 0 0 0 0.2rem rgba($nl-blue, 0.25);
+		}
+		&:disabled,
+		&.disabled, 
+		&[readonly] {
+			opacity: 1;
+			border-color: $nl-grey-20;
+			background-color: $nl-grey-10;
+			color: $nl-grey-30;
+		}
+		&.ng-invalid.ng-touched {
+			border: 1px solid $dgpmi-primary !important;
+		}
+	}
+	.form-select {
+		padding-right: 2rem;
+		-moz-padding-start: calc(0.75rem - 3px);
+		background-color: #fff;
+		background-image: url("../images/icon-chevron-down.svg");
+		background-repeat: no-repeat;
+		background-position: right 0.5rem center;
+		background-size: 16px 16px;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+		&.form-control-sm {
+			padding-right: 1.5rem;
+			background-size: 14px 14px;
+			background-position: right 0.35rem center;
+		}
+		&.form-control-lg {
+			padding-right: 2.25rem;
+			background-size: 18px 18px;
+			background-position: right 0.65rem center;
+		}
+	}
+	.form-icon {
+		padding-left: 2rem;
+		background-image: url("../images/icon-search.svg");
+		background-repeat: no-repeat;
+		background-position: left 0.5rem center;
+		background-size: 16px 16px;
+		&.calendar {
+			background-image: url("../images/icon-calendar.svg");
+			border-radius: 4px;
+		}
+		&.search {
+			// background-image: url("../images/icon-search.svg");
+			background-image: url("../images/icon-search.svg");
+			border-radius: $nl-small-extra;
+		}
+		&.form-control-sm {
+			padding-left: 1.5rem;
+			background-size: 14px 14px;
+			background-position: left 0.35rem center;
+		}
+		&.form-control-lg {
+			padding-left: 2.25rem;
+			background-size: 18px 18px;
+			background-position: left 0.65rem center;
+		}
+	}
+	textarea {
+		&.form-control {
+			height: auto;
+		}
+	}
+}

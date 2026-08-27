@@ -1,0 +1,49 @@
+.nl {
+	.nav-tabs {
+		border:none;
+		& > .nav-item {
+			text-align: center;
+			& > .nav-link {
+				border: none;
+				color: $nl-grey-30;
+				position: relative;
+				padding: .85rem 0.5rem;
+				font-size: 14px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				@include transition (all 0.3s cubic-bezier(0.0,0.0,0.2,1));
+        &.disabled {
+          .feather {
+            color: $nl-grey-20;
+          }
+        }
+				&.active, &:hover {
+					font-size: 14px;
+					color: $dgpmi-primary;
+					background-color: transparent;
+					> .feather {
+						color: $dgpmi-primary;
+					}
+					&::after {
+						transform: scale(1);
+					}
+				}
+				&::after {
+					content: "";
+					background: $dgpmi-primary;
+					height: 3px;
+					position: absolute;
+					width: 100%;
+					left: 0px;
+					bottom: 0px;
+					@include transition (all 0.3s cubic-bezier(0.0,0.0,0.2,1));
+					transform: scale(0);
+				}
+				&.disabled {
+					color: $nl-grey-20;
+				}
+			}
+		}
+	}
+}

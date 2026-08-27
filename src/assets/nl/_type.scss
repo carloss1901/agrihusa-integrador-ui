@@ -1,0 +1,75 @@
+.nl {
+    .label {
+        &-small {
+            font-size: 10px;
+            line-height: 130%;
+        }
+        &-regular {
+            font-size: 12px;
+            line-height: 130%;
+        }
+        &-large {
+            font-size: 14px;
+            line-height: 130%;
+        }
+        &-extralarge {
+            font-size: 16px;
+            line-height: 130%;
+        }
+    }
+    .paragraph {
+        &-small {
+            font-size: 12px;
+            line-height: 175%;
+        }
+        &-regular {
+            font-size: 14px;
+            line-height: 150%;
+        }
+        &-large {
+            font-size: 16px;
+            line-height: 150%;
+        }
+    }
+    .code {
+        &-small {
+            font-size: 12px;
+            line-height: 130%;
+        }
+        &-regular {
+            font-size: 14px;
+            line-height: 130%;
+        }
+    }
+    .heading {
+        &-h6 {
+            font-size: 18px;
+            line-height: 130%;
+        }
+        &-h5 {
+            font-size: 20px;
+            line-height: 130%;
+        }
+        &-h4 {
+            font-size: 24px;
+            line-height: 130%;
+        }
+        &-h3 {
+            font-size: 30px;
+            line-height: 100%;
+        }
+        &-h2 {
+            font-size: 36px;
+            line-height: 100%;
+        }
+        &-h1 {
+            font-size: 40px;
+            line-height: 100%;
+        }
+        &-h1plus {
+            font-size: 100px;
+            line-height: 100%;
+        }
+    }
+    
+}
