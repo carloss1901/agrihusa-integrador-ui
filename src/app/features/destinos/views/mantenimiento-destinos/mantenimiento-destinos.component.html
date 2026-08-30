@@ -1,0 +1,62 @@
+<div class="frame-layout">
+  <div class="frame-layout__header">
+    <div class="col-12 my-2">
+      <agrihusa-topbar
+        [titulo]="getNombreMantenimiento"
+        [subtitulo]="'Mantenimiento de destinos'"
+        [showCancel]="false"
+      ></agrihusa-topbar>
+    </div>
+  </div>
+
+  <div class="frame-layout__body">
+    <div class="agrihusa-card mb-component">
+      <app-filtro-mant-destinos
+        (buscarDestino)="onBuscar($event)"
+        (limpiar)="onLimpiarFiltro()"
+      ></app-filtro-mant-destinos>
+    </div>
+
+    <div class="agrihusa-card">
+      <div class="p-content d-flex justify-content-between align-items-center">
+        <span class="title-group-uppercase">Lista de destinos</span>
+        <div class="d-flex gap-2">
+          <agrihusa-button
+            color="primary"
+            variant="outlined"
+            icon="plus"
+            [esIcono]="true"
+            (click)="mostrarModalUpsert(AccionMantenimiento.CREAR)"
+          ></agrihusa-button>
+          <agrihusa-button
+            color="secondary"
+            variant="outlined"
+            icon="edit"
+            [esIcono]="true"
+            [disabled]="!filaSeleccionada || !filaSeleccionada.activo"
+            (click)="mostrarModalUpsert(AccionMantenimiento.ACTUALIZAR)"
+          ></agrihusa-button>
+          <agrihusa-button
+            color="secondary"
+            variant="outlined"
+            icon="trash"
+            [esIcono]="true"
+            [disabled]="!filaSeleccionada"
+            (click)="eliminarDestino()"
+          ></agrihusa-button>
+        </div>
+      </div>
+
+      <app-tabla-mant-destinos
+        [datasource]="dataDestinos"
+        [loading]="loading"
+        [totalItems]="totalItems"
+        [page]="page"
+        [pageSize]="pageSize"
+        [filaSeleccionada]="filaSeleccionada"
+        (seleccionar)="onSeleccionarItem($event)"
+        (paginar)="onChangePaginate($event)"
+      ></app-tabla-mant-destinos>
+    </div>
+  </div>
+</div>

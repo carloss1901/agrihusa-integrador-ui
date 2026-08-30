@@ -1,5 +1,6 @@
 .agrihusa {
-	ngb-accordion {
+	ngb-accordion,
+	[ngbAccordion] {
 	  --bs-accordion-border-color: none;
   
 	  .accordion-item:not(:last-child) {

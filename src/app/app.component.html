@@ -1,4 +1,4 @@
-<div id="agrihusaApp">
+<div id="agrihusaApp" class="agrihusa">
   <div class="agrihusa-header" *ngIf="isAuthenticated">
     <header>
       <app-header
@@ -16,7 +16,9 @@
         </section>
       </aside>
       <main class="agrihusaApp-content_main">
-        <section class="agrihusaApp-content_placeholder">
+        <app-mantenimiento-destinos *ngIf="mostrarDestinos"></app-mantenimiento-destinos>
+
+        <section class="agrihusaApp-content_placeholder" *ngIf="!mostrarDestinos">
           <p class="eyebrow">Layout base</p>
           <h1>{{ selectedMenuLabel }}</h1>
           <p>

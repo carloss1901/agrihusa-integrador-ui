@@ -1,0 +1,65 @@
+<div class="agrihusa">
+  <div class="modal-header">
+    <h6 class="modal-title w-100">{{ titleModal }}</h6>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="onCerrarModal()"
+    ></button>
+  </div>
+  <div class="modal-body">
+    <div class="container-fluid px-0 g-0">
+      <form [formGroup]="formulario">
+        <div class="row gx-3 align-items-baseline">
+          <div class="col-12 col-md-6">
+            <div
+              class="form-group required"
+              [ngClass]="{ invalid: esControlInvalido(cboPais) }"
+            >
+              <label class="form-label">Pais: </label>
+              <ng-select
+                class="text-uppercase"
+                [items]="lstCboPais"
+                bindLabel="descripcion"
+                bindValue="maestroId"
+                placeholder="-- SELECCIONAR --"
+                [clearable]="true"
+                [searchable]="false"
+                formControlName="cboPais"
+              ></ng-select>
+              <div *ngIf="esControlInvalido(cboPais)" class="invalid-feedback">
+                <span>Campo requerido</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div
+              class="form-group required"
+              [ngClass]="{ invalid: esControlInvalido(txtCiudad) }"
+            >
+              <label class="form-label">Ciudad: </label>
+              <input class="form-control agrihusa" formControlName="txtCiudad" />
+              <div *ngIf="esControlInvalido(txtCiudad)" class="invalid-feedback">
+                <span>Campo requerido</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <agrihusa-button
+      texto="Cancelar"
+      color="danger"
+      icon="x"
+      (click)="onCerrarModal()"
+    ></agrihusa-button>
+    <agrihusa-button
+      texto="Guardar"
+      icon="check"
+      (click)="onGuardar()"
+    ></agrihusa-button>
+  </div>
+</div>

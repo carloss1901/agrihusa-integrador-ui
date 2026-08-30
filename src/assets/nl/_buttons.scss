@@ -1,4 +1,4 @@
-.nl {
+.agrihusa {
 	.btn {
 		display: inline-flex;
 		align-items: center;
@@ -23,7 +23,8 @@
 				font-size: 18px;
 			}
 		}
-		&.btn-primary {
+		&.btn-primary,
+		&.btn-danger {
 			color: white !important;
 		}
 		&.btn-secondary {

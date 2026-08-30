@@ -7,26 +7,26 @@ $spacio-separacion: 1.125rem;
 	border-top-right-radius: 0;
 }
 
-.nl {
+.agrihusa {
 	.nav-tabs {
 		@extend .border-bottom;
 	}
 }
 
-.nl .acc-body-padding-0 {
+.agrihusa .acc-body-padding-0 {
 	.accordion-body {
 		padding: 0 !important;
 	}
 }
 
-.nl .modal {
+.agrihusa .modal {
 	&-title {
 		font-size: 1.18rem;
 		text-transform: uppercase;
 	}
 
 	&-footer {
-		padding: 1rem;
+		padding: 0.5rem;
 
 		.btn {
 			margin: 0;
