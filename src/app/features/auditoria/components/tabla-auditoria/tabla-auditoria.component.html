@@ -1,0 +1,49 @@
+<div
+  class="table-responsive"
+  [ngClass]="{ 'table-sticky table-sticky--height': datasource.length > 10 }"
+>
+  <table class="table tbl-grid m-0 head-no-rounded">
+    <caption class="d-none">Tabla de auditoría</caption>
+    <thead>
+      <tr>
+        <th scope="col">Fecha</th>
+        <th scope="col">Usuario</th>
+        <th scope="col">Acción</th>
+        <th scope="col">Entidad</th>
+        <th scope="col">Detalle</th>
+        <th scope="col">IP</th>
+      </tr>
+    </thead>
+    <tbody *ngIf="!loading">
+      <tr
+        *ngFor="let item of datasource; index as i"
+        [class]="'c-pointer tbl-row tbl-row-' + i"
+        [ngClass]="{ active: item.idAuditoria === itemId }"
+        (click)="onSeleccionarFila(item)"
+      >
+        <td>{{ item.fecha }}</td>
+        <td>{{ item.usuario }}</td>
+        <td>{{ item.accion }}</td>
+        <td>{{ item.entidad }}</td>
+        <td>{{ item.detalle }}</td>
+        <td>{{ item.ip }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-container *ngIf="!loading && !totalItems">
+    <agrihusa-no-results></agrihusa-no-results>
+  </ng-container>
+
+  <ng-container *ngIf="loading">
+    <agrihusa-loading></agrihusa-loading>
+  </ng-container>
+</div>
+
+<table-footer-pagination
+  [totalItems]="totalItems"
+  [totalItemsPerPage]="datasource.length"
+  (changePaginate)="onChangePaginate($event)"
+  [page]="page"
+  [pageSize]="pageSize"
+></table-footer-pagination>

@@ -17,8 +17,9 @@
       </aside>
       <main class="agrihusaApp-content_main">
         <app-mantenimiento-destinos *ngIf="mostrarDestinos"></app-mantenimiento-destinos>
+        <app-auditoria *ngIf="mostrarAuditoria"></app-auditoria>
 
-        <section class="agrihusaApp-content_placeholder" *ngIf="!mostrarDestinos">
+        <section class="agrihusaApp-content_placeholder" *ngIf="!mostrarDestinos && !mostrarAuditoria">
           <p class="eyebrow">Layout base</p>
           <h1>{{ selectedMenuLabel }}</h1>
           <p>

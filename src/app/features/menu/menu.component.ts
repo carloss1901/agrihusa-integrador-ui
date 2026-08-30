@@ -51,6 +51,13 @@ export class MenuComponent {
         { nombre: 'Productos', codigo: 107 },
         { nombre: 'Variedades', codigo: 108 }
       ]
+    },
+    {
+      nombreModulo: 'Modulo de Auditoría',
+      codigo: 4,
+      subMenu: [
+        { nombre: 'Auditoría', codigo: 109 }
+      ]
     }
   ];
 

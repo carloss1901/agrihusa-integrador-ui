@@ -5,11 +5,12 @@ import { HeaderComponent } from './features/header/header.component';
 import { LoginComponent } from './features/login/login.component';
 import { MenuComponent } from './features/menu/menu.component';
 import { MantenimientoDestinosComponent } from './features/destinos/views/mantenimiento-destinos/mantenimiento-destinos.component';
+import { AuditoriaComponent } from './features/auditoria/views/auditoria/auditoria.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, MenuComponent, LoginComponent, MantenimientoDestinosComponent],
+  imports: [CommonModule, HeaderComponent, MenuComponent, LoginComponent, MantenimientoDestinosComponent, AuditoriaComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
@@ -18,6 +19,7 @@ export class AppComponent {
   menuVisible = true;
   selectedMenuLabel = 'Seleccione una opcion del menu';
   mostrarDestinos = false;
+  mostrarAuditoria = false;
 
   toggleMenu(esCerrar: boolean): void {
     this.menuVisible = !esCerrar;
@@ -31,10 +33,12 @@ export class AppComponent {
     this.isAuthenticated = false;
     this.menuVisible = true;
     this.mostrarDestinos = false;
+    this.mostrarAuditoria = false;
   }
 
   onSelectMenu(label: string): void {
     this.selectedMenuLabel = label;
     this.mostrarDestinos = label === 'Destinos';
+    this.mostrarAuditoria = label === 'Auditoría';
   }
 }
