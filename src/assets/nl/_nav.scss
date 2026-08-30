@@ -1,0 +1,17 @@
+.nav {
+  .nav-item {
+    .nav-link {
+       color: $nl-grey-30;
+       background-color: transparent;
+       border-radius: $border-radius;
+       @include transition (all 0.3s cubic-bezier(0.0,0.0,0.2,1));
+       &.active, &.active:hover {
+         color: $dgpmi-primary;
+         background-color: $dgpmi-primary-light;
+       }
+       &:hover {
+         background-color: $nl-grey-10;
+       }
+    }
+  }
+}

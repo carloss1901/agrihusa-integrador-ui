@@ -1,0 +1,19 @@
+// estilo para titulos de una bloque / seccion
+.title-group {
+	@extend .fw-bold;
+	@extend .fs-6;
+}
+
+// estilo para titulos de una bloque / seccion en mayuscula
+.title-group-uppercase {
+	@extend .title-group;
+	text-transform: uppercase;
+	color: var(--bs-body-color);
+}
+
+.title-name-page {
+	@extend .text-primary;
+	@extend .fw-bold;
+	@extend .fst-italic;
+	margin: 0 !important;
+}

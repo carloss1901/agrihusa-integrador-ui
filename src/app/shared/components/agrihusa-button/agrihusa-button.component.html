@@ -1,0 +1,11 @@
+<button type="button" [class]="getClasses()" [disabled]="isDisabled">
+  <span *ngIf="isIcon" [class]="['feather', 'icon-' + icon]"></span>
+
+  <span [class]="{ 'ms-1': localTexto }">{{
+    loading ? loadingTexto : localTexto
+  }}</span>
+
+  <ng-container *ngIf="loading">
+    <span class="spinner-border spinner-border-sm ms-1" role="status"></span>
+  </ng-container>
+</button>

@@ -1,0 +1,131 @@
+.agrihusa {
+	ngb-accordion,
+	[ngbAccordion] {
+	  --bs-accordion-border-color: none;
+  
+	  .accordion-item:not(:last-child) {
+		margin-bottom: 0.75rem;
+	  }
+  
+	  .accordion-header {
+		border-radius: 3px;
+  
+		.wrapper {
+		  display: flex;
+		  align-items: center;
+		}
+  
+		.accordion-button {
+		  padding: 1rem;
+		  background-color: transparent;
+		  border: 0 !important;
+  
+		  .feather {
+			margin-right: 50px;
+			color: #000;
+		  }
+  
+		  .title {
+			font-weight: 600;
+			color: #000;
+			margin-bottom: 0;
+			font-size: 16px;
+		  }
+  
+		  .description {
+			margin-bottom: 0;
+			font-size: 14px;
+			color: #000;
+			font-weight: 300;
+		  }
+  
+		  // --- Estilos del .accordion-search integrados aquí ---
+		  &:not(.collapsed) {
+			color: #000 !important; // Texto en negro cuando está expandido
+  
+			&::after {
+			  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>") !important;
+			}
+		  }
+		}
+  
+		.accordion-button .collapsed {
+		  background-color: transparent;
+		  border-radius: 3px;
+		  border: 1px solid transparent;
+  
+		  .feather {
+			color: transparent;
+		  }
+  
+		  .title {
+			color: $nl-grey-40;
+		  }
+  
+		  .description {
+			color: #5e5e5e;
+		  }
+		}
+  
+		.accordion-button:focus {
+		  box-shadow: none;
+		  border-color: rgba(63, 63, 63, 0.125);
+		}
+  
+		.accordion-button:disabled {
+		  opacity: 0.54;
+		}
+	  }
+  
+	  .accordion-body {
+		padding-top: 1rem !important;
+		padding-bottom: 1rem !important;
+	  }
+
+	  .accordion-button:not(.collapsed) {
+		border-bottom: 1px solid rgba(0, 0, 0, 0.125) !important;
+		color: $nl-red;
+	  }
+	}
+  
+	formly-wrapper-form-field {
+	  div {
+		margin-bottom: 0rem !important;
+	  }
+	}
+}
+
+.accordion-item {
+	border-color: rgba(0, 0, 0, 0.125); // rgba(63, 63, 63, 0.125);
+}
+
+.accordion-button:not(.collapsed) {
+	border-bottom: 1px solid rgba(0, 0, 0, 0.125) !important;
+	color: $nl-red;
+}
+
+.ngb-accordion-stacked ngb-accordion {
+	.accordion-item {
+		margin-bottom: 0 !important;
+	}
+}
+
+.ngb-accordion-body-pad-0 ngb-accordion .accordion-body {
+	padding: 0 !important;
+}
+
+.accordion-historico {
+	.accordion-header {
+		box-shadow: none;
+		border-color: $nl-red !important;
+	}
+	.accordion-item {
+		border: 1px solid #ddd;
+		.accordion-button {
+			border-bottom: 1px solid #ddd;
+		}
+		.accordion-button.collapsed {
+			border-bottom: 0 !important;
+		}
+	}
+}

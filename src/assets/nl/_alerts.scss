@@ -1,0 +1,141 @@
+.agrihusa {
+  .ngb-toasts {
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    position: fixed;
+    z-index: 1200;
+    background-color: transparent;
+
+    .toast__animation {
+
+      // animation: slideTop 1s;
+      // animation-delay: 1s;
+      .toast {
+        margin: 0 auto 0;
+        animation: slideTop 0.5s ease;
+        backdrop-filter: blur(0);
+        background-color: transparent;
+        box-shadow: none;
+        border: none;
+
+        .toast-body {
+          padding-top: 0;
+          padding-bottom: 1.5rem;
+          box-shadow: none;
+        }
+      }
+    }
+
+    @keyframes slideTop {
+      0% {
+        transform: translateY(-100%);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+  }
+  
+  .alert {
+    padding: 0.75rem;
+    border-radius: 4px;
+    display: flex;
+    &-flotante {
+      width: 360px;
+      box-shadow: $box-shadow-lg;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    &-embebido {
+      border-top: 0;
+      border-left: 0;
+      border-right: 0;
+      border-radius: 0;
+    }
+    &-success {
+      color: $nl-black;
+      background-color: $nl-green-light;
+      border-color: $nl-green;
+      .feather {
+        font-size: 18px;
+        color: $nl-green;
+      }
+    }
+    &-info {
+      color: $nl-black;
+      background-color: $nl-blue-light;
+      border-color: $nl-blue;
+      .feather {
+        font-size: 18px;
+        color: $nl-blue;
+      }
+    }
+    &-warning {
+      color: $nl-black;
+      background-color: $nl-orange-light;
+      border-color: $nl-orange;
+      .feather {
+        font-size: 18px;
+        color: $nl-orange;
+      }
+    }
+    &-danger {
+      color: $nl-black;
+      background-color: $dgpmi-primary-light;
+      border-color: $dgpmi-primary;
+      .feather {
+        font-size: 18px;
+        color: $dgpmi-primary;
+      }
+    }
+  }
+
+  .bg-alert-info {
+    .alert {
+      color: $nl-black;
+      background-color: $nl-blue-light;
+      border-color: $nl-blue;
+      .feather {
+        font-size: 18px;
+        color: $nl-blue;
+      }
+    }
+  }
+  .bg-alert-warning {
+    .alert {
+      color: $nl-black;
+      background-color: $nl-orange-light;
+      border-color: $nl-orange;
+      .feather {
+        font-size: 18px;
+        color: $nl-orange;
+      }
+    }
+  }
+  .bg-alert-danger {
+    .alert {
+      color: $nl-black;
+      background-color: $nl-red-ligth;
+      border-color: $nl-red;
+      .feather {
+        font-size: 18px;
+        color: $nl-red;
+      }
+    }
+  }
+  .bg-alert-success {
+    .alert {
+      color: $nl-black;
+      background-color: $nl-green-light;
+      border-color: $nl-green;
+      .feather {
+        font-size: 18px;
+        color: $nl-green;
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+// El layout general del shell (#agrihusaApp, .agrihusa-header, sidebar y main)
+// está definido en assets/nl/_layout.scss (importado globalmente).
+// Aquí solo se estiliza el placeholder de contenido que no forma parte del framework.
+
+.agrihusaApp-content_placeholder {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border-radius: 18px;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px dashed rgba(0, 99, 42, 0.24);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #00632a;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.agrihusaApp-content_placeholder h1 {
+  margin: 0 0 12px;
+  font-size: 32px;
+}
+
+.agrihusaApp-content_placeholder p {
+  margin: 0;
+  max-width: 680px;
+  line-height: 1.5;
+}
+
+@media (max-width: 960px) {
+  .agrihusaApp-content-container {
+    flex-direction: column;
+  }
+
+  .agrihusaApp-content_sidebar {
+    min-width: 100%;
+    height: auto;
+  }
+
+  .agrihusaApp-content_main {
+    height: auto;
+  }
+}
