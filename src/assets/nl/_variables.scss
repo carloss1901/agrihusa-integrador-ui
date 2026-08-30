@@ -10,17 +10,32 @@ $nl-green: #93C249;
 $nl-green-light: #F2F7E8;
 $nl-blue: #0594B9;
 $nl-blue-light: #CDE6EC;
+$nl-blue-dark: #004899;
 $nl-gris: #606062;
 $nl-grey-10: #F5F6FA;
 $nl-grey-20: #D2D3D5;
 $nl-grey-30: #828283;
 $nl-grey-40: #373739;
+$nl-grey-50: #4b5563;
+$nl-grey-60: #2A303C;
+$nl-yellow: #f59e0b;
+$nl-purple: #5E1893;
+$nl-purple-light: #E9D0FC;
+$nl-disabled: #EEEEEE;
+$nl-modal-bg: #DAD8F2;
 
 $dgpmi-primary: #00632a;
 $dgpmi-primary-dark: #003B19;
 $dgpmi-primary-light: #e0f3e7;
+$nl-azul: #1a237e;
+$nl-azul-dark: #303f9f;
+$nl-azul-gradient: #008BD2;
+$nl-verde-gradient: #76B82A;
 $active-row: #E0F2F6;
 $nl-focus: #80bdff;
+$glass-bg-weak:   rgba(255, 255, 255, 0.1);
+$glass-bg-strong: rgba(255, 255, 255, 0.15);
+$glass-border:    rgba(255, 255, 255, 0.3);
 // Espaciado
 $nl-extra-small:              8px;
 $nl-small:                    16px;
@@ -80,6 +95,7 @@ $component-active-bg:          $dgpmi-primary;
 $box-shadow:                   0px 1px 5px rgba(0, 0, 0, 0.1);
 $box-shadow-sm:                0px 3px 7px rgba(0, 0, 0, 0.08);
 $box-shadow-lg:                0px 10px 15px rgba(0, 0, 0, 0.1), 0px 4px 6px rgba(0, 0, 0, 0.05);
+$box-shadow-header:            0px 4px 20px rgba(0, 0, 0, 0.15);
 // Hr
 $hr-border-color:              $nl-grey-10;
 // Tables
@@ -110,3 +126,8 @@ $btn-link-color:               $dgpmi-primary;
 $btn-link-hover-color:         $dgpmi-primary-dark;
 // Link
 $link-color:                   $dgpmi-primary;
+// Header
+$header-height:                54px;
+// Gradient
+$gradient-aurora-bg: linear-gradient(90deg, $nl-verde-gradient 0%, $nl-azul-gradient 100%);
+$gradient-tricolor:   linear-gradient(90deg, $nl-azul-gradient 33.3%, $nl-white 33.3%, $nl-white 66.6%, $nl-red 66.6%);

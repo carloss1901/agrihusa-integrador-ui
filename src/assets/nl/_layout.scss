@@ -22,27 +22,43 @@
 }
 
 #agrihusaApp {
-	width: 100%;
-	overflow-x: hidden;
+	height: 100vh;
 	display: flex;
 	flex-direction: column;
+	overflow: hidden;
+	width: 100%;
+}
+
+.agrihusa-header {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
 }
 
 .agrihusaApp-content-container {
-	display: flex;
 	flex: 1;
+	display: flex;
+	overflow: hidden;
+	min-height: 0;
 }
 
 .agrihusaApp-content_sidebar {
-	height: calc(100vh - 54px);
-	min-width: 320px;
+	width: 300px;
+	min-width: 300px;
+	flex-shrink: 0;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
 	background-color: #606062;
 }
 
 .agrihusaApp-content_main {
-	height: calc(100vh - 54px);
-	flex-grow: 1;
-	overflow-y: auto;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 }
 
 .containerIn-title {

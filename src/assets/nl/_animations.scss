@@ -1,0 +1,47 @@
+@keyframes aurora-flow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1); opacity: 1; box-shadow: 0 0 15px #22c55e; }
+  100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.anim-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}
+
+.anim-slide-down {
+  animation: slide-down 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.anim-spin {
+  animation: spin 1s linear infinite;
+}
+
+.sismemacc-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}

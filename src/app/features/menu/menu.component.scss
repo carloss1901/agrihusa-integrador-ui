@@ -9,7 +9,8 @@
 #agrihusa-aside-menu {
   padding-top: 10px;
   padding-bottom: 0;
-  height: calc(100vh - 54px);
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
