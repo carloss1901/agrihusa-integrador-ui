@@ -1,0 +1,63 @@
+<div class="agrihusa">
+  <div class="modal-header">
+    <h6 class="modal-title w-100">{{ titleModal }}</h6>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="onCerrar()"
+    ></button>
+  </div>
+  <div class="modal-body">
+    <div class="modal-body-content">
+      <div class="container-fluid px-0 g-0">
+        <div class="row gx-3 align-items-baseline">
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label class="form-label">Fecha: </label>
+              <input class="form-control agrihusa" [value]="data?.fecha" readonly />
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label class="form-label">Usuario: </label>
+              <input class="form-control agrihusa" [value]="data?.usuario" readonly />
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label class="form-label">Acción: </label>
+              <input class="form-control agrihusa" [value]="data?.accion" readonly />
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label class="form-label">Entidad: </label>
+              <input class="form-control agrihusa" [value]="data?.entidad" readonly />
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label class="form-label">Detalle: </label>
+              <input class="form-control agrihusa" [value]="data?.detalle" readonly />
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label class="form-label">IP: </label>
+              <input class="form-control agrihusa" [value]="data?.ip" readonly />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <agrihusa-button
+      texto="Cancelar"
+      color="danger"
+      icon="x"
+      (click)="onCerrar()"
+    ></agrihusa-button>
+  </div>
+</div>

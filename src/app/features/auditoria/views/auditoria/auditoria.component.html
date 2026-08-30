@@ -1,0 +1,47 @@
+<div class="frame-layout">
+  <div class="frame-layout__header">
+    <div class="col-12 my-2">
+      <agrihusa-topbar
+        [titulo]="getNombreMantenimiento"
+        [subtitulo]="'Registro de auditoría'"
+        [showCancel]="false"
+      ></agrihusa-topbar>
+    </div>
+  </div>
+
+  <div class="frame-layout__body">
+    <div class="nl-card mb-component">
+      <app-filtro-auditoria
+        (buscar)="onBuscar($event)"
+        (limpiar)="onLimpiar()"
+      ></app-filtro-auditoria>
+    </div>
+
+    <div class="agrihusa-card">
+      <div class="p-content d-flex justify-content-between align-items-center">
+        <span class="title-group-uppercase">Lista de auditoría</span>
+        <div class="d-flex gap-2">
+          <agrihusa-button
+            color="secondary"
+            variant="outlined"
+            icon="eye"
+            [esIcono]="true"
+            [disabled]="!filaSeleccionada"
+            (click)="mostrarModalDetalle()"
+          ></agrihusa-button>
+        </div>
+      </div>
+
+      <app-tabla-auditoria
+        [datasource]="dataAuditoria"
+        [loading]="loading"
+        [totalItems]="totalItems"
+        [page]="page"
+        [pageSize]="pageSize"
+        [filaSeleccionada]="filaSeleccionada"
+        (seleccionar)="onSeleccionarItem($event)"
+        (paginar)="onChangePaginate($event)"
+      ></app-tabla-auditoria>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,95 @@
+<div ngbAccordion [closeOthers]="false">
+  <div ngbAccordionItem [collapsed]="false">
+    <h2 ngbAccordionHeader>
+      <button ngbAccordionButton class="d-flex justify-content-between w-100">
+        <span class="title-group-uppercase">Filtros de búsqueda</span>
+      </button>
+    </h2>
+    <div ngbAccordionCollapse>
+      <div ngbAccordionBody>
+        <ng-template>
+          <form [formGroup]="frmFiltro">
+            <div class="container-fluid px-0">
+              <div class="row gx-3 align-items-baseline mb-2">
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">Usuario:</label>
+                    <input class="form-control" formControlName="txtUsuario" />
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">Acción:</label>
+                    <ng-select
+                      class="text-uppercase"
+                      [items]="lstCboAccion"
+                      bindLabel="descripcion"
+                      bindValue="maestroId"
+                      placeholder="-- SELECCIONAR --"
+                      [clearable]="true"
+                      [searchable]="false"
+                      formControlName="cboAccion"
+                    ></ng-select>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">Entidad:</label>
+                    <ng-select
+                      class="text-uppercase"
+                      [items]="lstCboEntidad"
+                      bindLabel="descripcion"
+                      bindValue="maestroId"
+                      placeholder="-- SELECCIONAR --"
+                      [clearable]="true"
+                      [searchable]="false"
+                      formControlName="cboEntidad"
+                    ></ng-select>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">Fecha desde:</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      formControlName="txtFechaIni"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">Fecha hasta:</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      formControlName="txtFechaFin"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="row gx-2 justify-content-end">
+                <div class="col-auto">
+                  <div class="d-flex gap-2">
+                    <agrihusa-button
+                      texto="Limpiar"
+                      icon="refresh-ccw"
+                      color="secondary"
+                      (click)="onLimpiar()"
+                    ></agrihusa-button>
+                    <agrihusa-button
+                      texto="Buscar"
+                      icon="search"
+                      (click)="onBuscar()"
+                    ></agrihusa-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

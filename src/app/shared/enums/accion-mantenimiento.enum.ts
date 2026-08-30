@@ -1,4 +1,5 @@
 export enum AccionMantenimiento {
   CREAR = 'C',
-  ACTUALIZAR = 'U'
+  ACTUALIZAR = 'U',
+  VER = 'V'
 }
