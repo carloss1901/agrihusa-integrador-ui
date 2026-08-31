@@ -41,7 +41,8 @@ export class MenuComponent {
       subMenu: [
         { nombre: 'Destinos', codigo: 104 },
         { nombre: 'Vias', codigo: 105 },
-        { nombre: 'Transportistas', codigo: 106 }
+        { nombre: 'Navieras', codigo: 106 },
+        { nombre: 'Puertos de llegada', codigo: 110 }
       ]
     },
     {
@@ -53,11 +54,9 @@ export class MenuComponent {
       ]
     },
     {
-      nombreModulo: 'Modulo de Auditoría',
+      nombreModulo: 'Modulo de Auditoria',
       codigo: 4,
-      subMenu: [
-        { nombre: 'Auditoría', codigo: 109 }
-      ]
+      subMenu: [{ nombre: 'Auditoria', codigo: 109 }]
     }
   ];
 
