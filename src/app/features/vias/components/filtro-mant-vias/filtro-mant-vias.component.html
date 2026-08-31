@@ -11,23 +11,10 @@
           <form [formGroup]="frmFiltro">
             <div class="container-fluid px-0">
               <div class="row gx-3 align-items-baseline mb-2">
-                <div class="col-12 col-md-4" *ngFor="let field of fields">
+                <div class="col-12 col-md-4">
                   <div class="form-group">
-                    <label class="form-label">{{ field.label }}:</label>
-                    <ng-select
-                      *ngIf="field.options; else textFilter"
-                      class="text-uppercase"
-                      [items]="field.options"
-                      bindLabel="descripcion"
-                      bindValue="maestroId"
-                      placeholder="-- SELECCIONAR --"
-                      [clearable]="true"
-                      [searchable]="false"
-                      [formControlName]="getControlName(field.key)"
-                    ></ng-select>
-                    <ng-template #textFilter>
-                      <input class="form-control" [formControlName]="getControlName(field.key)" />
-                    </ng-template>
+                    <label class="form-label">Via:</label>
+                    <input class="form-control" formControlName="txtVia" />
                   </div>
                 </div>
                 <div class="col-12 col-md-4">
@@ -50,17 +37,8 @@
               <div class="row gx-2 justify-content-end">
                 <div class="col-auto">
                   <div class="d-flex gap-2">
-                    <agrihusa-button
-                      texto="Limpiar"
-                      icon="refresh-ccw"
-                      color="secondary"
-                      (click)="onLimpiar()"
-                    ></agrihusa-button>
-                    <agrihusa-button
-                      texto="Buscar"
-                      icon="search"
-                      (click)="onBuscar()"
-                    ></agrihusa-button>
+                    <agrihusa-button texto="Limpiar" icon="refresh-ccw" color="secondary" (click)="onLimpiar()"></agrihusa-button>
+                    <agrihusa-button texto="Buscar" icon="search" (click)="onBuscar()"></agrihusa-button>
                   </div>
                 </div>
               </div>

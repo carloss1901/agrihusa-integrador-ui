@@ -1,0 +1,47 @@
+<div ngbAccordion [closeOthers]="false">
+  <div ngbAccordionItem [collapsed]="false">
+    <h2 ngbAccordionHeader>
+      <button ngbAccordionButton class="d-flex justify-content-between w-100">
+        <span class="title-group-uppercase">Filtros de busqueda</span>
+      </button>
+    </h2>
+    <div ngbAccordionCollapse>
+      <div ngbAccordionBody>
+        <ng-template>
+          <form [formGroup]="frmFiltro">
+            <div class="container-fluid px-0">
+              <div class="row gx-3 align-items-baseline mb-2">
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">Pais:</label>
+                    <ng-select class="text-uppercase" [items]="lstCboPais" bindLabel="descripcion" bindValue="maestroId" placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="false" formControlName="cboPais"></ng-select>
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">Puerto:</label>
+                    <input class="form-control" formControlName="txtPuerto" />
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">Estado:</label>
+                    <ng-select class="text-uppercase" [items]="lstCboEstado" bindLabel="descripcion" bindValue="maestroId" placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="false" formControlName="cboEstado"></ng-select>
+                  </div>
+                </div>
+              </div>
+              <div class="row gx-2 justify-content-end">
+                <div class="col-auto">
+                  <div class="d-flex gap-2">
+                    <agrihusa-button texto="Limpiar" icon="refresh-ccw" color="secondary" (click)="onLimpiar()"></agrihusa-button>
+                    <agrihusa-button texto="Buscar" icon="search" (click)="onBuscar()"></agrihusa-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

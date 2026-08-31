@@ -1,33 +1,19 @@
-<div
-  class="table-responsive"
-  [ngClass]="{ 'table-sticky table-sticky--height': datasource.length > 10 }"
->
+<div class="table-responsive" [ngClass]="{ 'table-sticky table-sticky--height': datasource.length > 10 }">
   <table class="table tbl-grid m-0 head-no-rounded">
-    <caption class="d-none">{{ caption }}</caption>
+    <caption class="d-none">Tabla de mantenimiento de vias</caption>
     <thead>
       <tr>
         <th scope="col">Id</th>
-        <th scope="col" *ngFor="let field of fields">{{ field.label }}</th>
+        <th scope="col">Via</th>
         <th scope="col">Estado</th>
       </tr>
     </thead>
     <tbody *ngIf="!loading">
-      <tr
-        *ngFor="let item of datasource; index as i"
-        [class]="'c-pointer tbl-row tbl-row-' + i"
-        [ngClass]="{ active: item.id === itemId }"
-        (click)="onSeleccionarFila(item)"
-      >
-        <td>{{ item.id }}</td>
-        <td *ngFor="let field of fields">{{ item[field.key] }}</td>
+      <tr *ngFor="let item of datasource; index as i" [class]="'c-pointer tbl-row tbl-row-' + i" [ngClass]="{ active: item.idVia === itemId }" (click)="onSeleccionarFila(item)">
+        <td>{{ item.idVia }}</td>
+        <td>{{ item.descripcion }}</td>
         <td>
-          <span
-            class="labels"
-            [ngClass]="{
-              'labels-activo': item.activo === true,
-              'labels-inactivo': item.activo === false
-            }"
-          >
+          <span class="labels" [ngClass]="{ 'labels-activo': item.activo === true, 'labels-inactivo': item.activo === false }">
             <span class="labels_circle"></span>
             <span>{{ item.activo ? 'ACTIVO' : 'INACTIVO' }}</span>
           </span>
