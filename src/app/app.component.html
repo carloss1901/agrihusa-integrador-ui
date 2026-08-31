@@ -17,9 +17,16 @@
       </aside>
       <main class="agrihusaApp-content_main">
         <app-mantenimiento-destinos *ngIf="mostrarDestinos"></app-mantenimiento-destinos>
+        <app-mantenimiento-vias *ngIf="mostrarVias"></app-mantenimiento-vias>
+        <app-mantenimiento-variedades *ngIf="mostrarVariedades"></app-mantenimiento-variedades>
+        <app-mantenimiento-navieras *ngIf="mostrarNavieras"></app-mantenimiento-navieras>
+        <app-mantenimiento-puertos-llegada *ngIf="mostrarPuertosLlegada"></app-mantenimiento-puertos-llegada>
         <app-auditoria *ngIf="mostrarAuditoria"></app-auditoria>
 
-        <section class="agrihusaApp-content_placeholder" *ngIf="!mostrarDestinos && !mostrarAuditoria">
+        <section
+          class="agrihusaApp-content_placeholder"
+          *ngIf="!mostrarDestinos && !mostrarVias && !mostrarVariedades && !mostrarNavieras && !mostrarPuertosLlegada && !mostrarAuditoria"
+        >
           <p class="eyebrow">Layout base</p>
           <h1>{{ selectedMenuLabel }}</h1>
           <p>
