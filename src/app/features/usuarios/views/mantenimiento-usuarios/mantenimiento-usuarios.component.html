@@ -1,0 +1,73 @@
+<div class="frame-layout">
+    <div class="frame-layout__header">
+        <div class="col-12 my-2">
+            <agrihusa-topbar [titulo]="titulo" subtitulo="Administración de cuentas y accesos"
+                [showCancel]="false"></agrihusa-topbar>
+        </div>
+    </div>
+
+    <div class="frame-layout__body">
+        <div class="agrihusa-card mb-component">
+            <app-filtro-usuarios [roles]="roles" (buscar)="onBuscar($event)"
+                (limpiar)="onLimpiarFiltro()"></app-filtro-usuarios>
+        </div>
+
+        <div *ngIf="filaSeleccionada?.esSistema" class="alert alert-info" role="status">
+            El usuario Administrador pertenece al sistema. Puedes
+            actualizar su información personal, pero no cambiar su
+            identificador, rol o estado.
+        </div>
+
+        <div class="agrihusa-card">
+            <div class="
+            p-content
+            d-flex
+            justify-content-between
+            align-items-center
+            ">
+                <span class="title-group-uppercase">
+                    Lista de usuarios
+                </span>
+
+                <div class="d-flex gap-2">
+                    <div title="Registrar usuario">
+                        <agrihusa-button color="primary" variant="outlined" icon="plus" [esIcono]="true"
+                            [disabled]="!puedeCrear" (click)="mostrarModalCrear()"></agrihusa-button>
+                    </div>
+
+                    <div title="Editar usuario">
+                        <agrihusa-button color="secondary" variant="outlined" icon="edit" [esIcono]="true" [disabled]="
+                            !puedeEditar ||
+                            !filaSeleccionada ||
+                            !filaSeleccionada.activo
+                        " (click)="mostrarModalEditar()"></agrihusa-button>
+                    </div>
+
+                    <div [title]="
+                                filaSeleccionada?.activo
+                                    ? 'Desactivar usuario'
+                                    : 'Activar usuario'
+                                ">
+                        <agrihusa-button [color]="
+                                filaSeleccionada?.activo
+                                ? 'secondary'
+                                : 'success'
+                            " variant="outlined" [icon]="
+                                filaSeleccionada?.activo
+                                ? 'trash'
+                                : 'refresh-ccw'
+                            " [esIcono]="true" [disabled]="
+                                !puedeCambiarEstado ||
+                                !filaSeleccionada ||
+                                filaSeleccionada.esSistema
+                            " (click)="cambiarEstado()"></agrihusa-button>
+                    </div>
+                </div>
+            </div>
+
+            <app-tabla-usuarios [datasource]="usuarios" [roles]="roles" [loading]="loading" [totalItems]="totalItems"
+                [page]="page" [pageSize]="pageSize" [filaSeleccionada]="filaSeleccionada"
+                (seleccionar)="onSeleccionarUsuario($event)" (paginar)="onChangePaginate($event)"></app-tabla-usuarios>
+        </div>
+    </div>
+</div>

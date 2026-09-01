@@ -1,32 +1,79 @@
-<div
-  class="table-responsive"
-  [ngClass]="{ 'table-sticky table-sticky--height': datasource.length > 10 }"
->
+<div class="table-responsive" [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }">
   <table class="table tbl-grid m-0 head-no-rounded">
-    <caption class="d-none">Tabla de auditoría</caption>
+    <caption class="d-none">
+      Tabla de registros de bitácora
+    </caption>
+
     <thead>
       <tr>
+        <th scope="col">Id</th>
         <th scope="col">Fecha</th>
         <th scope="col">Usuario</th>
         <th scope="col">Acción</th>
+        <th scope="col">Módulo</th>
         <th scope="col">Entidad</th>
         <th scope="col">Detalle</th>
-        <th scope="col">IP</th>
+        <th scope="col">Resultado</th>
       </tr>
     </thead>
+
     <tbody *ngIf="!loading">
-      <tr
-        *ngFor="let item of datasource; index as i"
-        [class]="'c-pointer tbl-row tbl-row-' + i"
-        [ngClass]="{ active: item.idAuditoria === itemId }"
-        (click)="onSeleccionarFila(item)"
-      >
-        <td>{{ item.fecha }}</td>
-        <td>{{ item.usuario }}</td>
-        <td>{{ item.accion }}</td>
+      <tr *ngFor="
+          let item of datasource;
+          index as i;
+          trackBy: trackByRegistroId
+        " tabindex="0" [class]="'c-pointer tbl-row tbl-row-' + i" [ngClass]="{
+          active: item.id === itemId
+        }" [attr.aria-selected]="item.id === itemId" (click)="onSeleccionarFila(item)"
+        (keydown.enter)="onSeleccionarFila(item)">
+        <td>{{ item.id }}</td>
+
+        <td>
+          {{ formatearFecha(item.fecha) }}
+        </td>
+
+        <td>
+          <strong>{{ item.nombreUsuario }}</strong>
+        </td>
+
+        <td>
+          {{ obtenerNombreAccion(item.accion) }}
+        </td>
+
+        <td>
+          {{ obtenerNombreModulo(item.modulo) }}
+        </td>
+
         <td>{{ item.entidad }}</td>
-        <td>{{ item.detalle }}</td>
-        <td>{{ item.ip }}</td>
+
+        <td class="text-truncate" style="max-width: 280px" [title]="item.detalle">
+          {{ item.detalle }}
+        </td>
+
+        <td>
+          <span class="labels" [ngClass]="{
+              'labels-activo':
+                item.resultado ===
+                ResultadoBitacora.EXITO,
+              'labels-inactivo':
+                item.resultado ===
+                ResultadoBitacora.ERROR
+            }">
+            <span class="labels_circle" aria-hidden="true"></span>
+
+            <span>
+              {{
+              item.resultado ===
+              ResultadoBitacora.EXITO
+              ? 'ÉXITO'
+              : 'ERROR'
+              }}
+            </span>
+          </span>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -40,10 +87,5 @@
   </ng-container>
 </div>
 
-<table-footer-pagination
-  [totalItems]="totalItems"
-  [totalItemsPerPage]="datasource.length"
-  (changePaginate)="onChangePaginate($event)"
-  [page]="page"
-  [pageSize]="pageSize"
-></table-footer-pagination>
+<table-footer-pagination [totalItems]="totalItems" [totalItemsPerPage]="datasource.length" [page]="page"
+  [pageSize]="pageSize" (changePaginate)="onChangePaginate($event)"></table-footer-pagination>

@@ -1,0 +1,371 @@
+<div class="frame-layout">
+    <div class="frame-layout__header">
+        <div class="col-12 my-2">
+            <agrihusa-topbar [titulo]="titulo" subtitulo="Información personal y seguridad de la cuenta"
+                [showCancel]="false"></agrihusa-topbar>
+        </div>
+    </div>
+
+    <div class="frame-layout__body">
+        <div *ngIf="cargando" class="profile-loading" role="status">
+            <div class="spinner-border text-success" aria-hidden="true"></div>
+
+            <span>Cargando perfil...</span>
+        </div>
+
+        <div *ngIf="mensajeError" class="alert alert-danger" role="alert">
+            {{ mensajeError }}
+        </div>
+
+        <div *ngIf="mensajeExito" class="alert alert-success" role="status">
+            {{ mensajeExito }}
+        </div>
+
+        <ng-container *ngIf="!cargando && usuarioActual">
+            <div *ngIf="usuarioActual.debeCambiarPassword" class="alert alert-warning" role="alert">
+                Tu cuenta tiene una contraseña temporal. Debes
+                cambiarla para completar la configuración de seguridad.
+            </div>
+
+            <div class="profile-layout">
+                <aside class="profile-summary">
+                    <div class="profile-avatar" aria-hidden="true">
+                        <span class="feather icon-user"></span>
+                    </div>
+
+                    <h2 class="profile-name">
+                        {{ usuarioActual.nombres }}
+                        {{ usuarioActual.apellidos }}
+                    </h2>
+
+                    <p class="profile-username">
+                        {{ usuarioActual.nombreUsuario }}
+                    </p>
+
+                    <span class="labels" [ngClass]="{
+              'labels-activo':
+                usuarioActual.activo,
+              'labels-inactivo':
+                !usuarioActual.activo
+            }">
+                        <span class="labels_circle" aria-hidden="true"></span>
+
+                        {{
+                        usuarioActual.activo
+                        ? 'ACTIVO'
+                        : 'INACTIVO'
+                        }}
+                    </span>
+
+                    <dl class="profile-metadata">
+                        <div>
+                            <dt>Rol</dt>
+                            <dd>{{ nombreRol }}</dd>
+                        </div>
+
+                        <div>
+                            <dt>Tipo de cuenta</dt>
+                            <dd>
+                                {{
+                                usuarioActual.esSistema
+                                ? 'Sistema'
+                                : 'Regular'
+                                }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Último acceso</dt>
+                            <dd>
+                                {{
+                                formatearUltimoAcceso(
+                                usuarioActual.ultimoAcceso
+                                )
+                                }}
+                            </dd>
+                        </div>
+                    </dl>
+                </aside>
+
+                <section class="profile-form-card">
+                    <div class="profile-section-header">
+                        <div>
+                            <p class="profile-eyebrow">
+                                Datos personales
+                            </p>
+
+                            <h3>Información del usuario</h3>
+                        </div>
+
+                        <span *ngIf="!puedeEditar" class="profile-readonly">
+                            Solo lectura
+                        </span>
+                    </div>
+
+                    <form [formGroup]="formulario" (ngSubmit)="guardarPerfil()">
+                        <div class="row gx-3">
+                            <div class="col-12 col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label" for="perfilNombres">
+                                        Nombres:
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <input id="perfilNombres" type="text" class="form-control" formControlName="nombres"
+                                        maxlength="80" [class.is-invalid]="
+                      controlInvalido('nombres')
+                    " />
+
+                                    <div *ngIf="
+                      controlInvalido('nombres')
+                    " class="invalid-feedback">
+                                        Los nombres son obligatorios y permiten
+                                        un máximo de 80 caracteres.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label" for="perfilApellidos">
+                                        Apellidos:
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <input id="perfilApellidos" type="text" class="form-control"
+                                        formControlName="apellidos" maxlength="80" [class.is-invalid]="
+                      controlInvalido('apellidos')
+                    " />
+
+                                    <div *ngIf="
+                      controlInvalido('apellidos')
+                    " class="invalid-feedback">
+                                        Los apellidos son obligatorios y permiten
+                                        un máximo de 80 caracteres.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-7">
+                                <div class="form-group mb-3">
+                                    <label class="form-label" for="perfilCorreo">
+                                        Correo:
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <input id="perfilCorreo" type="email" class="form-control" formControlName="correo"
+                                        maxlength="120" [class.is-invalid]="
+                      controlInvalido('correo')
+                    " />
+
+                                    <div *ngIf="
+                      controlInvalido('correo')
+                    " class="invalid-feedback">
+                                        Ingresa un correo válido de máximo
+                                        120 caracteres.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-5">
+                                <div class="form-group mb-3">
+                                    <label class="form-label" for="perfilTelefono">
+                                        Teléfono:
+                                    </label>
+
+                                    <input id="perfilTelefono" type="tel" class="form-control"
+                                        formControlName="telefono" maxlength="20" [class.is-invalid]="
+                      controlInvalido('telefono')
+                    " />
+
+                                    <div *ngIf="
+                      controlInvalido('telefono')
+                    " class="invalid-feedback">
+                                        Ingresa un teléfono válido de máximo
+                                        20 caracteres.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="profile-actions">
+                            <agrihusa-button texto="Guardar cambios" icon="check" [disabled]="
+                  !puedeEditar ||
+                  guardando
+                " (click)="guardarPerfil()"></agrihusa-button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+            <section class="password-card">
+                <div class="profile-section-header">
+                    <div>
+                        <p class="profile-eyebrow">
+                            Seguridad
+                        </p>
+
+                        <h3>Cambiar contraseña</h3>
+                    </div>
+                </div>
+
+                <div *ngIf="mensajePasswordError" class="alert alert-danger py-2" role="alert">
+                    {{ mensajePasswordError }}
+                </div>
+
+                <div *ngIf="mensajePasswordExito" class="alert alert-success py-2" role="status">
+                    {{ mensajePasswordExito }}
+                </div>
+
+                <form [formGroup]="formularioPassword" (ngSubmit)="cambiarPassword()">
+                    <div class="row gx-3">
+                        <div class="col-12 col-lg-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label" for="perfilPasswordActual">
+                                    Contraseña actual:
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <div class="input-group">
+                                    <input id="perfilPasswordActual" [type]="
+                mostrarPasswordActual
+                  ? 'text'
+                  : 'password'
+              " class="form-control" formControlName="passwordActual" maxlength="64" autocomplete="current-password"
+                                        [class.is-invalid]="
+                controlPasswordInvalido(
+                  'passwordActual'
+                )
+              " />
+
+                                    <button type="button" class="btn password-toggle"
+                                        aria-label="Mostrar u ocultar contraseña actual"
+                                        title="Mostrar u ocultar contraseña actual"
+                                        (click)="alternarPassword('actual')">
+                                        <span class="feather" [ngClass]="
+                  mostrarPasswordActual
+                    ? 'icon-eye-off'
+                    : 'icon-eye'
+                " aria-hidden="true"></span>
+
+                                        <span class="visually-hidden">
+                                            Mostrar u ocultar contraseña actual
+                                        </span>
+                                    </button>
+                                </div>
+
+                                <div *ngIf="
+              controlPasswordInvalido(
+                'passwordActual'
+              )
+            " class="invalid-feedback d-block">
+                                    Ingresa tu contraseña actual.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label" for="perfilNuevaPassword">
+                                    Nueva contraseña:
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <div class="input-group">
+                                    <input id="perfilNuevaPassword" [type]="
+                mostrarNuevaPassword
+                  ? 'text'
+                  : 'password'
+              " class="form-control" formControlName="nuevaPassword" maxlength="64" autocomplete="new-password"
+                                        [class.is-invalid]="
+                controlPasswordInvalido(
+                  'nuevaPassword'
+                )
+              " />
+
+                                    <button type="button" class="btn password-toggle"
+                                        aria-label="Mostrar u ocultar nueva contraseña"
+                                        title="Mostrar u ocultar nueva contraseña" (click)="alternarPassword('nueva')">
+                                        <span class="feather" [ngClass]="
+                  mostrarNuevaPassword
+                    ? 'icon-eye-off'
+                    : 'icon-eye'
+                " aria-hidden="true"></span>
+
+                                        <span class="visually-hidden">
+                                            Mostrar u ocultar nueva contraseña
+                                        </span>
+                                    </button>
+                                </div>
+
+                                <div *ngIf="
+              controlPasswordInvalido(
+                'nuevaPassword'
+              )
+            " class="invalid-feedback d-block">
+                                    Debe tener al menos 8 caracteres e incluir
+                                    mayúscula, minúscula, número y símbolo.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-4">
+                            <div class="form-group mb-3">
+                                <label class="form-label" for="perfilConfirmarPassword">
+                                    Confirmar contraseña:
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <div class="input-group">
+                                    <input id="perfilConfirmarPassword" [type]="
+                mostrarConfirmacionPassword
+                  ? 'text'
+                  : 'password'
+              " class="form-control" formControlName="confirmarPassword" maxlength="64" autocomplete="new-password"
+                                        [class.is-invalid]="
+                controlPasswordInvalido(
+                  'confirmarPassword'
+                )
+              " />
+
+                                    <button type="button" class="btn password-toggle"
+                                        aria-label="Mostrar u ocultar confirmación"
+                                        title="Mostrar u ocultar confirmación" (click)="
+                alternarPassword('confirmacion')
+              ">
+                                        <span class="feather" [ngClass]="
+                  mostrarConfirmacionPassword
+                    ? 'icon-eye-off'
+                    : 'icon-eye'
+                " aria-hidden="true"></span>
+
+                                        <span class="visually-hidden">
+                                            Mostrar u ocultar confirmación
+                                        </span>
+                                    </button>
+                                </div>
+
+                                <div *ngIf="
+              controlPasswordInvalido(
+                'confirmarPassword'
+              )
+            " class="invalid-feedback d-block">
+                                    Confirma la nueva contraseña.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="password-policy">
+                        La nueva contraseña debe ser diferente a la actual y
+                        contener mayúscula, minúscula, número y símbolo.
+                    </p>
+
+                    <div class="profile-actions">
+                        <agrihusa-button texto="Cambiar contraseña" icon="lock" [disabled]="cambiandoPassword"
+                            (click)="cambiarPassword()"></agrihusa-button>
+                    </div>
+                </form>
+            </section>
+        </ng-container>
+    </div>
+</div>

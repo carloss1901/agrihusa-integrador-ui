@@ -1,0 +1,137 @@
+<div class="modal-header">
+    <h5 class="modal-title">
+        {{ titleModal }}
+    </h5>
+
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="onCerrarModal()"></button>
+</div>
+
+<div class="modal-body">
+    <form [formGroup]="formulario">
+        <div class="row gx-3">
+            <div class="col-12 col-md-6">
+                <div class="form-group mb-3">
+                    <label class="form-label" for="nombreRol">
+                        Nombre:
+                    </label>
+
+                    <input id="nombreRol" type="text" class="form-control" formControlName="nombre" maxlength="50"
+                        [class.is-invalid]="controlInvalido('nombre')" />
+
+                    <div *ngIf="controlInvalido('nombre')" class="invalid-feedback">
+                        <span *ngIf="
+                                    formulario.controls.nombre.hasError('required')
+                                  ">
+                            El nombre es obligatorio.
+                        </span>
+
+                        <span *ngIf="
+                                    formulario.controls.nombre.hasError('maxlength')
+                                  ">
+                            El nombre permite un máximo de 50 caracteres.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <div class="form-group mb-3">
+                    <label class="form-label" for="descripcionRol">
+                        Descripción:
+                    </label>
+
+                    <input id="descripcionRol" type="text" class="form-control" formControlName="descripcion"
+                        maxlength="150" [class.is-invalid]="
+              controlInvalido('descripcion')
+            " />
+
+                    <div *ngIf="controlInvalido('descripcion')" class="invalid-feedback">
+                        <span *ngIf="
+                formulario.controls.descripcion.hasError(
+                  'required'
+                )
+              ">
+                            La descripción es obligatoria.
+                        </span>
+
+                        <span *ngIf="
+                formulario.controls.descripcion.hasError(
+                  'maxlength'
+                )
+              ">
+                            La descripción permite un máximo de 150
+                            caracteres.
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">
+                Permisos:
+            </label>
+
+            <div class="table-responsive border rounded">
+                <table class="table table-sm table-bordered mb-0">
+                    <caption class="d-none">
+                        Matriz de permisos del rol
+                    </caption>
+
+                    <thead>
+                        <tr>
+                            <th scope="col">Módulo</th>
+
+                            <th *ngFor="let accion of acciones" scope="col" class="text-center">
+                                {{ accion | uppercase }}
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let modulo of modulos">
+                            <th scope="row">
+                                {{ modulo.nombre }}
+                            </th>
+
+                            <td *ngFor="let accion of acciones" class="text-center align-middle">
+                                <ng-container *ngIf="
+                                                accionDisponible(modulo, accion);
+                                                else accionNoDisponible
+                                ">
+                                    <label class="permission-checkbox">
+                                        <input #permisoCheckbox type="checkbox" class="form-check-input" [checked]="
+                                          tienePermiso(modulo.codigo, accion)
+                                        " (change)="
+                                          onPermisoChange(
+                                            modulo.codigo,
+                                            accion,
+                                            permisoCheckbox.checked
+                                          )
+                                        " /> <span class="visually-hidden">
+                                            Permiso {{ accion }} para {{ modulo.nombre }}
+                                        </span>
+                                    </label>
+                                </ng-container>
+
+                                <ng-template #accionNoDisponible>
+                                    <span aria-hidden="true">—</span>
+                                </ng-template>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div *ngIf="errorPermisos" class="text-danger small mt-2">
+                Selecciona al menos un permiso.
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <agrihusa-button texto="Cancelar" color="danger" icon="x" (click)="onCerrarModal()"></agrihusa-button>
+
+    <agrihusa-button texto="Guardar" icon="check" (click)="onGuardar()"></agrihusa-button>
+</div>

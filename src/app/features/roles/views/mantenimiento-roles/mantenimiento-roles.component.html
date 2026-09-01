@@ -1,0 +1,70 @@
+<div class="frame-layout">
+    <div class="frame-layout__header">
+        <div class="col-12 my-2">
+            <agrihusa-topbar [titulo]="titulo" subtitulo="Administración de roles y permisos"
+                [showCancel]="false"></agrihusa-topbar>
+        </div>
+    </div>
+
+    <div class="frame-layout__body">
+        <div class="agrihusa-card mb-component">
+            <app-filtro-roles (buscar)="onBuscar($event)" (limpiar)="onLimpiarFiltro()"></app-filtro-roles>
+        </div>
+
+        <div *ngIf="filaSeleccionada?.esSistema" class="alert alert-info" role="alert">
+            El rol Administrador está protegido y no puede
+            editarse ni desactivarse.
+        </div>
+
+        <div class="agrihusa-card">
+            <div class="
+          p-content
+          d-flex
+          justify-content-between
+          align-items-center
+        ">
+                <span class="title-group-uppercase">
+                    Lista de roles
+                </span>
+
+                <div class="d-flex gap-2">
+                    <div title="Registrar rol">
+                        <agrihusa-button color="primary" variant="outlined" icon="plus" [esIcono]="true"
+                            (click)="mostrarModalCrear()"></agrihusa-button>
+                    </div>
+
+                    <div title="Editar rol">
+                        <agrihusa-button color="secondary" variant="outlined" icon="edit" [esIcono]="true" [disabled]="
+                !filaSeleccionada ||
+                filaSeleccionada.esSistema ||
+                !filaSeleccionada.activo
+              " (click)="mostrarModalEditar()"></agrihusa-button>
+                    </div>
+
+                    <div [title]="
+              filaSeleccionada?.activo
+                ? 'Desactivar rol'
+                : 'Activar rol'
+            ">
+                        <agrihusa-button [color]="
+                filaSeleccionada?.activo
+                  ? 'secondary'
+                  : 'success'
+              " variant="outlined" [icon]="
+                filaSeleccionada?.activo
+                  ? 'trash'
+                  : 'refresh-ccw'
+              " [esIcono]="true" [disabled]="
+                !filaSeleccionada ||
+                filaSeleccionada.esSistema
+              " (click)="cambiarEstado()"></agrihusa-button>
+                    </div>
+                </div>
+            </div>
+
+            <app-tabla-roles [datasource]="roles" [loading]="loading" [totalItems]="totalItems" [page]="page"
+                [pageSize]="pageSize" [filaSeleccionada]="filaSeleccionada" (seleccionar)="onSeleccionarRol($event)"
+                (paginar)="onChangePaginate($event)"></app-tabla-roles>
+        </div>
+    </div>
+</div>

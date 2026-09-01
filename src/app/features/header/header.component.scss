@@ -85,9 +85,24 @@
   letter-spacing: 0.08em;
 }
 
-:host ::ng-deep .header-ng-select {
+.header-role-value {
   width: 100%;
+  min-height: 32px;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #1d2a1f;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
 }
+
 
 :host ::ng-deep .header-ng-select .ng-select-container {
   min-height: 32px !important;
@@ -181,11 +196,23 @@
 }
 
 .header-container-right-username {
+  max-width: 280px;
   font-size: 12px;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .header-container-right-address {
-  font-size: 12px !important;
+  max-width: 360px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .avatar-box {

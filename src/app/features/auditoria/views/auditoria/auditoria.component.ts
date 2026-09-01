@@ -1,31 +1,32 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
+import { finalize } from 'rxjs';
+
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import {
+  IChangePaginate
+} from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
+import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
 import { FiltroAuditoriaComponent } from '../../components/filtro-auditoria/filtro-auditoria.component';
-import { TablaAuditoriaComponent } from '../../components/tabla-auditoria/tabla-auditoria.component';
 import { ModalDetalleAuditoriaComponent } from '../../components/modal-detalle-auditoria/modal-detalle-auditoria.component';
-import { IChangePaginate } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
-import { AccionMantenimiento } from '../../../../shared/enums/accion-mantenimiento.enum';
-
-export interface IQueryAuditoria {
-  usuario?: string;
-  accion?: string;
-  entidad?: string;
-  fechaIni?: string;
-  fechaFin?: string;
-}
-
-interface RegistroAuditoria {
-  idAuditoria: number;
-  fecha: string;
-  usuario: string;
-  accion: string;
-  entidad: string;
-  detalle: string;
-  ip: string;
-}
+import { TablaAuditoriaComponent } from '../../components/tabla-auditoria/tabla-auditoria.component';
+import {
+  AccionBitacora,
+  BitacoraFilter,
+  BitacoraQuery,
+  RegistroBitacora,
+  ResultadoBitacora
+} from '../../models/bitacora.model';
+import {
+  AccionPermiso,
+  ModuloSistema
+} from '../../../../core/models/permiso.model';
+import { BitacoraService } from '../../services/bitacora.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-auditoria',
@@ -35,122 +36,251 @@ interface RegistroAuditoria {
     AgrihusaTopBarComponent,
     AgrihusaButtonComponent,
     FiltroAuditoriaComponent,
-    TablaAuditoriaComponent,
-    ModalDetalleAuditoriaComponent
+    TablaAuditoriaComponent
   ],
   templateUrl: './auditoria.component.html'
 })
-export class AuditoriaComponent implements OnInit {
-  getNombreMantenimiento = 'Auditoría';
+export class AuditoriaComponent
+  implements OnInit {
+  readonly titulo = 'Bitácora del Sistema';
 
-  filaSeleccionada: any | null = null;
-  dataAuditoria: RegistroAuditoria[] = [];
+  registros: RegistroBitacora[] = [];
+  filaSeleccionada: RegistroBitacora | null =
+    null;
+
   loading = false;
   totalItems = 0;
   page = 1;
   pageSize = 10;
+  puedeExportar = false;
 
-  private todosRegistros: RegistroAuditoria[] = [];
-  private queryFilter: IQueryAuditoria = {};
+  private filtro: BitacoraFilter = {};
 
-  constructor(private modalService: NgbModal) {}
+  constructor(
+    private bitacoraService: BitacoraService,
+    private authService: AuthService,
+    private modalService: NgbModal
+  ) { }
 
   ngOnInit(): void {
-    this.cargarMocks();
-    this.aplicarGrilla();
+    this.cargarPermisoExportar();
+    this.cargarRegistros();
   }
 
-  private cargarMocks() {
-    const usuarios = ['ADMIN', 'JORGE PÉREZ', 'ANA LÓPEZ', 'LUIS MARTÍNEZ'];
-    const acciones = ['CREAR', 'EDITAR', 'ELIMINAR', 'CONSULTAR'];
-    const entidades = ['DESTINO', 'VÍA', 'TRANSPORTISTA', 'USUARIO'];
-    const ips = ['192.168.1.10', '192.168.1.25', '10.0.0.7', '172.16.4.3'];
-    const detalles = [
-      'Se registró el destino PERÚ',
-      'Se modificó el destino BOGOTÁ',
-      'Se eliminó la vía CALI',
-      'Se consultó el registro del transportista',
-      'Se actualizó el usuario LUIS MARTÍNEZ',
-      'Se creó la entidad MEDELLÍN',
-      'Se modificó la vía principal',
-      'Se consultó el detalle de auditoría'
-    ];
-
-    this.todosRegistros = [];
-    const base = new Date(2024, 0, 15);
-    for (let i = 1; i <= 23; i++) {
-      const day = new Date(base);
-      day.setDate(day.getDate() + i);
-      const fecha = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')} ${String(8 + (i % 10)).padStart(2, '0')}:${String((i * 7) % 60).padStart(2, '0')}`;
-      this.todosRegistros.push({
-        idAuditoria: i,
-        fecha,
-        usuario: usuarios[i % usuarios.length],
-        accion: acciones[i % acciones.length],
-        entidad: entidades[i % entidades.length],
-        detalle: detalles[i % detalles.length],
-        ip: ips[i % ips.length]
-      });
-    }
-  }
-
-  private aplicarGrilla() {
-    const q = this.queryFilter;
-    const filtrados = this.todosRegistros.filter((r) => {
-      if (q.usuario && !r.usuario.toUpperCase().includes(q.usuario.toUpperCase()))
-        return false;
-      if (q.accion && r.accion !== q.accion) return false;
-      if (q.entidad && r.entidad !== q.entidad) return false;
-      if (q.fechaIni && r.fecha < q.fechaIni) return false;
-      if (q.fechaFin && r.fecha > `${q.fechaFin} 23:59`) return false;
-      return true;
-    });
-
-    this.totalItems = filtrados.length;
-    const inicio = (this.page - 1) * this.pageSize;
-    this.dataAuditoria = filtrados.slice(inicio, inicio + this.pageSize);
-  }
-
-  onBuscar(query: IQueryAuditoria) {
-    this.queryFilter = { ...query };
+  onBuscar(filtro: BitacoraFilter): void {
+    this.filtro = { ...filtro };
     this.page = 1;
-    this.aplicarGrilla();
+    this.cargarRegistros();
   }
 
-  onLimpiar() {
-    this.queryFilter = {};
+  onLimpiar(): void {
+    this.filtro = {};
     this.page = 1;
-    this.aplicarGrilla();
+    this.cargarRegistros();
   }
 
-  onSeleccionarItem(item: any) {
-    if (this.filaSeleccionada?.idAuditoria === item.idAuditoria) {
-      this.filaSeleccionada = null;
-    } else {
-      this.filaSeleccionada = item;
+  onSeleccionarItem(
+    item: RegistroBitacora
+  ): void {
+    this.filaSeleccionada =
+      this.filaSeleccionada?.id === item.id
+        ? null
+        : item;
+  }
+
+  mostrarModalDetalle(): void {
+    if (!this.filaSeleccionada) {
+      return;
     }
+
+    const modalRef = this.modalService.open(
+      ModalDetalleAuditoriaComponent,
+      {
+        backdrop: 'static',
+        keyboard: false,
+        size: 'lg',
+        centered: true,
+        scrollable: true
+      }
+    );
+
+    modalRef.componentInstance.titleModal =
+      'DETALLE DE BITÁCORA';
+
+    modalRef.componentInstance.data =
+      this.filaSeleccionada;
+
+    modalRef.result.catch(() => { });
   }
 
-  mostrarModalDetalle() {
-    const modalRef = this.modalService.open(ModalDetalleAuditoriaComponent, {
-      backdrop: 'static',
-      keyboard: false,
-      size: 'lg',
-      centered: true
-    });
-
-    modalRef.componentInstance.titleModal = 'DETALLE DE AUDITORÍA';
-    modalRef.componentInstance.accion = AccionMantenimiento.VER;
-    modalRef.componentInstance.data = this.filaSeleccionada;
-
-    modalRef.result
-      .then(() => {})
-      .catch(() => {});
-  }
-
-  onChangePaginate(event: IChangePaginate) {
+  onChangePaginate(
+    event: IChangePaginate
+  ): void {
     this.page = event.page;
     this.pageSize = event.pageSize;
-    this.aplicarGrilla();
+    this.cargarRegistros();
+  }
+
+  exportarCsv(): void {
+    if (!this.puedeExportar) {
+      return;
+    }
+
+    const query: BitacoraQuery = {
+      ...this.filtro,
+      page: 1,
+      pageSize: Number.MAX_SAFE_INTEGER
+    };
+
+    this.bitacoraService
+      .listar(query)
+      .subscribe((resultado) => {
+        if (!resultado.items.length) {
+          window.alert(
+            'No existen registros para exportar.'
+          );
+          return;
+        }
+
+        const encabezados = [
+          'ID',
+          'FECHA',
+          'USUARIO',
+          'ACCIÓN',
+          'MÓDULO',
+          'ENTIDAD',
+          'ID REGISTRO',
+          'DETALLE',
+          'RESULTADO'
+        ];
+
+        const filas = resultado.items.map(
+          (registro) => [
+            registro.id,
+            registro.fecha,
+            registro.nombreUsuario,
+            registro.accion,
+            registro.modulo,
+            registro.entidad,
+            registro.registroId ?? '',
+            registro.detalle,
+            registro.resultado
+          ]
+        );
+
+        const contenido = [
+          encabezados,
+          ...filas
+        ]
+          .map((fila) =>
+            fila
+              .map((valor) =>
+                this.escaparValorCsv(valor)
+              )
+              .join(';')
+          )
+          .join('\r\n');
+
+        this.descargarCsv(contenido);
+        this.registrarExportacion(
+          resultado.items.length
+        );
+      });
+  }
+  private cargarRegistros(): void {
+    const query: BitacoraQuery = {
+      ...this.filtro,
+      page: this.page,
+      pageSize: this.pageSize
+    };
+
+    this.loading = true;
+    this.filaSeleccionada = null;
+
+    this.bitacoraService
+      .listar(query)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe((resultado) => {
+        this.registros = resultado.items;
+        this.totalItems = resultado.totalItems;
+      });
+  }
+  private cargarPermisoExportar(): void {
+    this.authService
+      .tienePermiso(
+        ModuloSistema.BITACORA,
+        AccionPermiso.EXPORTAR
+      )
+      .subscribe((permitido) => {
+        this.puedeExportar = permitido;
+      });
+  }
+
+  private escaparValorCsv(
+    valor: string | number
+  ): string {
+    let texto = String(valor ?? '');
+
+    if (/^[=+\-@]/.test(texto)) {
+      texto = `'${texto}`;
+    }
+
+    texto = texto.replace(/"/g, '""');
+
+    return `"${texto}"`;
+  }
+
+  private descargarCsv(contenido: string): void {
+    const blob = new Blob(
+      ['\uFEFF', contenido],
+      {
+        type: 'text/csv;charset=utf-8'
+      }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const enlace = document.createElement('a');
+
+    const fecha = new Date()
+      .toISOString()
+      .slice(0, 10);
+
+    enlace.href = url;
+    enlace.download =
+      `bitacora-${fecha}.csv`;
+
+    enlace.click();
+    enlace.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  private registrarExportacion(
+    cantidad: number
+  ): void {
+    const sesion =
+      this.authService.obtenerSesionActual();
+
+    if (!sesion) {
+      return;
+    }
+
+    this.bitacoraService
+      .registrar({
+        usuarioId: sesion.usuarioId,
+        nombreUsuario: sesion.nombreUsuario,
+        modulo: ModuloSistema.BITACORA,
+        accion: AccionBitacora.EXPORTAR,
+        entidad: 'Bitácora',
+        registroId: null,
+        detalle:
+          `Se exportaron ${cantidad} registros ` +
+          'de bitácora.',
+        resultado: ResultadoBitacora.EXITO
+      })
+      .subscribe();
   }
 }

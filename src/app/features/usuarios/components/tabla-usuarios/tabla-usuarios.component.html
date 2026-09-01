@@ -1,0 +1,90 @@
+<div class="table-responsive" [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }">
+    <table class="table tbl-grid m-0 head-no-rounded">
+        <caption class="d-none">
+            Tabla de mantenimiento de usuarios
+        </caption>
+
+        <thead>
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Usuario</th>
+                <th scope="col">Nombre completo</th>
+                <th scope="col">Correo</th>
+                <th scope="col">Rol</th>
+                <th scope="col">Último acceso</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Estado</th>
+            </tr>
+        </thead>
+
+        <tbody *ngIf="!loading">
+            <tr *ngFor="
+          let usuario of datasource;
+          index as i;
+          trackBy: trackByUsuarioId
+        " tabindex="0" [class]="'c-pointer tbl-row tbl-row-' + i" [ngClass]="{
+          active: usuario.id === itemId
+        }" [attr.aria-selected]="usuario.id === itemId" (click)="onSeleccionarFila(usuario)"
+                (keydown.enter)="onSeleccionarFila(usuario)">
+                <td>{{ usuario.id }}</td>
+
+                <td>
+                    <strong>{{ usuario.nombreUsuario }}</strong>
+                </td>
+
+                <td>
+                    {{ usuario.nombres }} {{ usuario.apellidos }}
+                </td>
+
+                <td>{{ usuario.correo }}</td>
+
+                <td>
+                    {{ obtenerNombreRol(usuario.rolId) }}
+                </td>
+
+                <td>
+                    {{ formatearUltimoAcceso(usuario.ultimoAcceso) }}
+                </td>
+
+                <td>
+                    {{
+                    usuario.esSistema
+                    ? 'SISTEMA'
+                    : 'REGULAR'
+                    }}
+                </td>
+
+                <td>
+                    <span class="labels" [ngClass]="{
+              'labels-activo': usuario.activo,
+              'labels-inactivo': !usuario.activo
+            }">
+                        <span class="labels_circle" aria-hidden="true"></span>
+
+                        <span>
+                            {{
+                            usuario.activo
+                            ? 'ACTIVO'
+                            : 'INACTIVO'
+                            }}
+                        </span>
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ng-container *ngIf="!loading && !totalItems">
+        <agrihusa-no-results></agrihusa-no-results>
+    </ng-container>
+
+    <ng-container *ngIf="loading">
+        <agrihusa-loading></agrihusa-loading>
+    </ng-container>
+</div>
+
+<table-footer-pagination [totalItems]="totalItems" [totalItemsPerPage]="datasource.length" [page]="page"
+    [pageSize]="pageSize" (changePaginate)="onChangePaginate($event)"></table-footer-pagination>

@@ -44,24 +44,52 @@ export class TableFooterPaginationComponent implements OnChanges {
   to = 1;
   from = this.pageSize;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    this.calPaginationPerPage(this.localPage, this.localPageSize);
+  ngOnChanges(_changes: SimpleChanges): void {
+    this.localPage = this.page;
+    this.localPageSize = this.pageSize;
+
+    this.calPaginationPerPage(
+      this.localPage,
+      this.localPageSize
+    );
   }
 
-  onChangePageSize(pageSize: number) {
+  onChangePageSize(pageSize: number): void {
+    this.localPage = 1;
     this.localPageSize = pageSize;
-    this.calPaginationPerPage(this.localPage, pageSize);
-    this.changePaginate.emit({ page: this.localPage, pageSize });
+
+    this.calPaginationPerPage(
+      this.localPage,
+      this.localPageSize
+    );
+
+    this.changePaginate.emit({
+      page: 1,
+      pageSize
+    });
   }
 
-  onChangePaginate(page: number) {
+  onChangePaginate(page: number): void {
     this.localPage = page;
-    this.calPaginationPerPage(this.localPage, this.localPageSize);
-    this.changePaginate.emit({ page, pageSize: this.localPageSize });
+
+    this.calPaginationPerPage(
+      this.localPage,
+      this.localPageSize
+    );
+
+    this.changePaginate.emit({
+      page,
+      pageSize: this.localPageSize
+    });
   }
 
-  private calPaginationPerPage(page: number, pageSize: number) {
+  private calPaginationPerPage(
+    page: number,
+    pageSize: number
+  ): void {
     this.to = pageSize * page - pageSize + 1;
-    this.from = pageSize * page - (pageSize - this.totalItemsPerPage);
+    this.from =
+      pageSize * page -
+      (pageSize - this.totalItemsPerPage);
   }
 }

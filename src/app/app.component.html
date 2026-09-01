@@ -1,32 +1,36 @@
 <div id="agrihusaApp" class="agrihusa">
   <div class="agrihusa-header" *ngIf="isAuthenticated">
     <header>
-      <app-header
-        (onToggleSideNav)="toggleMenu($event)"
-        (onLogout)="logout()"
-      ></app-header>
+      <app-header (onToggleSideNav)="toggleMenu($event)" (onLogout)="logout()"></app-header>
     </header>
     <div class="agrihusaApp-content-container">
       <aside class="agrihusaApp-content_sidebar" [class.d-none]="!menuVisible">
         <section>
-          <app-menu
-            (onToggleSideNav)="toggleMenu($event)"
-            (onSelectItem)="onSelectMenu($event)"
-          ></app-menu>
+          <app-menu (onToggleSideNav)="toggleMenu($event)" (onSelectItem)="onSelectMenu($event)"></app-menu>
         </section>
       </aside>
       <main class="agrihusaApp-content_main">
+        <app-mantenimiento-roles *ngIf="mostrarRoles"></app-mantenimiento-roles>
+        <app-mantenimiento-usuarios *ngIf="mostrarUsuarios"></app-mantenimiento-usuarios>
         <app-mantenimiento-destinos *ngIf="mostrarDestinos"></app-mantenimiento-destinos>
         <app-mantenimiento-vias *ngIf="mostrarVias"></app-mantenimiento-vias>
         <app-mantenimiento-variedades *ngIf="mostrarVariedades"></app-mantenimiento-variedades>
         <app-mantenimiento-navieras *ngIf="mostrarNavieras"></app-mantenimiento-navieras>
         <app-mantenimiento-puertos-llegada *ngIf="mostrarPuertosLlegada"></app-mantenimiento-puertos-llegada>
         <app-auditoria *ngIf="mostrarAuditoria"></app-auditoria>
+        <app-perfil-usuario *ngIf="mostrarPerfilUsuario"></app-perfil-usuario>
 
-        <section
-          class="agrihusaApp-content_placeholder"
-          *ngIf="!mostrarDestinos && !mostrarVias && !mostrarVariedades && !mostrarNavieras && !mostrarPuertosLlegada && !mostrarAuditoria"
-        >
+        <section class="agrihusaApp-content_placeholder" *ngIf="
+            !mostrarRoles &&
+            !mostrarUsuarios &&
+            !mostrarDestinos &&
+            !mostrarVias &&
+            !mostrarVariedades &&
+            !mostrarNavieras &&
+            !mostrarPuertosLlegada &&
+            !mostrarPerfilUsuario &&
+            !mostrarAuditoria
+          ">
           <p class="eyebrow">Layout base</p>
           <h1>{{ selectedMenuLabel }}</h1>
           <p>
@@ -38,6 +42,6 @@
   </div>
 
   <div *ngIf="!isAuthenticated">
-    <app-login (onLogin)="login()"></app-login>
+    <app-login></app-login>
   </div>
 </div>

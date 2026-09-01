@@ -1,63 +1,137 @@
 <div class="agrihusa">
   <div class="modal-header">
-    <h6 class="modal-title w-100">{{ titleModal }}</h6>
-    <button
-      type="button"
-      class="btn-close"
-      aria-label="Close"
-      (click)="onCerrar()"
-    ></button>
+    <div>
+      <p class="mb-1 text-success fw-bold small">
+        Registro histórico inmutable
+      </p>
+
+      <h5 class="modal-title">
+        {{ titleModal }}
+      </h5>
+    </div>
+
+    <button type="button" class="btn-close" aria-label="Cerrar" title="Cerrar" (click)="onCerrar()"></button>
   </div>
+
   <div class="modal-body">
     <div class="modal-body-content">
-      <div class="container-fluid px-0 g-0">
-        <div class="row gx-3 align-items-baseline">
-          <div class="col-12 col-md-6">
-            <div class="form-group">
-              <label class="form-label">Fecha: </label>
-              <input class="form-control agrihusa" [value]="data?.fecha" readonly />
+      <div class="container-fluid px-0">
+        <div class="row gx-3">
+          <div class="col-12 col-md-4">
+            <div class="form-group mb-3">
+              <label class="form-label" for="bitacoraDetalleId">
+                Id:
+              </label>
+
+              <input id="bitacoraDetalleId" class="form-control" [value]="data?.id ?? ''" readonly />
             </div>
           </div>
-          <div class="col-12 col-md-6">
-            <div class="form-group">
-              <label class="form-label">Usuario: </label>
-              <input class="form-control agrihusa" [value]="data?.usuario" readonly />
+
+          <div class="col-12 col-md-8">
+            <div class="form-group mb-3">
+              <label class="form-label" for="bitacoraDetalleFecha">
+                Fecha y hora:
+              </label>
+
+              <input id="bitacoraDetalleFecha" class="form-control" [value]="formatearFecha(data?.fecha)" readonly />
             </div>
           </div>
+
           <div class="col-12 col-md-6">
-            <div class="form-group">
-              <label class="form-label">Acción: </label>
-              <input class="form-control agrihusa" [value]="data?.accion" readonly />
+            <div class="form-group mb-3">
+              <label class="form-label" for="bitacoraDetalleUsuario">
+                Usuario:
+              </label>
+
+              <input id="bitacoraDetalleUsuario" class="form-control" [value]="data?.nombreUsuario ?? ''" readonly />
             </div>
           </div>
+
           <div class="col-12 col-md-6">
-            <div class="form-group">
-              <label class="form-label">Entidad: </label>
-              <input class="form-control agrihusa" [value]="data?.entidad" readonly />
+            <div class="form-group mb-3">
+              <label class="form-label" for="bitacoraDetalleUsuarioId">
+                Id de usuario:
+              </label>
+
+              <input id="bitacoraDetalleUsuarioId" class="form-control" [value]="
+                  data?.usuarioId ?? 'NO DISPONIBLE'
+                " readonly />
             </div>
           </div>
+
           <div class="col-12 col-md-6">
-            <div class="form-group">
-              <label class="form-label">Detalle: </label>
-              <input class="form-control agrihusa" [value]="data?.detalle" readonly />
+            <div class="form-group mb-3">
+              <label class="form-label" for="bitacoraDetalleAccion">
+                Acción:
+              </label>
+
+              <input id="bitacoraDetalleAccion" class="form-control" [value]="
+                  obtenerNombreAccion(data?.accion)
+                " readonly />
             </div>
           </div>
+
           <div class="col-12 col-md-6">
+            <div class="form-group mb-3">
+              <label class="form-label" for="bitacoraDetalleModulo">
+                Módulo:
+              </label>
+
+              <input id="bitacoraDetalleModulo" class="form-control" [value]="
+                  obtenerNombreModulo(data?.modulo)
+                " readonly />
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div class="form-group mb-3">
+              <label class="form-label" for="bitacoraDetalleEntidad">
+                Entidad:
+              </label>
+
+              <input id="bitacoraDetalleEntidad" class="form-control" [value]="data?.entidad ?? ''" readonly />
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div class="form-group mb-3">
+              <label class="form-label" for="bitacoraDetalleRegistroId">
+                Id del registro afectado:
+              </label>
+
+              <input id="bitacoraDetalleRegistroId" class="form-control" [value]="
+                  data?.registroId ?? 'NO APLICA'
+                " readonly />
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="form-group mb-3">
+              <label class="form-label" for="bitacoraDetalleResultado">
+                Resultado:
+              </label>
+
+              <input id="bitacoraDetalleResultado" class="form-control text-uppercase fw-bold"
+                [value]="data?.resultado ?? ''" readonly />
+            </div>
+          </div>
+
+          <div class="col-12">
             <div class="form-group">
-              <label class="form-label">IP: </label>
-              <input class="form-control agrihusa" [value]="data?.ip" readonly />
+              <label class="form-label" for="bitacoraDetalleDescripcion">
+                Detalle:
+              </label>
+
+              <textarea id="bitacoraDetalleDescripcion" class="form-control" rows="4" [value]="data?.detalle ?? ''"
+                readonly></textarea>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
   <div class="modal-footer">
-    <agrihusa-button
-      texto="Cancelar"
-      color="danger"
-      icon="x"
-      (click)="onCerrar()"
-    ></agrihusa-button>
+    <agrihusa-button texto="Cerrar" color="secondary" icon="x" (click)="onCerrar()"></agrihusa-button>
   </div>
 </div>
