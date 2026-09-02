@@ -1,135 +1,355 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {
+  EMPTY,
+  finalize,
+  forkJoin,
+  switchMap
+} from 'rxjs';
+
+import {
+  AccionPermiso,
+  ModuloSistema
+} from '../../../../core/models/permiso.model';
+import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { IChangePaginate } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
+import {
+  IChangePaginate
+} from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
-import { AccionMantenimiento } from '../../../../shared/enums/accion-mantenimiento.enum';
+import {
+  AccionBitacora,
+  RegistroBitacoraCrearData,
+  ResultadoBitacora
+} from '../../../auditoria/models/bitacora.model';
+import { BitacoraService } from '../../../auditoria/services/bitacora.service';
 import { FiltroMantNavierasComponent } from '../../components/filtro-mant-navieras/filtro-mant-navieras.component';
 import { ModalUpsertNavieraComponent } from '../../components/modal-upsert-naviera/modal-upsert-naviera.component';
 import { TablaMantNavierasComponent } from '../../components/tabla-mant-navieras/tabla-mant-navieras.component';
-
-export interface IQueryMantNaviera {
-  descripcion?: string;
-  estado?: number;
-  page?: number;
-  size?: number;
-}
-
-interface Naviera {
-  idNaviera: number;
-  descripcion: string;
-  activo: boolean;
-}
+import {
+  Naviera,
+  NavieraFilter,
+  NavieraFormData,
+  NavieraQuery
+} from '../../models/naviera.model';
+import { NavieraService } from '../../services/naviera.service';
 
 @Component({
   selector: 'app-mantenimiento-navieras',
   standalone: true,
-  imports: [CommonModule, AgrihusaTopBarComponent, AgrihusaButtonComponent, FiltroMantNavierasComponent, TablaMantNavierasComponent],
-  templateUrl: './mantenimiento-navieras.component.html'
+  imports: [
+    CommonModule,
+    AgrihusaTopBarComponent,
+    AgrihusaButtonComponent,
+    FiltroMantNavierasComponent,
+    TablaMantNavierasComponent
+  ],
+  templateUrl:
+    './mantenimiento-navieras.component.html'
 })
-export class MantenimientoNavierasComponent implements OnInit {
-  readonly AccionMantenimiento = AccionMantenimiento;
+export class MantenimientoNavierasComponent
+  implements OnInit {
+  readonly titulo = 'Mantenimiento de Navieras';
 
-  getNombreMantenimiento = 'Mantenimiento de Navieras';
-  filaSeleccionada: any = null;
-  dataNavieras: Naviera[] = [];
+  navieras: Naviera[] = [];
+  filaSeleccionada: Naviera | null = null;
   loading = false;
   totalItems = 0;
   page = 1;
   pageSize = 10;
 
-  private todasNavieras: Naviera[] = [];
-  private queryFilter: IQueryMantNaviera = { page: 1, size: 10 };
+  puedeCrear = false;
+  puedeEditar = false;
+  puedeCambiarEstado = false;
 
-  constructor(private modalService: NgbModal) {}
+  private filtro: NavieraFilter = {};
+
+  constructor(
+    private navieraService: NavieraService,
+    private authService: AuthService,
+    private bitacoraService: BitacoraService,
+    private modalService: NgbModal
+  ) { }
 
   ngOnInit(): void {
-    this.todasNavieras = [
-      { idNaviera: 1, descripcion: 'MAERSK', activo: true },
-      { idNaviera: 2, descripcion: 'MSC', activo: true },
-      { idNaviera: 3, descripcion: 'HAPAG-LLOYD', activo: true },
-      { idNaviera: 4, descripcion: 'CMA CGM', activo: false },
-      { idNaviera: 5, descripcion: 'EVERGREEN', activo: true }
-    ];
-    this.aplicarGrilla();
+    this.cargarPermisos();
+    this.cargarNavieras();
   }
 
-  onBuscar(query: IQueryMantNaviera) {
-    this.queryFilter = { ...query, page: 1, size: this.pageSize };
+  onBuscar(filtro: NavieraFilter): void {
+    this.filtro = { ...filtro };
     this.page = 1;
-    this.aplicarGrilla();
+    this.cargarNavieras();
   }
 
-  onLimpiarFiltro() {
-    this.queryFilter = { page: 1, size: this.pageSize };
+  onLimpiarFiltro(): void {
+    this.filtro = {};
     this.page = 1;
-    this.aplicarGrilla();
+    this.cargarNavieras();
   }
 
-  onSeleccionarItem(item: any) {
-    this.filaSeleccionada = this.filaSeleccionada?.idNaviera === item.idNaviera ? null : item;
+  onSeleccionarNaviera(
+    naviera: Naviera
+  ): void {
+    this.filaSeleccionada =
+      this.filaSeleccionada?.id === naviera.id
+        ? null
+        : naviera;
   }
 
-  onChangePaginate(event: IChangePaginate) {
+  onChangePaginate(
+    event: IChangePaginate
+  ): void {
     this.page = event.page;
     this.pageSize = event.pageSize;
-    this.aplicarGrilla();
+    this.cargarNavieras();
   }
 
-  mostrarModalUpsert(accion: AccionMantenimiento) {
-    const modalRef = this.modalService.open(ModalUpsertNavieraComponent, {
-      backdrop: 'static',
-      keyboard: false,
-      size: 'lg',
-      centered: true
-    });
-
-    modalRef.componentInstance.titleModal =
-      accion === AccionMantenimiento.CREAR ? 'REGISTRAR NAVIERA' : 'EDITAR NAVIERA';
-    modalRef.componentInstance.accion = accion;
-    modalRef.componentInstance.data =
-      accion === AccionMantenimiento.ACTUALIZAR ? this.filaSeleccionada : null;
-
-    modalRef.result
-      .then((result: { accion: AccionMantenimiento; descripcion: string }) => {
-        if (result) this.onGuardarModal(result.accion, result.descripcion);
-      })
-      .catch(() => {});
-  }
-
-  eliminarNaviera() {
-    const target = this.todasNavieras.find((item) => item.idNaviera === this.filaSeleccionada?.idNaviera);
-    if (target) target.activo = !target.activo;
-    this.aplicarGrilla();
-  }
-
-  private aplicarGrilla() {
-    this.filaSeleccionada = null;
-    const filtrados = this.todasNavieras.filter((item) => {
-      if (this.queryFilter.descripcion && !item.descripcion.toUpperCase().includes(this.queryFilter.descripcion.toUpperCase())) return false;
-      if (this.queryFilter.estado != null) {
-        const activo = this.queryFilter.estado === 1;
-        if (item.activo !== activo) return false;
-      }
-      return true;
-    });
-
-    this.totalItems = filtrados.length;
-    const inicio = (this.page - 1) * this.pageSize;
-    this.dataNavieras = filtrados.slice(inicio, inicio + this.pageSize);
-  }
-
-  private onGuardarModal(accion: AccionMantenimiento, descripcion: string) {
-    if (accion === AccionMantenimiento.CREAR) {
-      const nuevoId = this.todasNavieras.length > 0 ? Math.max(...this.todasNavieras.map((item) => item.idNaviera)) + 1 : 1;
-      this.todasNavieras.unshift({ idNaviera: nuevoId, descripcion, activo: true });
-    } else {
-      const target = this.todasNavieras.find((item) => item.idNaviera === this.filaSeleccionada?.idNaviera);
-      if (target) target.descripcion = descripcion;
+  mostrarModalCrear(): void {
+    if (!this.puedeCrear) {
+      return;
     }
 
-    this.page = 1;
-    this.aplicarGrilla();
+    this.abrirModal(null);
+  }
+
+  mostrarModalEditar(): void {
+    if (
+      !this.puedeEditar ||
+      !this.filaSeleccionada ||
+      !this.filaSeleccionada.activo
+    ) {
+      return;
+    }
+
+    this.abrirModal(this.filaSeleccionada);
+  }
+
+  cambiarEstado(): void {
+    const naviera = this.filaSeleccionada;
+
+    if (
+      !this.puedeCambiarEstado ||
+      !naviera
+    ) {
+      return;
+    }
+
+    const accion = naviera.activo
+      ? 'desactivar'
+      : 'activar';
+
+    const confirmado = window.confirm(
+      `¿Deseas ${accion} la naviera ` +
+      `"${naviera.nombre}"?`
+    );
+
+    if (!confirmado) {
+      return;
+    }
+
+    this.navieraService
+      .cambiarEstado(naviera.id)
+      .subscribe((resultado) => {
+        if (!resultado) {
+          return;
+        }
+
+        const accionBitacora = resultado.activo
+          ? AccionBitacora.ACTIVAR
+          : AccionBitacora.DESACTIVAR;
+
+        this.registrarEventoNaviera(
+          accionBitacora,
+          resultado,
+          resultado.activo
+            ? `Se activó la naviera ${resultado.nombre}.`
+            : `Se desactivó la naviera ${resultado.nombre}.`
+        );
+
+        this.cargarNavieras();
+      });
+  }
+
+  private cargarNavieras(): void {
+    const query: NavieraQuery = {
+      ...this.filtro,
+      page: this.page,
+      pageSize: this.pageSize
+    };
+
+    this.loading = true;
+    this.filaSeleccionada = null;
+
+    this.navieraService
+      .listar(query)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe((resultado) => {
+        this.navieras = resultado.items;
+        this.totalItems = resultado.totalItems;
+      });
+  }
+
+  private abrirModal(
+    naviera: Naviera | null
+  ): void {
+    const modalRef = this.modalService.open(
+      ModalUpsertNavieraComponent,
+      {
+        backdrop: 'static',
+        keyboard: false,
+        size: 'lg',
+        centered: true,
+        scrollable: true
+      }
+    );
+
+    modalRef.componentInstance.titleModal = naviera
+      ? 'EDITAR NAVIERA'
+      : 'REGISTRAR NAVIERA';
+
+    modalRef.componentInstance.data = naviera;
+
+    modalRef.result
+      .then((resultado: NavieraFormData) => {
+        if (resultado) {
+          this.guardarNaviera(
+            resultado,
+            naviera
+          );
+        }
+      })
+      .catch(() => { });
+  }
+
+  private guardarNaviera(
+    data: NavieraFormData,
+    naviera: Naviera | null
+  ): void {
+    forkJoin({
+      existeCodigo:
+        this.navieraService.existeCodigo(
+          data.codigo,
+          naviera?.id
+        ),
+      existeNombre:
+        this.navieraService.existeNombre(
+          data.nombre,
+          naviera?.id
+        )
+    })
+      .pipe(
+        switchMap(
+          ({ existeCodigo, existeNombre }) => {
+            if (existeCodigo) {
+              window.alert(
+                'Ya existe una naviera con ese código.'
+              );
+
+              return EMPTY;
+            }
+
+            if (existeNombre) {
+              window.alert(
+                'Ya existe una naviera con ese nombre.'
+              );
+
+              return EMPTY;
+            }
+
+            if (!naviera) {
+              return this.navieraService.crear(data);
+            }
+
+            return this.navieraService.actualizar(
+              naviera.id,
+              data
+            );
+          }
+        )
+      )
+      .subscribe((navieraGuardada) => {
+        if (!navieraGuardada) {
+          return;
+        }
+
+        if (!naviera) {
+          this.registrarEventoNaviera(
+            AccionBitacora.CREAR,
+            navieraGuardada,
+            `Se creó la naviera ` +
+            `${navieraGuardada.nombre}.`
+          );
+        } else {
+          this.registrarEventoNaviera(
+            AccionBitacora.EDITAR,
+            navieraGuardada,
+            `Se actualizó la naviera ` +
+            `${navieraGuardada.nombre}.`
+          );
+        }
+
+        this.page = 1;
+        this.cargarNavieras();
+      });
+  }
+
+  private cargarPermisos(): void {
+    forkJoin({
+      crear: this.authService.tienePermiso(
+        ModuloSistema.NAVIERAS,
+        AccionPermiso.CREAR
+      ),
+      editar: this.authService.tienePermiso(
+        ModuloSistema.NAVIERAS,
+        AccionPermiso.EDITAR
+      ),
+      cambiarEstado:
+        this.authService.tienePermiso(
+          ModuloSistema.NAVIERAS,
+          AccionPermiso.ELIMINAR
+        )
+    }).subscribe((permisos) => {
+      this.puedeCrear = permisos.crear;
+      this.puedeEditar = permisos.editar;
+      this.puedeCambiarEstado =
+        permisos.cambiarEstado;
+    });
+  }
+
+  private registrarEventoNaviera(
+    accion: AccionBitacora,
+    naviera: Naviera,
+    detalle: string
+  ): void {
+    const sesion =
+      this.authService.obtenerSesionActual();
+
+    if (!sesion) {
+      return;
+    }
+
+    const evento: RegistroBitacoraCrearData = {
+      usuarioId: sesion.usuarioId,
+      nombreUsuario: sesion.nombreUsuario,
+      modulo: ModuloSistema.NAVIERAS,
+      accion,
+      entidad: 'Naviera',
+      registroId: naviera.id,
+      detalle,
+      resultado: ResultadoBitacora.EXITO
+    };
+
+    this.bitacoraService
+      .registrar(evento)
+      .subscribe();
   }
 }

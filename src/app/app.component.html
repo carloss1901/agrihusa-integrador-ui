@@ -19,6 +19,8 @@
         <app-mantenimiento-puertos-llegada *ngIf="mostrarPuertosLlegada"></app-mantenimiento-puertos-llegada>
         <app-auditoria *ngIf="mostrarAuditoria"></app-auditoria>
         <app-perfil-usuario *ngIf="mostrarPerfilUsuario"></app-perfil-usuario>
+        <app-mantenimiento-clientes *ngIf="mostrarClientes"></app-mantenimiento-clientes>
+        <app-mantenimiento-operadores-logisticos *ngIf="mostrarOperadoresLogisticos"></app-mantenimiento-operadores-logisticos>
 
         <section class="agrihusaApp-content_placeholder" *ngIf="
             !mostrarRoles &&
@@ -29,6 +31,8 @@
             !mostrarNavieras &&
             !mostrarPuertosLlegada &&
             !mostrarPerfilUsuario &&
+            !mostrarClientes &&
+            !mostrarOperadoresLogisticos &&
             !mostrarAuditoria
           ">
           <p class="eyebrow">Layout base</p>

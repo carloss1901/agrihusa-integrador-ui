@@ -1,0 +1,219 @@
+<div class="modal-header">
+    <div>
+        <p class="modal-eyebrow mb-1">
+            Gestión comercial
+        </p>
+
+        <h5 class="modal-title">
+            {{ titleModal }}
+        </h5>
+    </div>
+
+    <button type="button" class="btn-close" aria-label="Cerrar" title="Cerrar" (click)="onCerrarModal()"></button>
+</div>
+
+<div class="modal-body">
+    <form id="formularioCliente" [formGroup]="formulario" (ngSubmit)="onGuardar()">
+        <section class="form-section">
+            <h6 class="form-section-title">
+                Identificación comercial
+            </h6>
+
+            <div class="row gx-3">
+                <div class="col-12 col-md-4">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="tipoDocumentoCliente">
+                            Tipo de documento:
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <ng-select inputId="tipoDocumentoCliente" [items]="tiposDocumento" bindLabel="descripcion"
+                            bindValue="valor" placeholder="-- SELECCIONAR --" [clearable]="false" [searchable]="false"
+                            formControlName="tipoDocumento" [class.is-invalid]="
+                controlInvalido('tipoDocumento')
+              "></ng-select>
+
+                        <div *ngIf="controlInvalido('tipoDocumento')" class="invalid-feedback d-block">
+                            Selecciona un tipo de documento.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="numeroDocumentoCliente">
+                            Número de documento:
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input id="numeroDocumentoCliente" type="text" class="form-control text-uppercase"
+                            formControlName="numeroDocumento" maxlength="20" autocomplete="off"
+                            placeholder="Ingrese el documento" [class.is-invalid]="
+                controlInvalido('numeroDocumento')
+              " />
+
+                        <div *ngIf="controlInvalido('numeroDocumento')" class="invalid-feedback">
+                            <span *ngIf="
+                  formulario.controls.numeroDocumento.hasError(
+                    'required'
+                  )
+                ">
+                                El número de documento es obligatorio.
+                            </span>
+
+                            <span *ngIf="
+                  formulario.controls.numeroDocumento.hasError(
+                    'pattern'
+                  )
+                ">
+                                El formato no corresponde al tipo seleccionado.
+                                RUC requiere 11 dígitos y DNI 8 dígitos.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="paisCliente">
+                            País:
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input id="paisCliente" type="text" class="form-control text-uppercase" formControlName="pais"
+                            maxlength="80" placeholder="Ejemplo: PERÚ" [class.is-invalid]="
+                controlInvalido('pais')
+              " />
+
+                        <div *ngIf="controlInvalido('pais')" class="invalid-feedback">
+                            El país es obligatorio y permite un máximo
+                            de 80 caracteres.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-7">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="razonSocialCliente">
+                            Razón social:
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input id="razonSocialCliente" type="text" class="form-control text-uppercase"
+                            formControlName="razonSocial" maxlength="150" placeholder="Ingrese la razón social"
+                            [class.is-invalid]="
+                controlInvalido('razonSocial')
+              " />
+
+                        <div *ngIf="controlInvalido('razonSocial')" class="invalid-feedback">
+                            La razón social es obligatoria y permite un
+                            máximo de 150 caracteres.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-5">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="nombreComercialCliente">
+                            Nombre comercial:
+                        </label>
+
+                        <input id="nombreComercialCliente" type="text" class="form-control text-uppercase"
+                            formControlName="nombreComercial" maxlength="120"
+                            placeholder="Nombre utilizado comercialmente" [class.is-invalid]="
+                controlInvalido('nombreComercial')
+              " />
+
+                        <div *ngIf="controlInvalido('nombreComercial')" class="invalid-feedback">
+                            Permite un máximo de 120 caracteres.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <h6 class="form-section-title">
+                Contacto y ubicación
+            </h6>
+
+            <div class="row gx-3">
+                <div class="col-12 col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="contactoCliente">
+                            Persona de contacto:
+                        </label>
+
+                        <input id="contactoCliente" type="text" class="form-control" formControlName="contacto"
+                            maxlength="120" placeholder="Nombre del contacto" [class.is-invalid]="
+                controlInvalido('contacto')
+              " />
+
+                        <div *ngIf="controlInvalido('contacto')" class="invalid-feedback">
+                            Permite un máximo de 120 caracteres.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="correoCliente">
+                            Correo:
+                        </label>
+
+                        <input id="correoCliente" type="email" class="form-control" formControlName="correo"
+                            maxlength="120" placeholder="contacto@empresa.com" [class.is-invalid]="
+                controlInvalido('correo')
+              " />
+
+                        <div *ngIf="controlInvalido('correo')" class="invalid-feedback">
+                            Ingresa un correo válido de máximo
+                            120 caracteres.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="telefonoCliente">
+                            Teléfono:
+                        </label>
+
+                        <input id="telefonoCliente" type="tel" class="form-control" formControlName="telefono"
+                            maxlength="20" placeholder="+51 999 999 999" [class.is-invalid]="
+                controlInvalido('telefono')
+              " />
+
+                        <div *ngIf="controlInvalido('telefono')" class="invalid-feedback">
+                            Ingresa un teléfono válido de máximo
+                            20 caracteres.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-8">
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="direccionCliente">
+                            Dirección:
+                        </label>
+
+                        <textarea id="direccionCliente" class="form-control" formControlName="direccion" maxlength="200"
+                            rows="2" placeholder="Dirección comercial del cliente" [class.is-invalid]="
+                controlInvalido('direccion')
+              "></textarea>
+
+                        <div *ngIf="controlInvalido('direccion')" class="invalid-feedback">
+                            Permite un máximo de 200 caracteres.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <agrihusa-button texto="Cancelar" color="danger" icon="x" (click)="onCerrarModal()"></agrihusa-button>
+
+    <agrihusa-button texto="Guardar" icon="check" (click)="onGuardar()"></agrihusa-button>
+</div>

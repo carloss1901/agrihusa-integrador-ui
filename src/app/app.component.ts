@@ -25,6 +25,8 @@ import {
 } from './core/models/permiso.model';
 import { AuthService } from './core/services/auth.service';
 import { PerfilUsuarioComponent } from './features/perfil-usuario/views/perfil-usuario/perfil-usuario.component';
+import { MantenimientoClientesComponent } from './features/clientes/views/mantenimiento-clientes/mantenimiento-clientes.component';
+import { MantenimientoOperadoresLogisticosComponent } from './features/operadores-logisticos/views/mantenimiento-operadores-logisticos/mantenimiento-operadores-logisticos.component';
 
 @Component({
   selector: 'app-root',
@@ -42,7 +44,9 @@ import { PerfilUsuarioComponent } from './features/perfil-usuario/views/perfil-u
     MantenimientoPuertosLlegadaComponent,
     MantenimientoRolesComponent,
     AuditoriaComponent,
-    PerfilUsuarioComponent
+    PerfilUsuarioComponent,
+    MantenimientoClientesComponent,
+    MantenimientoOperadoresLogisticosComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -61,7 +65,8 @@ export class AppComponent {
   mostrarPuertosLlegada = false;
   mostrarAuditoria = false;
   mostrarPerfilUsuario = false;
-
+  mostrarClientes = false;
+  mostrarOperadoresLogisticos = false;
   toggleMenu(esCerrar: boolean): void {
     this.menuVisible = !esCerrar;
   }
@@ -135,6 +140,14 @@ export class AppComponent {
           case ModuloSistema.PERFIL_USUARIO:
             this.mostrarPerfilUsuario = true;
             break;
+
+          case ModuloSistema.CLIENTES:
+            this.mostrarClientes = true;
+            break;
+          
+          case ModuloSistema.OPERADORES_LOGISTICOS:
+            this.mostrarOperadoresLogisticos = true;
+            break;
         }
       });
   }
@@ -149,6 +162,8 @@ export class AppComponent {
     this.mostrarPuertosLlegada = false;
     this.mostrarAuditoria = false;
     this.mostrarPerfilUsuario = false;
+    this.mostrarClientes = false;
+    this.mostrarOperadoresLogisticos = false;
   }
 
   constructor(

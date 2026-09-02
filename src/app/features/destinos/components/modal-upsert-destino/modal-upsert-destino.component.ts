@@ -1,17 +1,24 @@
-import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  Component,
+  Input,
+  OnInit
+} from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { NgSelectModule } from '@ng-select/ng-select';
-import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { AccionMantenimiento } from '../../../../shared/enums/accion-mantenimiento.enum';
 
-interface Destino {
-  idDestino: number;
-  pais: string;
-  ciudad: string;
-  activo: boolean;
-}
+import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import {
+  Destino,
+  DestinoFormData
+} from '../../models/destino.model';
+
+type NombreControl = 'pais' | 'ciudad';
 
 @Component({
   selector: 'app-modal-upsert-destino',
@@ -19,75 +26,90 @@ interface Destino {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    NgSelectModule,
     AgrihusaButtonComponent
   ],
-  templateUrl: './modal-upsert-destino.component.html'
+  templateUrl:
+    './modal-upsert-destino.component.html',
+  styleUrls: [
+    './modal-upsert-destino.component.scss'
+  ]
 })
-export class ModalUpsertDestinoComponent implements OnInit {
-  readonly AccionMantenimiento = AccionMantenimiento;
-
+export class ModalUpsertDestinoComponent
+  implements OnInit {
   @Input() titleModal = '';
-  @Input() accion: AccionMantenimiento = AccionMantenimiento.CREAR;
   @Input() data: Destino | null = null;
 
-  formulario!: FormGroup;
-  lstCboPais: any[] = [];
   submitted = false;
 
-  constructor(private fb: FormBuilder, public activeModal: NgbActiveModal) {}
+  readonly formulario = new FormGroup({
+    pais: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.maxLength(80),
+        Validators.pattern(
+          /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.'-]+$/
+        )
+      ]
+    }),
+    ciudad: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.maxLength(100),
+        Validators.pattern(
+          /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.'-]+$/
+        )
+      ]
+    })
+  });
+
+  constructor(
+    public activeModal: NgbActiveModal
+  ) {}
 
   ngOnInit(): void {
-    this.initFormulario();
-  }
-
-  private initFormulario() {
-    this.formulario = this.fb.group({
-      cboPais: [null, [Validators.required]],
-      txtCiudad: ['', [Validators.required]]
-    });
-
-    this.lstCboPais = [
-      { maestroId: 'PERÚ', descripcion: 'PERÚ' },
-      { maestroId: 'ECUADOR', descripcion: 'ECUADOR' },
-      { maestroId: 'COLOMBIA', descripcion: 'COLOMBIA' },
-      { maestroId: 'CHILE', descripcion: 'CHILE' },
-      { maestroId: 'BOLIVIA', descripcion: 'BOLIVIA' }
-    ];
-
-    if (this.accion === AccionMantenimiento.ACTUALIZAR && this.data) {
-      this.cboPais?.setValue(this.data.pais);
-      this.txtCiudad?.setValue(this.data.ciudad);
-    }
-  }
-
-  onGuardar() {
-    this.submitted = true;
-    if (this.formulario.invalid) {
-      Object.values(this.formulario.controls).forEach((control) =>
-        control.markAllAsTouched()
-      );
+    if (!this.data) {
       return;
     }
-    this.activeModal.close({
-      accion: this.accion,
-      pais: this.cboPais?.value,
-      ciudad: this.txtCiudad?.value
+
+    this.formulario.patchValue({
+      pais: this.data.pais,
+      ciudad: this.data.ciudad
     });
   }
 
-  onCerrarModal() {
-    this.activeModal.close();
+  onGuardar(): void {
+    this.submitted = true;
+    this.formulario.markAllAsTouched();
+
+    if (this.formulario.invalid) {
+      return;
+    }
+
+    const value = this.formulario.getRawValue();
+
+    const resultado: DestinoFormData = {
+      pais: value.pais.trim(),
+      ciudad: value.ciudad.trim()
+    };
+
+    this.activeModal.close(resultado);
   }
 
-  esControlInvalido(control: any): boolean {
-    return !!(control && control.invalid && (control.touched || this.submitted));
+  onCerrarModal(): void {
+    this.activeModal.dismiss();
   }
 
-  get cboPais() {
-    return this.formulario.get('cboPais');
-  }
-  get txtCiudad() {
-    return this.formulario.get('txtCiudad');
+  controlInvalido(
+    nombreControl: NombreControl
+  ): boolean {
+    const control =
+      this.formulario.controls[nombreControl];
+
+    return (
+      control.invalid &&
+      (control.touched || this.submitted)
+    );
   }
 }

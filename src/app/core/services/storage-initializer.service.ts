@@ -10,6 +10,14 @@ import { Usuario } from '../../features/usuarios/models/usuario.model';
 import { STORAGE_KEYS } from '../constants/storage-keys.constant';
 import { LocalStorageService } from './local-storage.service';
 import { PasswordHashService } from './password-hash.service';
+import { crearClientesIniciales } from '../../features/clientes/data/clientes.seed';
+import { Cliente } from '../../features/clientes/models/cliente.model';
+import { crearNavierasIniciales } from '../../features/navieras/data/navieras.seed';
+import { Naviera } from '../../features/navieras/models/naviera.model';
+import { crearDestinosIniciales } from '../../features/destinos/data/destinos.seed';
+import { Destino } from '../../features/destinos/models/destino.model';
+import { crearOperadoresLogisticosIniciales } from '../../features/operadores-logisticos/data/operadores-logisticos.seed';
+import { OperadorLogistico } from '../../features/operadores-logisticos/models/operador-logistico.model';
 
 @Injectable({
   providedIn: 'root'
@@ -20,11 +28,15 @@ export class StorageInitializerService {
   constructor(
     private localStorageService: LocalStorageService,
     private passwordHashService: PasswordHashService
-  ) {}
+  ) { }
 
   async inicializar(): Promise<void> {
     this.inicializarVersion();
     this.inicializarRoles();
+    this.inicializarClientes();
+    this.inicializarNavieras();
+    this.inicializarDestinos();
+    this.inicializarOperadoresLogisticos();
     await this.inicializarUsuarios();
   }
 
@@ -56,6 +68,20 @@ export class StorageInitializerService {
     }
   }
 
+  private inicializarClientes(): void {
+    const clientes =
+      this.localStorageService.obtener<Cliente[]>(
+        STORAGE_KEYS.CLIENTES
+      );
+
+    if (clientes === null) {
+      this.localStorageService.guardar(
+        STORAGE_KEYS.CLIENTES,
+        crearClientesIniciales()
+      );
+    }
+  }
+
   private async inicializarUsuarios(): Promise<void> {
     const usuarios =
       this.localStorageService.obtener<Usuario[]>(
@@ -75,5 +101,48 @@ export class StorageInitializerService {
       STORAGE_KEYS.USUARIOS,
       crearUsuariosIniciales(passwordHash)
     );
+  }
+
+  private inicializarNavieras(): void {
+    const navieras =
+      this.localStorageService.obtener<Naviera[]>(
+        STORAGE_KEYS.NAVIERAS
+      );
+
+    if (navieras === null) {
+      this.localStorageService.guardar(
+        STORAGE_KEYS.NAVIERAS,
+        crearNavierasIniciales()
+      );
+    }
+  }
+
+  private inicializarDestinos(): void {
+    const destinos =
+      this.localStorageService.obtener<Destino[]>(
+        STORAGE_KEYS.DESTINOS
+      );
+
+    if (destinos === null) {
+      this.localStorageService.guardar(
+        STORAGE_KEYS.DESTINOS,
+        crearDestinosIniciales()
+      );
+    }
+  }
+  private inicializarOperadoresLogisticos(): void {
+    const operadores =
+      this.localStorageService.obtener<
+        OperadorLogistico[]
+      >(
+        STORAGE_KEYS.OPERADORES_LOGISTICOS
+      );
+
+    if (operadores === null) {
+      this.localStorageService.guardar(
+        STORAGE_KEYS.OPERADORES_LOGISTICOS,
+        crearOperadoresLogisticosIniciales()
+      );
+    }
   }
 }

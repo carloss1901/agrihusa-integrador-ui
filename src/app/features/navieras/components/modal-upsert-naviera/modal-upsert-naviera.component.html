@@ -1,27 +1,167 @@
-<div class="agrihusa">
-  <div class="modal-header">
-    <h6 class="modal-title w-100">{{ titleModal }}</h6>
-    <button type="button" class="btn-close" aria-label="Close" (click)="onCerrarModal()"></button>
+<div class="modal-header">
+  <div>
+    <p class="modal-eyebrow mb-1">
+      Gestión logística
+    </p>
+
+    <h5 class="modal-title">
+      {{ titleModal }}
+    </h5>
   </div>
-  <div class="modal-body">
-    <div class="container-fluid px-0 g-0">
-      <form [formGroup]="formulario">
-        <div class="row gx-3 align-items-baseline">
-          <div class="col-12 col-md-6">
-            <div class="form-group required" [ngClass]="{ invalid: esControlInvalido(txtNaviera) }">
-              <label class="form-label">Naviera: </label>
-              <input class="form-control agrihusa" formControlName="txtNaviera" />
-              <div *ngIf="esControlInvalido(txtNaviera)" class="invalid-feedback">
-                <span>Campo requerido</span>
-              </div>
+
+  <button type="button" class="btn-close" aria-label="Cerrar" title="Cerrar" (click)="onCerrarModal()"></button>
+</div>
+
+<div class="modal-body">
+  <form id="formularioNaviera" [formGroup]="formulario" (ngSubmit)="onGuardar()">
+    <section class="form-section">
+      <h6 class="form-section-title">
+        Identificación de la naviera
+      </h6>
+
+      <div class="row gx-3">
+        <div class="col-12 col-md-4">
+          <div class="form-group mb-3">
+            <label class="form-label" for="codigoNaviera">
+              Código:
+              <span class="text-danger">*</span>
+            </label>
+
+            <input id="codigoNaviera" type="text" class="form-control text-uppercase" formControlName="codigo"
+              maxlength="10" autocomplete="off" placeholder="Ejemplo: MSK" [class.is-invalid]="
+                controlInvalido('codigo')
+              " />
+
+            <div *ngIf="controlInvalido('codigo')" class="invalid-feedback">
+              Ingresa entre 2 y 10 letras, números o
+              guiones.
             </div>
           </div>
         </div>
-      </form>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <agrihusa-button texto="Cancelar" color="danger" icon="x" (click)="onCerrarModal()"></agrihusa-button>
-    <agrihusa-button texto="Guardar" icon="check" (click)="onGuardar()"></agrihusa-button>
-  </div>
+
+        <div class="col-12 col-md-8">
+          <div class="form-group mb-3">
+            <label class="form-label" for="nombreNaviera">
+              Nombre:
+              <span class="text-danger">*</span>
+            </label>
+
+            <input id="nombreNaviera" type="text" class="form-control text-uppercase" formControlName="nombre"
+              maxlength="120" placeholder="Nombre de la empresa naviera" [class.is-invalid]="
+                controlInvalido('nombre')
+              " />
+
+            <div *ngIf="controlInvalido('nombre')" class="invalid-feedback">
+              El nombre es obligatorio y permite un máximo
+              de 120 caracteres.
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="form-group mb-0">
+            <label class="form-label" for="paisNaviera">
+              País:
+              <span class="text-danger">*</span>
+            </label>
+
+            <input id="paisNaviera" type="text" class="form-control text-uppercase" formControlName="pais"
+              maxlength="80" placeholder="País de origen" [class.is-invalid]="
+                controlInvalido('pais')
+              " />
+
+            <div *ngIf="controlInvalido('pais')" class="invalid-feedback">
+              El país es obligatorio y permite un máximo
+              de 80 caracteres.
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="form-group mb-0">
+            <label class="form-label" for="sitioWebNaviera">
+              Sitio web:
+            </label>
+
+            <input id="sitioWebNaviera" type="url" class="form-control" formControlName="sitioWeb" maxlength="200"
+              placeholder="https://www.empresa.com" [class.is-invalid]="
+                controlInvalido('sitioWeb')
+              " />
+
+            <div *ngIf="controlInvalido('sitioWeb')" class="invalid-feedback">
+              Ingresa una dirección que comience con
+              http:// o https://.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h6 class="form-section-title">
+        Información de contacto
+      </h6>
+
+      <div class="row gx-3">
+        <div class="col-12 col-md-6">
+          <div class="form-group mb-3">
+            <label class="form-label" for="contactoNaviera">
+              Contacto:
+            </label>
+
+            <input id="contactoNaviera" type="text" class="form-control" formControlName="contacto" maxlength="120"
+              placeholder="Persona o área de contacto" [class.is-invalid]="
+                controlInvalido('contacto')
+              " />
+
+            <div *ngIf="controlInvalido('contacto')" class="invalid-feedback">
+              Permite un máximo de 120 caracteres.
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="form-group mb-3">
+            <label class="form-label" for="correoNaviera">
+              Correo:
+            </label>
+
+            <input id="correoNaviera" type="email" class="form-control" formControlName="correo" maxlength="120"
+              placeholder="contacto@naviera.com" [class.is-invalid]="
+                controlInvalido('correo')
+              " />
+
+            <div *ngIf="controlInvalido('correo')" class="invalid-feedback">
+              Ingresa un correo válido de máximo
+              120 caracteres.
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="form-group mb-0">
+            <label class="form-label" for="telefonoNaviera">
+              Teléfono:
+            </label>
+
+            <input id="telefonoNaviera" type="tel" class="form-control" formControlName="telefono" maxlength="20"
+              placeholder="+51 999 999 999" [class.is-invalid]="
+                controlInvalido('telefono')
+              " />
+
+            <div *ngIf="controlInvalido('telefono')" class="invalid-feedback">
+              Ingresa un teléfono válido de máximo
+              20 caracteres.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <agrihusa-button texto="Cancelar" color="danger" icon="x" (click)="onCerrarModal()"></agrihusa-button>
+
+  <agrihusa-button texto="Guardar" icon="check" (click)="onGuardar()"></agrihusa-button>
 </div>

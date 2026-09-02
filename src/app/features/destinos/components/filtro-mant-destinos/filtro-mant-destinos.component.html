@@ -1,50 +1,51 @@
 <div ngbAccordion [closeOthers]="false">
   <div ngbAccordionItem [collapsed]="false">
     <h2 ngbAccordionHeader>
-      <button ngbAccordionButton class="d-flex justify-content-between w-100">
-        <span class="title-group-uppercase">Filtros de búsqueda</span>
+      <button ngbAccordionButton class="d-flex justify-content-between w-100" type="button">
+        <span class="title-group-uppercase">
+          Filtros de búsqueda
+        </span>
       </button>
     </h2>
+
     <div ngbAccordionCollapse>
       <div ngbAccordionBody>
         <ng-template>
-          <form [formGroup]="frmFiltro">
+          <form [formGroup]="formulario">
             <div class="container-fluid px-0">
               <div class="row gx-3 align-items-baseline mb-2">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-lg-4">
                   <div class="form-group">
-                    <label class="form-label">País:</label>
-                    <ng-select
-                      class="text-uppercase"
-                      [items]="lstCboPais"
-                      bindLabel="descripcion"
-                      bindValue="maestroId"
-                      placeholder="-- SELECCIONAR --"
-                      [clearable]="true"
-                      [searchable]="false"
-                      formControlName="cboPais"
-                    ></ng-select>
+                    <label class="form-label" for="filtroDestinoTexto">
+                      Destino:
+                    </label>
+
+                    <input id="filtroDestinoTexto" class="form-control" type="search" formControlName="texto"
+                      placeholder="Ciudad o país" autocomplete="off" (keyup.enter)="onBuscar()" />
                   </div>
                 </div>
-                <div class="col-12 col-md-4">
+
+                <div class="col-12 col-md-6 col-lg-4">
                   <div class="form-group">
-                    <label class="form-label">Ciudad:</label>
-                    <input class="form-control" formControlName="txtCiudad" />
+                    <label class="form-label" for="filtroDestinoPais">
+                      País:
+                    </label>
+
+                    <input id="filtroDestinoPais" class="form-control text-uppercase" type="search"
+                      formControlName="pais" placeholder="Ejemplo: PERÚ" autocomplete="off"
+                      (keyup.enter)="onBuscar()" />
                   </div>
                 </div>
-                <div class="col-12 col-md-4">
+
+                <div class="col-12 col-md-6 col-lg-4">
                   <div class="form-group">
-                    <label class="form-label">Estado:</label>
-                    <ng-select
-                      class="text-uppercase"
-                      [items]="lstCboEstado"
-                      bindLabel="descripcion"
-                      bindValue="maestroId"
-                      placeholder="-- SELECCIONAR --"
-                      [clearable]="true"
-                      [searchable]="false"
-                      formControlName="cboEstado"
-                    ></ng-select>
+                    <label class="form-label" for="filtroDestinoEstado">
+                      Estado:
+                    </label>
+
+                    <ng-select inputId="filtroDestinoEstado" class="text-uppercase" [items]="estados"
+                      bindLabel="descripcion" bindValue="valor" placeholder="-- SELECCIONAR --" [clearable]="true"
+                      [searchable]="false" formControlName="estado"></ng-select>
                   </div>
                 </div>
               </div>
@@ -52,17 +53,10 @@
               <div class="row gx-2 justify-content-end">
                 <div class="col-auto">
                   <div class="d-flex gap-2">
-                    <agrihusa-button
-                      texto="Limpiar"
-                      icon="refresh-ccw"
-                      color="secondary"
-                      (click)="onLimpiar()"
-                    ></agrihusa-button>
-                    <agrihusa-button
-                      texto="Buscar"
-                      icon="search"
-                      (click)="onBuscar()"
-                    ></agrihusa-button>
+                    <agrihusa-button texto="Limpiar" icon="refresh-ccw" color="secondary"
+                      (click)="onLimpiar()"></agrihusa-button>
+
+                    <agrihusa-button texto="Buscar" icon="search" (click)="onBuscar()"></agrihusa-button>
                   </div>
                 </div>
               </div>

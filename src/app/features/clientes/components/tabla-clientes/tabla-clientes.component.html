@@ -1,0 +1,95 @@
+<div class="table-responsive" [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }">
+    <table class="table tbl-grid m-0 head-no-rounded">
+        <caption class="d-none">
+            Tabla de mantenimiento de clientes
+        </caption>
+
+        <thead>
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Documento</th>
+                <th scope="col">Razón social</th>
+                <th scope="col">Nombre comercial</th>
+                <th scope="col">Contacto</th>
+                <th scope="col">Teléfono</th>
+                <th scope="col">País</th>
+                <th scope="col">Estado</th>
+            </tr>
+        </thead>
+
+        <tbody *ngIf="!loading">
+            <tr *ngFor="
+          let cliente of datasource;
+          index as i;
+          trackBy: trackByClienteId
+        " tabindex="0" [class]="'c-pointer tbl-row tbl-row-' + i" [ngClass]="{
+          active: cliente.id === itemId
+        }" [attr.aria-selected]="cliente.id === itemId" (click)="onSeleccionarFila(cliente)"
+                (keydown.enter)="onSeleccionarFila(cliente)">
+                <td>{{ cliente.id }}</td>
+
+                <td>
+                    {{
+                    obtenerNombreTipoDocumento(
+                    cliente.tipoDocumento
+                    )
+                    }}
+                </td>
+
+                <td>
+                    <strong>{{ cliente.numeroDocumento }}</strong>
+                </td>
+
+                <td>{{ cliente.razonSocial }}</td>
+
+                <td>
+                    {{ cliente.nombreComercial || '—' }}
+                </td>
+
+                <td>
+                    <div>{{ cliente.contacto || '—' }}</div>
+
+                    <small class="text-muted">
+                        {{ cliente.correo || 'SIN CORREO' }}
+                    </small>
+                </td>
+
+                <td>{{ cliente.telefono || '—' }}</td>
+
+                <td>{{ cliente.pais }}</td>
+
+                <td>
+                    <span class="labels" [ngClass]="{
+              'labels-activo': cliente.activo,
+              'labels-inactivo': !cliente.activo
+            }">
+                        <span class="labels_circle" aria-hidden="true"></span>
+
+                        <span>
+                            {{
+                            cliente.activo
+                            ? 'ACTIVO'
+                            : 'INACTIVO'
+                            }}
+                        </span>
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ng-container *ngIf="!loading && !totalItems">
+        <agrihusa-no-results></agrihusa-no-results>
+    </ng-container>
+
+    <ng-container *ngIf="loading">
+        <agrihusa-loading></agrihusa-loading>
+    </ng-container>
+</div>
+
+<table-footer-pagination [totalItems]="totalItems" [totalItemsPerPage]="datasource.length" [page]="page"
+    [pageSize]="pageSize" (changePaginate)="onChangePaginate($event)"></table-footer-pagination>

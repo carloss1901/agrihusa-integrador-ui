@@ -97,6 +97,11 @@ export class MenuComponent {
           nombre: 'Puertos de llegada',
           codigo: 110,
           modulo: ModuloSistema.PUERTOS_LLEGADA
+        },
+        {
+          nombre: 'Operadores logísticos',
+          codigo: 113,
+          modulo: ModuloSistema.OPERADORES_LOGISTICOS
         }
       ]
     },
