@@ -1,57 +1,76 @@
-<div class="header_container-fluid">
+<header class="header_container-fluid">
   <div class="header_container-fluid-div">
     <div class="header-shell">
       <div class="header-container-left">
-      <div class="header-navbar-button px-2">
-        <button class="navbar-toggler text-white" type="button" (click)="toggleMenu(false)">
-          <span class="feather icon-menu"></span>
-        </button>
-      </div>
+        <div class="header-navbar-button px-2">
+          <button
+            class="navbar-toggler text-white"
+            type="button"
+            aria-label="Abrir menú principal"
+            title="Abrir menú"
+            (click)="toggleMenu(false)"
+          >
+            <span class="feather icon-menu" aria-hidden="true"></span>
+          </button>
+        </div>
 
-      <div class="agrihusa-header__title">
-        <a href="javascript:void(0)" class="link-to-landing">AGRIHUSA</a>
-      </div>
+        <div class="agrihusa-header__title">
+          <span class="link-to-landing">AGRIHUSA</span>
+        </div>
 
-      <div class="header-combo">
-        <div class="header-combo-content">
-          <label class="header-combo-label" for="rolId">ROL</label>
-          <ng-select
-            inputId="rolId"
-            class="text-uppercase header-ng-select"
-            placeholder="(Seleccione rol)"
-            [items]="roles"
-            bindLabel="descripcion"
-            bindValue="idRol"
-            [searchable]="false"
-            [clearable]="false"
-            [(ngModel)]="rolSeleccionado"
-          ></ng-select>
+        <div class="header-combo">
+          <div class="header-combo-content">
+            <span class="header-combo-label">ROL ACTUAL</span>
+
+            <strong class="header-role-value">
+              {{ nombreRol | uppercase }}
+            </strong>
+          </div>
         </div>
       </div>
-    </div>
 
       <div class="header-container-right">
-        <div class="header-dropdown-toggle" role="button" aria-expanded="true">
-        <div class="profile-group text-white me-3">
-          <div class="user-meta">
-            <h6 class="mb-0 fw-bold header-container-right-username">
-              {{ nombreUsuario.toUpperCase() }}
-            </h6>
-            <h6 class="mb-0 header-container-right-address">
-              {{ usuario.toUpperCase() }} | {{ fecSesion }}
-            </h6>
-          </div>
-          <div class="avatar-box">
-            <span>{{ inicialesUsuario }}</span>
-          </div>
-        </div>
+        <div class="header-dropdown-toggle">
+          <div class="profile-group text-white me-3">
+            <div class="user-meta">
+              <h6 class="mb-0 fw-bold header-container-right-username">
+                {{ nombreCompleto | uppercase }}
+              </h6>
 
-        <button class="logout-btn" (click)="logout()" title="Cerrar sesion">
-          <span class="feather icon-log-out"></span>
-          <span>Cerrar sesion</span>
-        </button>
+              <p class="mb-0 header-container-right-address">
+                {{ nombreUsuario | uppercase }}
+                <span aria-hidden="true"> | </span>
+                {{ empresa }}
+                <span aria-hidden="true"> | </span>
+                {{ fechaSesion }}
+              </p>
+            </div>
+
+            <div
+              class="avatar-box"
+              [attr.aria-label]="'Usuario ' + nombreCompleto"
+              title="{{ nombreCompleto }}"
+            >
+              <span aria-hidden="true">{{ inicialesUsuario }}</span>
+            </div>
+          </div>
+
+          <button
+            class="logout-btn"
+            type="button"
+            title="Cerrar sesión"
+            aria-label="Cerrar sesión"
+            (click)="logout()"
+          >
+            <span
+              class="feather icon-log-out"
+              aria-hidden="true"
+            ></span>
+
+            <span>Cerrar sesión</span>
+          </button>
+        </div>
       </div>
     </div>
-    </div>
   </div>
-</div>
+</header>

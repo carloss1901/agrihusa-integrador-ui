@@ -1,37 +1,73 @@
-<div 
+<div
   class="table-responsive"
-  [ngClass]="{ 'table-sticky table-sticky--height': datasource.length > 10 }"  
+  [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }"
 >
   <table class="table tbl-grid m-0 head-no-rounded">
-    <caption class="d-none">Tabla de mantenimiento de destinos</caption>
+    <caption class="d-none">
+      Tabla de mantenimiento de destinos
+    </caption>
+
     <thead>
       <tr>
         <th scope="col">Id</th>
         <th scope="col">País</th>
         <th scope="col">Ciudad</th>
+        <th scope="col">Destino</th>
         <th scope="col">Estado</th>
       </tr>
     </thead>
+
     <tbody *ngIf="!loading">
       <tr
-        *ngFor="let item of datasource; index as i"
+        *ngFor="
+          let destino of datasource;
+          index as i;
+          trackBy: trackByDestinoId
+        "
+        tabindex="0"
         [class]="'c-pointer tbl-row tbl-row-' + i"
-        [ngClass]="{ active: item.idDestino === itemId }"
-        (click)="onSeleccionarFila(item)"
+        [ngClass]="{
+          active: destino.id === itemId
+        }"
+        [attr.aria-selected]="destino.id === itemId"
+        (click)="onSeleccionarFila(destino)"
+        (keydown.enter)="onSeleccionarFila(destino)"
       >
-        <td>{{ item.idDestino }}</td>
-        <td>{{ item.pais }}</td>
-        <td>{{ item.ciudad }}</td>
+        <td>{{ destino.id }}</td>
+
+        <td>
+          <strong>{{ destino.pais }}</strong>
+        </td>
+
+        <td>{{ destino.ciudad }}</td>
+
+        <td>
+          {{ destino.ciudad }} - {{ destino.pais }}
+        </td>
+
         <td>
           <span
             class="labels"
             [ngClass]="{
-              'labels-activo': item.activo === true,
-              'labels-inactivo': item.activo === false
+              'labels-activo': destino.activo,
+              'labels-inactivo': !destino.activo
             }"
           >
-            <span class="labels_circle"></span>
-            <span>{{ item.activo ? 'ACTIVO' : 'INACTIVO' }}</span>
+            <span
+              class="labels_circle"
+              aria-hidden="true"
+            ></span>
+
+            <span>
+              {{
+                destino.activo
+                  ? 'ACTIVO'
+                  : 'INACTIVO'
+              }}
+            </span>
           </span>
         </td>
       </tr>
@@ -50,7 +86,7 @@
 <table-footer-pagination
   [totalItems]="totalItems"
   [totalItemsPerPage]="datasource.length"
-  (changePaginate)="onChangePaginate($event)"
   [page]="page"
   [pageSize]="pageSize"
+  (changePaginate)="onChangePaginate($event)"
 ></table-footer-pagination>

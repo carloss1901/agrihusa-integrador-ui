@@ -51,3 +51,21 @@ input.form-control {
 .login-link span {
   text-decoration: underline;
 }
+
+.login-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.75rem;
+  color: #52635a;
+  background-color: #edf4ef;
+  border: 1px solid #cfddd4;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.login-demo strong {
+  color: #00632a;
+  letter-spacing: 0.03em;
+}

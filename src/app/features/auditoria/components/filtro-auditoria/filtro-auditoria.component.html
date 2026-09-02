@@ -1,88 +1,99 @@
 <div ngbAccordion [closeOthers]="false">
   <div ngbAccordionItem [collapsed]="false">
     <h2 ngbAccordionHeader>
-      <button ngbAccordionButton class="d-flex justify-content-between w-100">
-        <span class="title-group-uppercase">Filtros de búsqueda</span>
+      <button ngbAccordionButton class="d-flex justify-content-between w-100" type="button">
+        <span class="title-group-uppercase">
+          Filtros de búsqueda
+        </span>
       </button>
     </h2>
+
     <div ngbAccordionCollapse>
       <div ngbAccordionBody>
         <ng-template>
-          <form [formGroup]="frmFiltro">
+          <form [formGroup]="formulario">
             <div class="container-fluid px-0">
-              <div class="row gx-3 align-items-baseline mb-2">
-                <div class="col-12 col-md-4">
+              <div class="row gx-3 mb-2">
+                <div class="col-12 col-md-6 col-lg-4">
                   <div class="form-group">
-                    <label class="form-label">Usuario:</label>
-                    <input class="form-control" formControlName="txtUsuario" />
+                    <label class="form-label" for="bitacoraUsuario">
+                      Usuario:
+                    </label>
+
+                    <input id="bitacoraUsuario" type="search" class="form-control" formControlName="usuario"
+                      placeholder="Ingrese el usuario" autocomplete="off" (keyup.enter)="onBuscar()" />
                   </div>
                 </div>
-                <div class="col-12 col-md-4">
+
+                <div class="col-12 col-md-6 col-lg-4">
                   <div class="form-group">
-                    <label class="form-label">Acción:</label>
-                    <ng-select
-                      class="text-uppercase"
-                      [items]="lstCboAccion"
-                      bindLabel="descripcion"
-                      bindValue="maestroId"
-                      placeholder="-- SELECCIONAR --"
-                      [clearable]="true"
-                      [searchable]="false"
-                      formControlName="cboAccion"
-                    ></ng-select>
+                    <label class="form-label" for="bitacoraAccion">
+                      Acción:
+                    </label>
+
+                    <ng-select inputId="bitacoraAccion" class="text-uppercase" [items]="acciones"
+                      bindLabel="descripcion" bindValue="valor" placeholder="-- SELECCIONAR --" [clearable]="true"
+                      [searchable]="false" formControlName="accion"></ng-select>
                   </div>
                 </div>
-                <div class="col-12 col-md-4">
+
+                <div class="col-12 col-md-6 col-lg-4">
                   <div class="form-group">
-                    <label class="form-label">Entidad:</label>
-                    <ng-select
-                      class="text-uppercase"
-                      [items]="lstCboEntidad"
-                      bindLabel="descripcion"
-                      bindValue="maestroId"
-                      placeholder="-- SELECCIONAR --"
-                      [clearable]="true"
-                      [searchable]="false"
-                      formControlName="cboEntidad"
-                    ></ng-select>
+                    <label class="form-label" for="bitacoraModulo">
+                      Módulo:
+                    </label>
+
+                    <ng-select inputId="bitacoraModulo" class="text-uppercase" [items]="modulos" bindLabel="descripcion"
+                      bindValue="valor" placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="true"
+                      formControlName="modulo"></ng-select>
                   </div>
                 </div>
-                <div class="col-12 col-md-4">
+
+                <div class="col-12 col-md-6 col-lg-4">
                   <div class="form-group">
-                    <label class="form-label">Fecha desde:</label>
-                    <input
-                      type="date"
-                      class="form-control"
-                      formControlName="txtFechaIni"
-                    />
+                    <label class="form-label" for="bitacoraResultado">
+                      Resultado:
+                    </label>
+
+                    <ng-select inputId="bitacoraResultado" class="text-uppercase" [items]="resultados"
+                      bindLabel="descripcion" bindValue="valor" placeholder="-- SELECCIONAR --" [clearable]="true"
+                      [searchable]="false" formControlName="resultado"></ng-select>
                   </div>
                 </div>
-                <div class="col-12 col-md-4">
+
+                <div class="col-12 col-md-6 col-lg-4">
                   <div class="form-group">
-                    <label class="form-label">Fecha hasta:</label>
-                    <input
-                      type="date"
-                      class="form-control"
-                      formControlName="txtFechaFin"
-                    />
+                    <label class="form-label" for="bitacoraFechaDesde">
+                      Fecha desde:
+                    </label>
+
+                    <input id="bitacoraFechaDesde" type="date" class="form-control" formControlName="fechaDesde" />
                   </div>
                 </div>
+
+                <div class="col-12 col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label class="form-label" for="bitacoraFechaHasta">
+                      Fecha hasta:
+                    </label>
+
+                    <input id="bitacoraFechaHasta" type="date" class="form-control" formControlName="fechaHasta" />
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="errorRangoFecha" class="alert alert-danger py-2" role="alert">
+                La fecha desde no puede ser posterior a la
+                fecha hasta.
               </div>
 
               <div class="row gx-2 justify-content-end">
                 <div class="col-auto">
                   <div class="d-flex gap-2">
-                    <agrihusa-button
-                      texto="Limpiar"
-                      icon="refresh-ccw"
-                      color="secondary"
-                      (click)="onLimpiar()"
-                    ></agrihusa-button>
-                    <agrihusa-button
-                      texto="Buscar"
-                      icon="search"
-                      (click)="onBuscar()"
-                    ></agrihusa-button>
+                    <agrihusa-button texto="Limpiar" icon="refresh-ccw" color="secondary"
+                      (click)="onLimpiar()"></agrihusa-button>
+
+                    <agrihusa-button texto="Buscar" icon="search" (click)="onBuscar()"></agrihusa-button>
                   </div>
                 </div>
               </div>

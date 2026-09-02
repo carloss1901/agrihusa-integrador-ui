@@ -1,23 +1,65 @@
 <div class="frame-layout">
   <div class="frame-layout__header">
     <div class="col-12 my-2">
-      <agrihusa-topbar [titulo]="getNombreMantenimiento" [subtitulo]="'Mantenimiento de navieras'" [showCancel]="false"></agrihusa-topbar>
+      <agrihusa-topbar [titulo]="titulo" subtitulo="Administración de empresas navieras"
+        [showCancel]="false"></agrihusa-topbar>
     </div>
   </div>
+
   <div class="frame-layout__body">
     <div class="agrihusa-card mb-component">
-      <app-filtro-mant-navieras (buscarNaviera)="onBuscar($event)" (limpiar)="onLimpiarFiltro()"></app-filtro-mant-navieras>
+      <app-filtro-mant-navieras (buscar)="onBuscar($event)" (limpiar)="onLimpiarFiltro()"></app-filtro-mant-navieras>
     </div>
+
     <div class="agrihusa-card">
-      <div class="p-content d-flex justify-content-between align-items-center">
-        <span class="title-group-uppercase">Lista de navieras</span>
+      <div class="
+          p-content
+          d-flex
+          justify-content-between
+          align-items-center
+        ">
+        <span class="title-group-uppercase">
+          Lista de navieras
+        </span>
+
         <div class="d-flex gap-2">
-          <agrihusa-button color="primary" variant="outlined" icon="plus" [esIcono]="true" (click)="mostrarModalUpsert(AccionMantenimiento.CREAR)"></agrihusa-button>
-          <agrihusa-button color="secondary" variant="outlined" icon="edit" [esIcono]="true" [disabled]="!filaSeleccionada || !filaSeleccionada.activo" (click)="mostrarModalUpsert(AccionMantenimiento.ACTUALIZAR)"></agrihusa-button>
-          <agrihusa-button color="secondary" variant="outlined" icon="trash" [esIcono]="true" [disabled]="!filaSeleccionada" (click)="eliminarNaviera()"></agrihusa-button>
+          <div title="Registrar naviera">
+            <agrihusa-button color="primary" variant="outlined" icon="plus" [esIcono]="true" [disabled]="!puedeCrear"
+              (click)="mostrarModalCrear()"></agrihusa-button>
+          </div>
+
+          <div title="Editar naviera">
+            <agrihusa-button color="secondary" variant="outlined" icon="edit" [esIcono]="true" [disabled]="
+                !puedeEditar ||
+                !filaSeleccionada ||
+                !filaSeleccionada.activo
+              " (click)="mostrarModalEditar()"></agrihusa-button>
+          </div>
+
+          <div [title]="
+              filaSeleccionada?.activo
+                ? 'Desactivar naviera'
+                : 'Activar naviera'
+            ">
+            <agrihusa-button [color]="
+                filaSeleccionada?.activo
+                  ? 'secondary'
+                  : 'success'
+              " variant="outlined" [icon]="
+                filaSeleccionada?.activo
+                  ? 'trash'
+                  : 'refresh-ccw'
+              " [esIcono]="true" [disabled]="
+                !puedeCambiarEstado ||
+                !filaSeleccionada
+              " (click)="cambiarEstado()"></agrihusa-button>
+          </div>
         </div>
       </div>
-      <app-tabla-mant-navieras [datasource]="dataNavieras" [loading]="loading" [totalItems]="totalItems" [page]="page" [pageSize]="pageSize" [filaSeleccionada]="filaSeleccionada" (seleccionar)="onSeleccionarItem($event)" (paginar)="onChangePaginate($event)"></app-tabla-mant-navieras>
+
+      <app-tabla-mant-navieras [datasource]="navieras" [loading]="loading" [totalItems]="totalItems" [page]="page"
+        [pageSize]="pageSize" [filaSeleccionada]="filaSeleccionada" (seleccionar)="onSeleccionarNaviera($event)"
+        (paginar)="onChangePaginate($event)"></app-tabla-mant-navieras>
     </div>
   </div>
 </div>

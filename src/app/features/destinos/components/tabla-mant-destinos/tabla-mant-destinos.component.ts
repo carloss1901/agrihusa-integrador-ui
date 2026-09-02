@@ -1,15 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output
+} from '@angular/core';
+
+import {
+  IChangePaginate,
+  TableFooterPaginationComponent
+} from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaLoadingComponent } from '../../../../shared/components/agrihusa-loading/agrihusa-loading.component';
 import { AgrihusaNoResultsComponent } from '../../../../shared/components/agrihusa-no-results/agrihusa-no-results.component';
-import { TableFooterPaginationComponent, IChangePaginate } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
-
-interface Destino {
-  idDestino: number;
-  pais: string;
-  ciudad: string;
-  activo: boolean;
-}
+import { Destino } from '../../models/destino.model';
 
 @Component({
   selector: 'app-tabla-mant-destinos',
@@ -20,7 +23,8 @@ interface Destino {
     AgrihusaNoResultsComponent,
     TableFooterPaginationComponent
   ],
-  templateUrl: './tabla-mant-destinos.component.html'
+  templateUrl:
+    './tabla-mant-destinos.component.html'
 })
 export class TablaMantDestinosComponent {
   @Input() datasource: Destino[] = [];
@@ -28,25 +32,36 @@ export class TablaMantDestinosComponent {
   @Input() totalItems = 0;
   @Input() page = 1;
   @Input() pageSize = 10;
-  @Input() filaSeleccionada: any | null = null;
+  @Input() filaSeleccionada: Destino | null = null;
 
-  @Output() seleccionar = new EventEmitter<any>();
-  @Output() paginar = new EventEmitter<IChangePaginate>();
+  @Output()
+  seleccionar = new EventEmitter<Destino>();
 
-  onSeleccionarFila(fila: any) {
-    this.seleccionar.emit(fila);
+  @Output()
+  paginar = new EventEmitter<IChangePaginate>();
+
+  onSeleccionarFila(destino: Destino): void {
+    this.seleccionar.emit(destino);
   }
 
-  onChangePaginate(event: IChangePaginate) {
-    if (!this.totalItems) return;
-    const { page, pageSize } = event;
-    if (pageSize !== this.pageSize && page > 1) {
+  onChangePaginate(
+    event: IChangePaginate
+  ): void {
+    if (!this.totalItems) {
       return;
     }
+
     this.paginar.emit(event);
   }
 
-  get itemId() {
-    return this.filaSeleccionada?.idDestino ?? 0;
+  trackByDestinoId(
+    _index: number,
+    destino: Destino
+  ): number {
+    return destino.id;
+  }
+
+  get itemId(): number {
+    return this.filaSeleccionada?.id ?? 0;
   }
 }

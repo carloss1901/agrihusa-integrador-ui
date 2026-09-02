@@ -1,10 +1,24 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  Component,
+  EventEmitter,
+  Output
+} from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule
+} from '@angular/forms';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
+
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { IQueryMantDestino } from '../../views/mantenimiento-destinos/mantenimiento-destinos.component';
+import { DestinoFilter } from '../../models/destino.model';
+
+interface EstadoOption {
+  valor: boolean;
+  descripcion: string;
+}
 
 @Component({
   selector: 'app-filtro-mant-destinos',
@@ -16,54 +30,63 @@ import { IQueryMantDestino } from '../../views/mantenimiento-destinos/mantenimie
     NgSelectModule,
     AgrihusaButtonComponent
   ],
-  templateUrl: './filtro-mant-destinos.component.html'
+  templateUrl:
+    './filtro-mant-destinos.component.html'
 })
-export class FiltroMantDestinosComponent implements OnInit {
-  @Output() buscarDestino = new EventEmitter<IQueryMantDestino>();
-  @Output() limpiar = new EventEmitter<void>();
+export class FiltroMantDestinosComponent {
+  @Output()
+  buscar = new EventEmitter<DestinoFilter>();
 
-  frmFiltro!: FormGroup;
-  lstCboPais: any[] = [];
-  lstCboEstado: any[] = [];
+  @Output()
+  limpiar = new EventEmitter<void>();
 
-  constructor(private fb: FormBuilder) {}
+  readonly estados: EstadoOption[] = [
+    {
+      valor: true,
+      descripcion: 'ACTIVO'
+    },
+    {
+      valor: false,
+      descripcion: 'INACTIVO'
+    }
+  ];
 
-  ngOnInit(): void {
-    this.initFormulario();
+  readonly formulario = new FormGroup({
+    texto: new FormControl('', {
+      nonNullable: true
+    }),
+    pais: new FormControl('', {
+      nonNullable: true
+    }),
+    estado: new FormControl<boolean | null>(null)
+  });
+
+  onBuscar(): void {
+    const value = this.formulario.getRawValue();
+    const filtro: DestinoFilter = {};
+
+    if (value.texto.trim()) {
+      filtro.texto = value.texto.trim();
+    }
+
+    if (value.pais.trim()) {
+      filtro.pais = value.pais.trim();
+    }
+
+    if (value.estado !== null) {
+      filtro.estado = value.estado;
+    }
+
+    this.buscar.emit(filtro);
   }
 
-  private initFormulario() {
-    this.frmFiltro = this.fb.group({
-      cboPais: [null],
-      txtCiudad: [''],
-      cboEstado: [null]
+  onLimpiar(): void {
+    this.formulario.reset({
+      texto: '',
+      pais: '',
+      estado: null
     });
 
-    this.lstCboEstado = [
-      { maestroId: 1, descripcion: 'ACTIVO' },
-      { maestroId: 0, descripcion: 'INACTIVO' }
-    ];
-
-    this.lstCboPais = [
-      { maestroId: 'PERÚ', descripcion: 'PERÚ' },
-      { maestroId: 'ECUADOR', descripcion: 'ECUADOR' },
-      { maestroId: 'COLOMBIA', descripcion: 'COLOMBIA' },
-      { maestroId: 'CHILE', descripcion: 'CHILE' },
-      { maestroId: 'BOLIVIA', descripcion: 'BOLIVIA' }
-    ];
-  }
-
-  onBuscar() {
-    const value = this.frmFiltro.value;
-    const query: IQueryMantDestino = {};
-    if (value.cboPais) query.pais = value.cboPais;
-    if (value.txtCiudad) query.ciudad = value.txtCiudad;
-    if (value.cboEstado != null) query.estado = value.cboEstado;
-    this.buscarDestino.emit(query);
-  }
-
-  onLimpiar() {
-    this.frmFiltro.reset();
     this.limpiar.emit();
   }
 }

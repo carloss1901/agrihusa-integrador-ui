@@ -1,28 +1,42 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
+import {
+  EMPTY,
+  finalize,
+  forkJoin,
+  switchMap
+} from 'rxjs';
+
+import {
+  AccionPermiso,
+  ModuloSistema
+} from '../../../../core/models/permiso.model';
+import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import {
+  IChangePaginate
+} from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
+import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
+import {
+  AccionBitacora,
+  RegistroBitacoraCrearData,
+  ResultadoBitacora
+} from '../../../auditoria/models/bitacora.model';
+import { BitacoraService } from '../../../auditoria/services/bitacora.service';
 import { FiltroMantDestinosComponent } from '../../components/filtro-mant-destinos/filtro-mant-destinos.component';
-import { TablaMantDestinosComponent } from '../../components/tabla-mant-destinos/tabla-mant-destinos.component';
 import { ModalUpsertDestinoComponent } from '../../components/modal-upsert-destino/modal-upsert-destino.component';
-import { IChangePaginate } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
-import { AccionMantenimiento } from '../../../../shared/enums/accion-mantenimiento.enum';
-
-export interface IQueryMantDestino {
-  pais?: string;
-  ciudad?: string;
-  estado?: number;
-  page?: number;
-  size?: number;
-}
-
-interface Destino {
-  idDestino: number;
-  pais: string;
-  ciudad: string;
-  activo: boolean;
-}
+import { TablaMantDestinosComponent } from '../../components/tabla-mant-destinos/tabla-mant-destinos.component';
+import {
+  Destino,
+  DestinoFilter,
+  DestinoFormData,
+  DestinoQuery
+} from '../../models/destino.model';
+import { DestinoService } from '../../services/destino.service';
 
 @Component({
   selector: 'app-mantenimiento-destinos',
@@ -32,159 +46,295 @@ interface Destino {
     AgrihusaTopBarComponent,
     AgrihusaButtonComponent,
     FiltroMantDestinosComponent,
-    TablaMantDestinosComponent,
-    ModalUpsertDestinoComponent
+    TablaMantDestinosComponent
   ],
-  templateUrl: './mantenimiento-destinos.component.html'
+  templateUrl:
+    './mantenimiento-destinos.component.html'
 })
-export class MantenimientoDestinosComponent implements OnInit {
-  readonly AccionMantenimiento = AccionMantenimiento;
+export class MantenimientoDestinosComponent
+  implements OnInit {
+  readonly titulo = 'Mantenimiento de Destinos';
 
-  getNombreMantenimiento = 'Mantenimiento de Destinos';
-
-  filaSeleccionada: any = null;
-  dataDestinos: Destino[] = [];
+  destinos: Destino[] = [];
+  filaSeleccionada: Destino | null = null;
   loading = false;
   totalItems = 0;
   page = 1;
   pageSize = 10;
 
-  private todosDestinos: Destino[] = [];
-  private queryFilter: IQueryMantDestino = { page: 1, size: 10 };
+  puedeCrear = false;
+  puedeEditar = false;
+  puedeCambiarEstado = false;
 
-  constructor(private modalService: NgbModal) {}
+  private filtro: DestinoFilter = {};
+
+  constructor(
+    private destinoService: DestinoService,
+    private authService: AuthService,
+    private bitacoraService: BitacoraService,
+    private modalService: NgbModal
+  ) {}
 
   ngOnInit(): void {
-    this.cargarMocks();
-    this.aplicarGrilla();
+    this.cargarPermisos();
+    this.cargarDestinos();
   }
 
-  private cargarMocks() {
-    const paises = ['PERÚ', 'ECUADOR', 'COLOMBIA', 'CHILE', 'BOLIVIA'];
-    const ciudades = ['LIMA', 'QUITO', 'BOGOTÁ', 'SANTIAGO', 'GUAYAQUIL', 'CALI', 'MEDELLÍN', 'BUENOS AIRES', 'LA PAZ', 'MEXICO'];
-    const total = 23;
-    this.todosDestinos = [];
-    for (let i = 1; i <= total; i++) {
-      this.todosDestinos.push({
-        idDestino: i,
-        pais: paises[i % paises.length],
-        ciudad: ciudades[i % ciudades.length],
-        activo: i % 4 !== 0
-      });
-    }
-  }
-
-  private aplicarGrilla() {
-    this.filaSeleccionada = null;
-
-    const q = this.queryFilter;
-    const filtrados = this.todosDestinos.filter((d) => {
-      if (q.pais && d.pais !== q.pais) return false;
-      if (q.ciudad && !d.ciudad.toUpperCase().includes(q.ciudad.toUpperCase()))
-        return false;
-      if (q.estado != null) {
-        const activo = q.estado === 1;
-        if (d.activo !== activo) return false;
-      }
-      return true;
-    });
-
-    this.totalItems = filtrados.length;
-    const inicio = (this.page - 1) * this.pageSize;
-    this.dataDestinos = filtrados.slice(inicio, inicio + this.pageSize);
-  }
-
-  onBuscar(query: IQueryMantDestino) {
-    this.queryFilter = { ...query, page: 1, size: this.pageSize };
+  onBuscar(filtro: DestinoFilter): void {
+    this.filtro = { ...filtro };
     this.page = 1;
-    this.aplicarGrilla();
+    this.cargarDestinos();
   }
 
-  onLimpiarFiltro() {
-    this.queryFilter = { page: 1, size: this.pageSize };
+  onLimpiarFiltro(): void {
+    this.filtro = {};
     this.page = 1;
-    this.aplicarGrilla();
+    this.cargarDestinos();
   }
 
-  onSeleccionarItem(item: any) {
-    if (this.filaSeleccionada?.idDestino === item.idDestino) {
-      this.filaSeleccionada = null;
-    } else {
-      this.filaSeleccionada = item;
-    }
+  onSeleccionarDestino(
+    destino: Destino
+  ): void {
+    this.filaSeleccionada =
+      this.filaSeleccionada?.id === destino.id
+        ? null
+        : destino;
   }
 
-  onChangePaginate(event: IChangePaginate) {
+  onChangePaginate(
+    event: IChangePaginate
+  ): void {
     this.page = event.page;
     this.pageSize = event.pageSize;
-    this.aplicarGrilla();
+    this.cargarDestinos();
   }
 
-  mostrarModalUpsert(accion: AccionMantenimiento) {
-    const modalRef = this.modalService.open(ModalUpsertDestinoComponent, {
-      backdrop: 'static',
-      keyboard: false,
-      size: 'lg',
-      centered: true
-    });
+  mostrarModalCrear(): void {
+    if (!this.puedeCrear) {
+      return;
+    }
 
-    modalRef.componentInstance.titleModal =
-      accion === AccionMantenimiento.CREAR ? 'REGISTRAR DESTINO' : 'EDITAR DESTINO';
-    modalRef.componentInstance.accion = accion;
-    modalRef.componentInstance.data =
-      accion === AccionMantenimiento.ACTUALIZAR ? this.filaSeleccionada : null;
+    this.abrirModal(null);
+  }
+
+  mostrarModalEditar(): void {
+    if (
+      !this.puedeEditar ||
+      !this.filaSeleccionada ||
+      !this.filaSeleccionada.activo
+    ) {
+      return;
+    }
+
+    this.abrirModal(this.filaSeleccionada);
+  }
+
+  cambiarEstado(): void {
+    const destino = this.filaSeleccionada;
+
+    if (
+      !this.puedeCambiarEstado ||
+      !destino
+    ) {
+      return;
+    }
+
+    const accion = destino.activo
+      ? 'desactivar'
+      : 'activar';
+
+    const confirmado = window.confirm(
+      `¿Deseas ${accion} el destino ` +
+      `"${destino.ciudad} - ${destino.pais}"?`
+    );
+
+    if (!confirmado) {
+      return;
+    }
+
+    this.destinoService
+      .cambiarEstado(destino.id)
+      .subscribe((resultado) => {
+        if (!resultado) {
+          return;
+        }
+
+        const accionBitacora = resultado.activo
+          ? AccionBitacora.ACTIVAR
+          : AccionBitacora.DESACTIVAR;
+
+        this.registrarEventoDestino(
+          accionBitacora,
+          resultado,
+          resultado.activo
+            ? `Se activó el destino ${resultado.ciudad} - ${resultado.pais}.`
+            : `Se desactivó el destino ${resultado.ciudad} - ${resultado.pais}.`
+        );
+
+        this.cargarDestinos();
+      });
+  }
+
+  private cargarDestinos(): void {
+    const query: DestinoQuery = {
+      ...this.filtro,
+      page: this.page,
+      pageSize: this.pageSize
+    };
+
+    this.loading = true;
+    this.filaSeleccionada = null;
+
+    this.destinoService
+      .listar(query)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe((resultado) => {
+        this.destinos = resultado.items;
+        this.totalItems = resultado.totalItems;
+      });
+  }
+
+  private abrirModal(
+    destino: Destino | null
+  ): void {
+    const modalRef = this.modalService.open(
+      ModalUpsertDestinoComponent,
+      {
+        backdrop: 'static',
+        keyboard: false,
+        size: 'lg',
+        centered: true
+      }
+    );
+
+    modalRef.componentInstance.titleModal = destino
+      ? 'EDITAR DESTINO'
+      : 'REGISTRAR DESTINO';
+
+    modalRef.componentInstance.data = destino;
 
     modalRef.result
-      .then((result: { accion: AccionMantenimiento; pais: string; ciudad: string }) => {
-        if (result) {
-          this.onGuardarModal(result.accion, {
-            pais: result.pais,
-            ciudad: result.ciudad
-          });
+      .then((resultado: DestinoFormData) => {
+        if (resultado) {
+          this.guardarDestino(
+            resultado,
+            destino
+          );
         }
       })
       .catch(() => {});
   }
 
-  private onGuardarModal(
-    accion: AccionMantenimiento,
-    data: { pais: string; ciudad: string }
-  ) {
-    if (accion === AccionMantenimiento.CREAR) {
-      const nuevoId =
-        this.todosDestinos.length > 0
-          ? Math.max(...this.todosDestinos.map((d) => d.idDestino)) + 1
-          : 1;
-      this.todosDestinos.unshift({
-        idDestino: nuevoId,
-        pais: data.pais,
-        ciudad: data.ciudad,
-        activo: true
-      });
-    } else {
-      const target = this.todosDestinos.find(
-        (d) => d.idDestino === this.filaSeleccionada?.idDestino
-      );
-      if (target) {
-        target.pais = data.pais;
-        target.ciudad = data.ciudad;
-      }
-    }
+  private guardarDestino(
+    data: DestinoFormData,
+    destino: Destino | null
+  ): void {
+    this.destinoService
+      .existeUbicacion(
+        data.pais,
+        data.ciudad,
+        destino?.id
+      )
+      .pipe(
+        switchMap((existeUbicacion) => {
+          if (existeUbicacion) {
+            window.alert(
+              'Ya existe ese destino para el país y ciudad indicados.'
+            );
 
-    this.page = 1;
-    this.aplicarGrilla();
+            return EMPTY;
+          }
+
+          if (!destino) {
+            return this.destinoService.crear(data);
+          }
+
+          return this.destinoService.actualizar(
+            destino.id,
+            data
+          );
+        })
+      )
+      .subscribe((destinoGuardado) => {
+        if (!destinoGuardado) {
+          return;
+        }
+
+        if (!destino) {
+          this.registrarEventoDestino(
+            AccionBitacora.CREAR,
+            destinoGuardado,
+            `Se creó el destino ` +
+              `${destinoGuardado.ciudad} - ` +
+              `${destinoGuardado.pais}.`
+          );
+        } else {
+          this.registrarEventoDestino(
+            AccionBitacora.EDITAR,
+            destinoGuardado,
+            `Se actualizó el destino ` +
+              `${destinoGuardado.ciudad} - ` +
+              `${destinoGuardado.pais}.`
+          );
+        }
+
+        this.page = 1;
+        this.cargarDestinos();
+      });
   }
 
-  eliminarDestino() {
-    const fila = this.filaSeleccionada;
-    if (!fila) return;
+  private cargarPermisos(): void {
+    forkJoin({
+      crear: this.authService.tienePermiso(
+        ModuloSistema.DESTINOS,
+        AccionPermiso.CREAR
+      ),
+      editar: this.authService.tienePermiso(
+        ModuloSistema.DESTINOS,
+        AccionPermiso.EDITAR
+      ),
+      cambiarEstado:
+        this.authService.tienePermiso(
+          ModuloSistema.DESTINOS,
+          AccionPermiso.ELIMINAR
+        )
+    }).subscribe((permisos) => {
+      this.puedeCrear = permisos.crear;
+      this.puedeEditar = permisos.editar;
+      this.puedeCambiarEstado =
+        permisos.cambiarEstado;
+    });
+  }
 
-    const target = this.todosDestinos.find(
-      (d) => d.idDestino === fila.idDestino
-    );
-    if (target) {
-      target.activo = !target.activo;
+  private registrarEventoDestino(
+    accion: AccionBitacora,
+    destino: Destino,
+    detalle: string
+  ): void {
+    const sesion =
+      this.authService.obtenerSesionActual();
+
+    if (!sesion) {
+      return;
     }
-    this.aplicarGrilla();
+
+    const evento: RegistroBitacoraCrearData = {
+      usuarioId: sesion.usuarioId,
+      nombreUsuario: sesion.nombreUsuario,
+      modulo: ModuloSistema.DESTINOS,
+      accion,
+      entidad: 'Destino',
+      registroId: destino.id,
+      detalle,
+      resultado: ResultadoBitacora.EXITO
+    };
+
+    this.bitacoraService
+      .registrar(evento)
+      .subscribe();
   }
 }

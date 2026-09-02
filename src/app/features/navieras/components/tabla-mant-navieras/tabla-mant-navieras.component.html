@@ -1,31 +1,86 @@
-<div class="table-responsive" [ngClass]="{ 'table-sticky table-sticky--height': datasource.length > 10 }">
+<div class="table-responsive" [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }">
   <table class="table tbl-grid m-0 head-no-rounded">
-    <caption class="d-none">Tabla de mantenimiento de navieras</caption>
+    <caption class="d-none">
+      Tabla de mantenimiento de navieras
+    </caption>
+
     <thead>
       <tr>
         <th scope="col">Id</th>
+        <th scope="col">Código</th>
         <th scope="col">Naviera</th>
+        <th scope="col">País</th>
+        <th scope="col">Contacto</th>
+        <th scope="col">Teléfono</th>
+        <th scope="col">Sitio web</th>
         <th scope="col">Estado</th>
       </tr>
     </thead>
+
     <tbody *ngIf="!loading">
-      <tr *ngFor="let item of datasource; index as i" [class]="'c-pointer tbl-row tbl-row-' + i" [ngClass]="{ active: item.idNaviera === itemId }" (click)="onSeleccionarFila(item)">
-        <td>{{ item.idNaviera }}</td>
-        <td>{{ item.descripcion }}</td>
+      <tr *ngFor="
+          let naviera of datasource;
+          index as i;
+          trackBy: trackByNavieraId
+        " tabindex="0" [class]="'c-pointer tbl-row tbl-row-' + i" [ngClass]="{
+          active: naviera.id === itemId
+        }" [attr.aria-selected]="naviera.id === itemId" (click)="onSeleccionarFila(naviera)"
+        (keydown.enter)="onSeleccionarFila(naviera)">
+        <td>{{ naviera.id }}</td>
+
         <td>
-          <span class="labels" [ngClass]="{ 'labels-activo': item.activo === true, 'labels-inactivo': item.activo === false }">
-            <span class="labels_circle"></span>
-            <span>{{ item.activo ? 'ACTIVO' : 'INACTIVO' }}</span>
+          <strong>{{ naviera.codigo }}</strong>
+        </td>
+
+        <td>{{ naviera.nombre }}</td>
+
+        <td>{{ naviera.pais }}</td>
+
+        <td>
+          <div>{{ naviera.contacto || '—' }}</div>
+
+          <small class="text-muted">
+            {{ naviera.correo || 'SIN CORREO' }}
+          </small>
+        </td>
+
+        <td>{{ naviera.telefono || '—' }}</td>
+
+        <td class="text-truncate" style="max-width: 180px" [title]="naviera.sitioWeb">
+          {{ naviera.sitioWeb || '—' }}
+        </td>
+
+        <td>
+          <span class="labels" [ngClass]="{
+              'labels-activo': naviera.activo,
+              'labels-inactivo': !naviera.activo
+            }">
+            <span class="labels_circle" aria-hidden="true"></span>
+
+            <span>
+              {{
+              naviera.activo
+              ? 'ACTIVO'
+              : 'INACTIVO'
+              }}
+            </span>
           </span>
         </td>
       </tr>
     </tbody>
   </table>
+
   <ng-container *ngIf="!loading && !totalItems">
     <agrihusa-no-results></agrihusa-no-results>
   </ng-container>
+
   <ng-container *ngIf="loading">
     <agrihusa-loading></agrihusa-loading>
   </ng-container>
 </div>
-<table-footer-pagination [totalItems]="totalItems" [totalItemsPerPage]="datasource.length" (changePaginate)="onChangePaginate($event)" [page]="page" [pageSize]="pageSize"></table-footer-pagination>
+
+<table-footer-pagination [totalItems]="totalItems" [totalItemsPerPage]="datasource.length" [page]="page"
+  [pageSize]="pageSize" (changePaginate)="onChangePaginate($event)"></table-footer-pagination>

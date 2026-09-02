@@ -1,48 +1,92 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  Component,
+  EventEmitter,
+  Output
+} from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule
+} from '@angular/forms';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
+
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { IQueryMantNaviera } from '../../views/mantenimiento-navieras/mantenimiento-navieras.component';
+import { NavieraFilter } from '../../models/naviera.model';
+
+interface EstadoOption {
+  valor: boolean;
+  descripcion: string;
+}
 
 @Component({
   selector: 'app-filtro-mant-navieras',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgbAccordionModule, NgSelectModule, AgrihusaButtonComponent],
-  templateUrl: './filtro-mant-navieras.component.html'
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NgbAccordionModule,
+    NgSelectModule,
+    AgrihusaButtonComponent
+  ],
+  templateUrl:
+    './filtro-mant-navieras.component.html'
 })
-export class FiltroMantNavierasComponent implements OnInit {
-  @Output() buscarNaviera = new EventEmitter<IQueryMantNaviera>();
-  @Output() limpiar = new EventEmitter<void>();
+export class FiltroMantNavierasComponent {
+  @Output()
+  buscar = new EventEmitter<NavieraFilter>();
 
-  frmFiltro!: FormGroup;
-  lstCboEstado: any[] = [];
+  @Output()
+  limpiar = new EventEmitter<void>();
 
-  constructor(private fb: FormBuilder) {}
+  readonly estados: EstadoOption[] = [
+    {
+      valor: true,
+      descripcion: 'ACTIVO'
+    },
+    {
+      valor: false,
+      descripcion: 'INACTIVO'
+    }
+  ];
 
-  ngOnInit(): void {
-    this.frmFiltro = this.fb.group({
-      txtNaviera: [''],
-      cboEstado: [null]
+  readonly formulario = new FormGroup({
+    texto: new FormControl('', {
+      nonNullable: true
+    }),
+    pais: new FormControl('', {
+      nonNullable: true
+    }),
+    estado: new FormControl<boolean | null>(null)
+  });
+
+  onBuscar(): void {
+    const value = this.formulario.getRawValue();
+    const filtro: NavieraFilter = {};
+
+    if (value.texto.trim()) {
+      filtro.texto = value.texto.trim();
+    }
+
+    if (value.pais.trim()) {
+      filtro.pais = value.pais.trim();
+    }
+
+    if (value.estado !== null) {
+      filtro.estado = value.estado;
+    }
+
+    this.buscar.emit(filtro);
+  }
+
+  onLimpiar(): void {
+    this.formulario.reset({
+      texto: '',
+      pais: '',
+      estado: null
     });
 
-    this.lstCboEstado = [
-      { maestroId: 1, descripcion: 'ACTIVO' },
-      { maestroId: 0, descripcion: 'INACTIVO' }
-    ];
-  }
-
-  onBuscar() {
-    const value = this.frmFiltro.value;
-    const query: IQueryMantNaviera = {};
-    if (value.txtNaviera) query.descripcion = value.txtNaviera;
-    if (value.cboEstado != null) query.estado = value.cboEstado;
-    this.buscarNaviera.emit(query);
-  }
-
-  onLimpiar() {
-    this.frmFiltro.reset();
     this.limpiar.emit();
   }
 }
