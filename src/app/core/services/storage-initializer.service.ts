@@ -18,6 +18,19 @@ import { crearDestinosIniciales } from '../../features/destinos/data/destinos.se
 import { Destino } from '../../features/destinos/models/destino.model';
 import { crearOperadoresLogisticosIniciales } from '../../features/operadores-logisticos/data/operadores-logisticos.seed';
 import { OperadorLogistico } from '../../features/operadores-logisticos/models/operador-logistico.model';
+import { crearPuertosLlegadaIniciales } from '../../features/puertos-llegada/data/puertos-llegada.seed';
+import { PuertoLlegada } from '../../features/puertos-llegada/models/puerto-llegada.model';
+import { crearProductosIniciales } from '../../features/productos/data/productos.seed';
+import { Producto } from '../../features/productos/models/producto.model';
+import { crearVariedadesIniciales } from '../../features/variedades/data/variedades.seed';
+import { Variedad } from '../../features/variedades/models/variedad.model';
+import { crearViasIniciales } from '../../features/vias/data/vias.seed';
+import { Via } from '../../features/vias/models/via.model';
+import { crearSituacionesIniciales } from '../../features/situaciones/data/situaciones.seed';
+import { Situacion } from '../../features/situaciones/models/situacion.model';
+import { crearDespachosIniciales } from '../../features/registro-despacho/data/despachos.seed';
+import { Despacho } from '../../features/registro-despacho/models/despacho.model';
+
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +50,12 @@ export class StorageInitializerService {
     this.inicializarNavieras();
     this.inicializarDestinos();
     this.inicializarOperadoresLogisticos();
+    this.inicializarPuertosLlegada();
+    this.inicializarProductos();
+    this.inicializarVariedades();
+    this.inicializarVias();
+    this.inicializarSituaciones();
+    this.inicializarDespachos();
     await this.inicializarUsuarios();
   }
 
@@ -145,4 +164,88 @@ export class StorageInitializerService {
       );
     }
   }
-}
+
+  private inicializarPuertosLlegada(): void {
+    const puertosLlegada =
+      this.localStorageService.obtener<PuertoLlegada[]>(
+        STORAGE_KEYS.PUERTOS_LLEGADA
+      );
+
+    if (puertosLlegada === null) {
+      this.localStorageService.guardar(
+        STORAGE_KEYS.PUERTOS_LLEGADA,
+        crearPuertosLlegadaIniciales()
+      );
+    }
+  }
+
+  private inicializarProductos(): void {
+    const productos =
+      this.localStorageService.obtener<Producto[]>(
+        STORAGE_KEYS.PRODUCTOS
+      );
+
+    if (productos === null) {
+      this.localStorageService.guardar(
+        STORAGE_KEYS.PRODUCTOS,
+        crearProductosIniciales()
+      );
+    }
+  }
+
+  private inicializarVariedades(): void {
+    const variedades =
+      this.localStorageService.obtener<Variedad[]>(
+        STORAGE_KEYS.VARIEDADES
+      );
+
+    if (variedades === null) {
+      this.localStorageService.guardar(
+        STORAGE_KEYS.VARIEDADES,
+        crearVariedadesIniciales()
+      );
+    }
+  }
+
+  private inicializarVias(): void {
+    const vias =
+      this.localStorageService.obtener<Via[]>(
+        STORAGE_KEYS.VIAS
+      );
+
+    if (vias === null) {
+      this.localStorageService.guardar(
+        STORAGE_KEYS.VIAS,
+        crearViasIniciales()
+      );
+    }
+  }
+
+  private inicializarSituaciones(): void {
+  const situaciones =
+    this.localStorageService.obtener<Situacion[]>(
+      STORAGE_KEYS.SITUACIONES
+    );
+
+  if (situaciones === null) {
+    this.localStorageService.guardar(
+      STORAGE_KEYS.SITUACIONES,
+      crearSituacionesIniciales()
+    );
+    }
+  }
+
+  private inicializarDespachos(): void {
+    const despachos =
+      this.localStorageService.obtener<Despacho[]>(
+        STORAGE_KEYS.DESPACHOS
+      );
+
+    if (despachos === null) {
+      this.localStorageService.guardar(
+        STORAGE_KEYS.DESPACHOS,
+        crearDespachosIniciales()
+      );
+    }
+  }
+} 

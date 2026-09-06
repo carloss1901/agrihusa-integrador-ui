@@ -1,23 +1,102 @@
 <div class="frame-layout">
   <div class="frame-layout__header">
     <div class="col-12 my-2">
-      <agrihusa-topbar [titulo]="getNombreMantenimiento" [subtitulo]="'Mantenimiento de puertos de llegada'" [showCancel]="false"></agrihusa-topbar>
+      <agrihusa-topbar
+        [titulo]="titulo"
+        subtitulo="Administración de puertos de destino"
+        [showCancel]="false"
+      ></agrihusa-topbar>
     </div>
   </div>
+
   <div class="frame-layout__body">
     <div class="agrihusa-card mb-component">
-      <app-filtro-mant-puertos-llegada (buscarPuertoLlegada)="onBuscar($event)" (limpiar)="onLimpiarFiltro()"></app-filtro-mant-puertos-llegada>
+      <app-filtro-mant-puertos-llegada
+        (buscar)="onBuscar($event)"
+        (limpiar)="onLimpiarFiltro()"
+      ></app-filtro-mant-puertos-llegada>
     </div>
+
     <div class="agrihusa-card">
-      <div class="p-content d-flex justify-content-between align-items-center">
-        <span class="title-group-uppercase">Lista de puertos de llegada</span>
+      <div
+        class="
+          p-content
+          d-flex
+          justify-content-between
+          align-items-center
+        "
+      >
+        <span class="title-group-uppercase">
+          Lista de puertos de llegada
+        </span>
+
         <div class="d-flex gap-2">
-          <agrihusa-button color="primary" variant="outlined" icon="plus" [esIcono]="true" (click)="mostrarModalUpsert(AccionMantenimiento.CREAR)"></agrihusa-button>
-          <agrihusa-button color="secondary" variant="outlined" icon="edit" [esIcono]="true" [disabled]="!filaSeleccionada || !filaSeleccionada.activo" (click)="mostrarModalUpsert(AccionMantenimiento.ACTUALIZAR)"></agrihusa-button>
-          <agrihusa-button color="secondary" variant="outlined" icon="trash" [esIcono]="true" [disabled]="!filaSeleccionada" (click)="eliminarPuertoLlegada()"></agrihusa-button>
+          <div title="Registrar puerto">
+            <agrihusa-button
+              color="primary"
+              variant="outlined"
+              icon="plus"
+              [esIcono]="true"
+              [disabled]="!puedeCrear"
+              (click)="mostrarModalCrear()"
+            ></agrihusa-button>
+          </div>
+
+          <div title="Editar puerto">
+            <agrihusa-button
+              color="secondary"
+              variant="outlined"
+              icon="edit"
+              [esIcono]="true"
+              [disabled]="
+                !puedeEditar ||
+                !filaSeleccionada ||
+                !filaSeleccionada.activo
+              "
+              (click)="mostrarModalEditar()"
+            ></agrihusa-button>
+          </div>
+
+          <div
+            [title]="
+              filaSeleccionada?.activo
+                ? 'Desactivar puerto'
+                : 'Activar puerto'
+            "
+          >
+            <agrihusa-button
+              [color]="
+                filaSeleccionada?.activo
+                  ? 'secondary'
+                  : 'success'
+              "
+              variant="outlined"
+              [icon]="
+                filaSeleccionada?.activo
+                  ? 'trash'
+                  : 'refresh-ccw'
+              "
+              [esIcono]="true"
+              [disabled]="
+                !puedeCambiarEstado ||
+                !filaSeleccionada
+              "
+              (click)="cambiarEstado()"
+            ></agrihusa-button>
+          </div>
         </div>
       </div>
-      <app-tabla-mant-puertos-llegada [datasource]="dataPuertosLlegada" [loading]="loading" [totalItems]="totalItems" [page]="page" [pageSize]="pageSize" [filaSeleccionada]="filaSeleccionada" (seleccionar)="onSeleccionarItem($event)" (paginar)="onChangePaginate($event)"></app-tabla-mant-puertos-llegada>
+
+      <app-tabla-mant-puertos-llegada
+        [datasource]="puertos"
+        [loading]="loading"
+        [totalItems]="totalItems"
+        [page]="page"
+        [pageSize]="pageSize"
+        [filaSeleccionada]="filaSeleccionada"
+        (seleccionar)="onSeleccionarPuerto($event)"
+        (paginar)="onChangePaginate($event)"
+      ></app-tabla-mant-puertos-llegada>
     </div>
   </div>
 </div>

@@ -1,48 +1,112 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  Component,
+  EventEmitter,
+  OnInit,
+  Output
+} from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule
+} from '@angular/forms';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
+
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { IQueryMantVariedad } from '../../views/mantenimiento-variedades/mantenimiento-variedades.component';
+import { Producto } from '../../../productos/models/producto.model';
+import { ProductoService } from '../../../productos/services/producto.service';
+import { VariedadFilter } from '../../models/variedad.model';
+
+interface EstadoOption {
+  valor: boolean;
+  descripcion: string;
+}
 
 @Component({
   selector: 'app-filtro-mant-variedades',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgbAccordionModule, NgSelectModule, AgrihusaButtonComponent],
-  templateUrl: './filtro-mant-variedades.component.html'
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NgbAccordionModule,
+    NgSelectModule,
+    AgrihusaButtonComponent
+  ],
+  templateUrl:
+    './filtro-mant-variedades.component.html'
 })
-export class FiltroMantVariedadesComponent implements OnInit {
-  @Output() buscarVariedad = new EventEmitter<IQueryMantVariedad>();
-  @Output() limpiar = new EventEmitter<void>();
+export class FiltroMantVariedadesComponent
+  implements OnInit {
+  @Output()
+  buscar = new EventEmitter<VariedadFilter>();
 
-  frmFiltro!: FormGroup;
-  lstCboEstado: any[] = [];
+  @Output()
+  limpiar = new EventEmitter<void>();
 
-  constructor(private fb: FormBuilder) {}
+  productos: Producto[] = [];
+
+  readonly estados: EstadoOption[] = [
+    {
+      valor: true,
+      descripcion: 'ACTIVO'
+    },
+    {
+      valor: false,
+      descripcion: 'INACTIVO'
+    }
+  ];
+
+  readonly formulario = new FormGroup({
+    texto: new FormControl('', {
+      nonNullable: true
+    }),
+    productoId: new FormControl<number | null>(null),
+    estado: new FormControl<boolean | null>(null)
+  });
+
+  constructor(
+    private productoService: ProductoService
+  ) {}
 
   ngOnInit(): void {
-    this.frmFiltro = this.fb.group({
-      txtVariedad: [''],
-      cboEstado: [null]
+    this.cargarProductos();
+  }
+
+  onBuscar(): void {
+    const value = this.formulario.getRawValue();
+    const filtro: VariedadFilter = {};
+
+    if (value.texto.trim()) {
+      filtro.texto = value.texto.trim();
+    }
+
+    if (value.productoId !== null) {
+      filtro.productoId = value.productoId;
+    }
+
+    if (value.estado !== null) {
+      filtro.estado = value.estado;
+    }
+
+    this.buscar.emit(filtro);
+  }
+
+  onLimpiar(): void {
+    this.formulario.reset({
+      texto: '',
+      productoId: null,
+      estado: null
     });
 
-    this.lstCboEstado = [
-      { maestroId: 1, descripcion: 'ACTIVO' },
-      { maestroId: 0, descripcion: 'INACTIVO' }
-    ];
-  }
-
-  onBuscar() {
-    const value = this.frmFiltro.value;
-    const query: IQueryMantVariedad = {};
-    if (value.txtVariedad) query.descripcion = value.txtVariedad;
-    if (value.cboEstado != null) query.estado = value.cboEstado;
-    this.buscarVariedad.emit(query);
-  }
-
-  onLimpiar() {
-    this.frmFiltro.reset();
     this.limpiar.emit();
+  }
+
+  private cargarProductos(): void {
+    this.productoService
+      .listarActivos()
+      .subscribe((productos) => {
+        this.productos = productos;
+      });
   }
 }

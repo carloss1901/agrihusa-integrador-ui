@@ -1,83 +1,129 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  Component,
+  Input,
+  OnInit
+} from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { NgSelectModule } from '@ng-select/ng-select';
-import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { AccionMantenimiento } from '../../../../shared/enums/accion-mantenimiento.enum';
 
-interface PuertoLlegada {
-  idPuertoLlegada: number;
-  pais: string;
-  puerto: string;
-  activo: boolean;
-}
+import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import {
+  PuertoLlegada,
+  PuertoLlegadaFormData
+} from '../../models/puerto-llegada.model';
+
+type NombreControl =
+  | 'codigo'
+  | 'puerto'
+  | 'pais';
 
 @Component({
   selector: 'app-modal-upsert-puerto-llegada',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgSelectModule, AgrihusaButtonComponent],
-  templateUrl: './modal-upsert-puerto-llegada.component.html'
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    AgrihusaButtonComponent
+  ],
+  templateUrl:
+    './modal-upsert-puerto-llegada.component.html',
+  styleUrls: [
+    './modal-upsert-puerto-llegada.component.scss'
+  ]
 })
-export class ModalUpsertPuertoLlegadaComponent implements OnInit {
-  readonly AccionMantenimiento = AccionMantenimiento;
-
+export class ModalUpsertPuertoLlegadaComponent
+  implements OnInit {
   @Input() titleModal = '';
-  @Input() accion: AccionMantenimiento = AccionMantenimiento.CREAR;
   @Input() data: PuertoLlegada | null = null;
 
-  formulario!: FormGroup;
-  lstCboPais: any[] = [];
   submitted = false;
 
-  constructor(private fb: FormBuilder, public activeModal: NgbActiveModal) {}
+  readonly formulario = new FormGroup({
+    codigo: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(10),
+        Validators.pattern(/^[A-Za-z0-9-]+$/)
+      ]
+    }),
+    puerto: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.maxLength(100),
+        Validators.pattern(
+          /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.'-]+$/
+        )
+      ]
+    }),
+    pais: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.maxLength(80),
+        Validators.pattern(
+          /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s.'-]+$/
+        )
+      ]
+    })
+  });
+
+  constructor(
+    public activeModal: NgbActiveModal
+  ) {}
 
   ngOnInit(): void {
-    this.formulario = this.fb.group({
-      cboPais: [null, [Validators.required]],
-      txtPuerto: ['', [Validators.required]]
-    });
-
-    this.lstCboPais = [
-      { maestroId: 'PERU', descripcion: 'PERU' },
-      { maestroId: 'CHILE', descripcion: 'CHILE' },
-      { maestroId: 'COLOMBIA', descripcion: 'COLOMBIA' },
-      { maestroId: 'ECUADOR', descripcion: 'ECUADOR' },
-      { maestroId: 'MEXICO', descripcion: 'MEXICO' }
-    ];
-
-    if (this.accion === AccionMantenimiento.ACTUALIZAR && this.data) {
-      this.cboPais?.setValue(this.data.pais);
-      this.txtPuerto?.setValue(this.data.puerto);
-    }
-  }
-
-  onGuardar() {
-    this.submitted = true;
-    if (this.formulario.invalid) {
-      Object.values(this.formulario.controls).forEach((control) => control.markAllAsTouched());
+    if (!this.data) {
       return;
     }
-    this.activeModal.close({
-      accion: this.accion,
-      pais: this.cboPais?.value,
-      puerto: this.txtPuerto?.value
+
+    this.formulario.patchValue({
+      codigo: this.data.codigo,
+      puerto: this.data.puerto,
+      pais: this.data.pais
     });
   }
 
-  onCerrarModal() {
-    this.activeModal.close();
+  onGuardar(): void {
+    this.submitted = true;
+    this.formulario.markAllAsTouched();
+
+    if (this.formulario.invalid) {
+      return;
+    }
+
+    const value = this.formulario.getRawValue();
+
+    const resultado: PuertoLlegadaFormData = {
+      codigo: value.codigo.trim(),
+      puerto: value.puerto.trim(),
+      pais: value.pais.trim()
+    };
+
+    this.activeModal.close(resultado);
   }
 
-  esControlInvalido(control: any): boolean {
-    return !!(control && control.invalid && (control.touched || this.submitted));
+  onCerrarModal(): void {
+    this.activeModal.dismiss();
   }
 
-  get cboPais() {
-    return this.formulario.get('cboPais');
-  }
+  controlInvalido(
+    nombreControl: NombreControl
+  ): boolean {
+    const control =
+      this.formulario.controls[nombreControl];
 
-  get txtPuerto() {
-    return this.formulario.get('txtPuerto');
+    return (
+      control.invalid &&
+      (control.touched || this.submitted)
+    );
   }
 }

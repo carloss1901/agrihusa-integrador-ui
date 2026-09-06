@@ -1,21 +1,65 @@
-<div class="table-responsive" [ngClass]="{ 'table-sticky table-sticky--height': datasource.length > 10 }">
+<div
+  class="table-responsive"
+  [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }"
+>
   <table class="table tbl-grid m-0 head-no-rounded">
-    <caption class="d-none">Tabla de mantenimiento de vias</caption>
+    <caption class="d-none">
+      Tabla de mantenimiento de vías
+    </caption>
+
     <thead>
       <tr>
         <th scope="col">Id</th>
-        <th scope="col">Via</th>
+        <th scope="col">Vía</th>
         <th scope="col">Estado</th>
       </tr>
     </thead>
+
     <tbody *ngIf="!loading">
-      <tr *ngFor="let item of datasource; index as i" [class]="'c-pointer tbl-row tbl-row-' + i" [ngClass]="{ active: item.idVia === itemId }" (click)="onSeleccionarFila(item)">
-        <td>{{ item.idVia }}</td>
-        <td>{{ item.descripcion }}</td>
+      <tr
+        *ngFor="
+          let via of datasource;
+          index as i;
+          trackBy: trackByViaId
+        "
+        tabindex="0"
+        [class]="'c-pointer tbl-row tbl-row-' + i"
+        [ngClass]="{
+          active: via.id === itemId
+        }"
+        [attr.aria-selected]="via.id === itemId"
+        (click)="onSeleccionarFila(via)"
+        (keydown.enter)="onSeleccionarFila(via)"
+      >
+        <td>{{ via.id }}</td>
+
         <td>
-          <span class="labels" [ngClass]="{ 'labels-activo': item.activo === true, 'labels-inactivo': item.activo === false }">
-            <span class="labels_circle"></span>
-            <span>{{ item.activo ? 'ACTIVO' : 'INACTIVO' }}</span>
+          <strong>{{ via.descripcion }}</strong>
+        </td>
+
+        <td>
+          <span
+            class="labels"
+            [ngClass]="{
+              'labels-activo': via.activo,
+              'labels-inactivo': !via.activo
+            }"
+          >
+            <span
+              class="labels_circle"
+              aria-hidden="true"
+            ></span>
+
+            <span>
+              {{
+                via.activo
+                  ? 'ACTIVO'
+                  : 'INACTIVO'
+              }}
+            </span>
           </span>
         </td>
       </tr>
@@ -34,7 +78,7 @@
 <table-footer-pagination
   [totalItems]="totalItems"
   [totalItemsPerPage]="datasource.length"
-  (changePaginate)="onChangePaginate($event)"
   [page]="page"
   [pageSize]="pageSize"
+  (changePaginate)="onChangePaginate($event)"
 ></table-footer-pagination>

@@ -122,6 +122,27 @@ export class MenuComponent {
       ]
     },
     {
+      nombreModulo: 'Módulo de Despacho',
+      codigo: 5,
+      subMenu: [
+        {
+          nombre: 'Registro de despacho',
+          codigo: 115,
+          modulo: ModuloSistema.REGISTRO_DESPACHO
+        },
+        {
+          nombre: 'Reporte de despacho',
+          codigo: 116,
+          modulo: ModuloSistema.REPORTE_DESPACHO
+        },
+        {
+          nombre: 'Situaciones',
+          codigo: 114,
+          modulo: ModuloSistema.SITUACIONES
+        }
+      ]
+    },
+    {
       nombreModulo: 'Módulo de Seguridad',
       codigo: 4,
       subMenu: [

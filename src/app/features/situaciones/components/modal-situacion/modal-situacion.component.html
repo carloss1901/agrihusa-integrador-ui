@@ -1,0 +1,83 @@
+<div class="modal-header">
+  <div>
+    <p class="modal-eyebrow mb-1">
+      Gestión de despachos
+    </p>
+
+    <h5 class="modal-title">
+      {{ titleModal }}
+    </h5>
+  </div>
+
+  <button
+    type="button"
+    class="btn-close"
+    aria-label="Cerrar"
+    title="Cerrar"
+    (click)="onCerrarModal()"
+  ></button>
+</div>
+
+<div class="modal-body">
+  <form
+    id="formularioSituacion"
+    [formGroup]="formulario"
+    (ngSubmit)="onGuardar()"
+  >
+    <section class="form-section">
+      <h6 class="form-section-title">
+        Información de la situación
+      </h6>
+
+      <div class="row gx-3">
+        <div class="col-12">
+          <div class="form-group">
+            <label
+              class="form-label"
+              for="descripcionSituacion"
+            >
+              Situación:
+              <span class="text-danger">*</span>
+            </label>
+
+            <input
+              id="descripcionSituacion"
+              type="text"
+              class="form-control text-uppercase"
+              formControlName="descripcion"
+              maxlength="80"
+              autocomplete="off"
+              placeholder="Ejemplo: EN TRÁNSITO"
+              [class.is-invalid]="
+                controlInvalido('descripcion')
+              "
+            />
+
+            <div
+              *ngIf="controlInvalido('descripcion')"
+              class="invalid-feedback"
+            >
+              Ingresa una situación válida de entre
+              3 y 80 caracteres.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <agrihusa-button
+    texto="Cancelar"
+    color="danger"
+    icon="x"
+    (click)="onCerrarModal()"
+  ></agrihusa-button>
+
+  <agrihusa-button
+    texto="Guardar"
+    icon="check"
+    (click)="onGuardar()"
+  ></agrihusa-button>
+</div>

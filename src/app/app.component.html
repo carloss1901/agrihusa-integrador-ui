@@ -21,6 +21,10 @@
         <app-perfil-usuario *ngIf="mostrarPerfilUsuario"></app-perfil-usuario>
         <app-mantenimiento-clientes *ngIf="mostrarClientes"></app-mantenimiento-clientes>
         <app-mantenimiento-operadores-logisticos *ngIf="mostrarOperadoresLogisticos"></app-mantenimiento-operadores-logisticos>
+        <app-mantenimiento-productos *ngIf="mostrarProductos"></app-mantenimiento-productos>
+        <app-mantenimiento-situaciones *ngIf="mostrarSituaciones"></app-mantenimiento-situaciones>
+        <app-registro-despacho *ngIf="mostrarRegistroDespacho"></app-registro-despacho>
+        <app-reporte-despacho *ngIf="mostrarReporteDespacho"></app-reporte-despacho>
 
         <section class="agrihusaApp-content_placeholder" *ngIf="
             !mostrarRoles &&
@@ -32,7 +36,11 @@
             !mostrarPuertosLlegada &&
             !mostrarPerfilUsuario &&
             !mostrarClientes &&
+            !mostrarProductos &&
+            !mostrarSituaciones &&
             !mostrarOperadoresLogisticos &&
+            !mostrarRegistroDespacho &&
+            !mostrarReporteDespacho &&
             !mostrarAuditoria
           ">
           <p class="eyebrow">Layout base</p>
