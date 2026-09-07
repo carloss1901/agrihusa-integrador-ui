@@ -1,161 +1,362 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {
+  EMPTY,
+  finalize,
+  forkJoin,
+  switchMap
+} from 'rxjs';
+
+import {
+  AccionPermiso,
+  ModuloSistema
+} from '../../../../core/models/permiso.model';
+import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { IChangePaginate } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
+import {
+  IChangePaginate
+} from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
-import { AccionMantenimiento } from '../../../../shared/enums/accion-mantenimiento.enum';
+import {
+  AccionBitacora,
+  RegistroBitacoraCrearData,
+  ResultadoBitacora
+} from '../../../auditoria/models/bitacora.model';
+import { BitacoraService } from '../../../auditoria/services/bitacora.service';
 import { FiltroMantPuertosLlegadaComponent } from '../../components/filtro-mant-puertos-llegada/filtro-mant-puertos-llegada.component';
 import { ModalUpsertPuertoLlegadaComponent } from '../../components/modal-upsert-puerto-llegada/modal-upsert-puerto-llegada.component';
 import { TablaMantPuertosLlegadaComponent } from '../../components/tabla-mant-puertos-llegada/tabla-mant-puertos-llegada.component';
-
-export interface IQueryMantPuertoLlegada {
-  pais?: string;
-  puerto?: string;
-  estado?: number;
-  page?: number;
-  size?: number;
-}
-
-interface PuertoLlegada {
-  idPuertoLlegada: number;
-  pais: string;
-  puerto: string;
-  activo: boolean;
-}
+import {
+  PuertoLlegada,
+  PuertoLlegadaFilter,
+  PuertoLlegadaFormData,
+  PuertoLlegadaQuery
+} from '../../models/puerto-llegada.model';
+import { PuertoLlegadaService } from '../../services/puerto-llegada.service';
 
 @Component({
   selector: 'app-mantenimiento-puertos-llegada',
   standalone: true,
-  imports: [CommonModule, AgrihusaTopBarComponent, AgrihusaButtonComponent, FiltroMantPuertosLlegadaComponent, TablaMantPuertosLlegadaComponent],
-  templateUrl: './mantenimiento-puertos-llegada.component.html'
+  imports: [
+    CommonModule,
+    AgrihusaTopBarComponent,
+    AgrihusaButtonComponent,
+    FiltroMantPuertosLlegadaComponent,
+    TablaMantPuertosLlegadaComponent
+  ],
+  templateUrl:
+    './mantenimiento-puertos-llegada.component.html'
 })
-export class MantenimientoPuertosLlegadaComponent implements OnInit {
-  readonly AccionMantenimiento = AccionMantenimiento;
+export class MantenimientoPuertosLlegadaComponent
+  implements OnInit {
+  readonly titulo =
+    'Mantenimiento de Puertos de Llegada';
 
-  getNombreMantenimiento = 'Mantenimiento de Puertos de Llegada';
-  filaSeleccionada: any = null;
-  dataPuertosLlegada: PuertoLlegada[] = [];
+  puertos: PuertoLlegada[] = [];
+  filaSeleccionada: PuertoLlegada | null = null;
   loading = false;
   totalItems = 0;
   page = 1;
   pageSize = 10;
 
-  private todosPuertosLlegada: PuertoLlegada[] = [];
-  private queryFilter: IQueryMantPuertoLlegada = { page: 1, size: 10 };
+  puedeCrear = false;
+  puedeEditar = false;
+  puedeCambiarEstado = false;
 
-  constructor(private modalService: NgbModal) {}
+  private filtro: PuertoLlegadaFilter = {};
+
+  constructor(
+    private puertoService: PuertoLlegadaService,
+    private authService: AuthService,
+    private bitacoraService: BitacoraService,
+    private modalService: NgbModal
+  ) {}
 
   ngOnInit(): void {
-    this.todosPuertosLlegada = [
-      { idPuertoLlegada: 1, pais: 'PERU', puerto: 'CALLAO', activo: true },
-      { idPuertoLlegada: 2, pais: 'CHILE', puerto: 'VALPARAISO', activo: true },
-      { idPuertoLlegada: 3, pais: 'COLOMBIA', puerto: 'BUENAVENTURA', activo: true },
-      { idPuertoLlegada: 4, pais: 'ECUADOR', puerto: 'GUAYAQUIL', activo: false },
-      { idPuertoLlegada: 5, pais: 'MEXICO', puerto: 'MANZANILLO', activo: true }
-    ];
-    this.aplicarGrilla();
+    this.cargarPermisos();
+    this.cargarPuertos();
   }
 
-  onBuscar(query: IQueryMantPuertoLlegada) {
-    this.queryFilter = { ...query, page: 1, size: this.pageSize };
+  onBuscar(
+    filtro: PuertoLlegadaFilter
+  ): void {
+    this.filtro = { ...filtro };
     this.page = 1;
-    this.aplicarGrilla();
+    this.cargarPuertos();
   }
 
-  onLimpiarFiltro() {
-    this.queryFilter = { page: 1, size: this.pageSize };
+  onLimpiarFiltro(): void {
+    this.filtro = {};
     this.page = 1;
-    this.aplicarGrilla();
+    this.cargarPuertos();
   }
 
-  onSeleccionarItem(item: any) {
+  onSeleccionarPuerto(
+    puerto: PuertoLlegada
+  ): void {
     this.filaSeleccionada =
-      this.filaSeleccionada?.idPuertoLlegada === item.idPuertoLlegada ? null : item;
+      this.filaSeleccionada?.id === puerto.id
+        ? null
+        : puerto;
   }
 
-  onChangePaginate(event: IChangePaginate) {
+  onChangePaginate(
+    event: IChangePaginate
+  ): void {
     this.page = event.page;
     this.pageSize = event.pageSize;
-    this.aplicarGrilla();
+    this.cargarPuertos();
   }
 
-  mostrarModalUpsert(accion: AccionMantenimiento) {
-    const modalRef = this.modalService.open(ModalUpsertPuertoLlegadaComponent, {
-      backdrop: 'static',
-      keyboard: false,
-      size: 'lg',
-      centered: true
-    });
+  mostrarModalCrear(): void {
+    if (!this.puedeCrear) {
+      return;
+    }
 
-    modalRef.componentInstance.titleModal =
-      accion === AccionMantenimiento.CREAR
-        ? 'REGISTRAR PUERTO DE LLEGADA'
-        : 'EDITAR PUERTO DE LLEGADA';
-    modalRef.componentInstance.accion = accion;
-    modalRef.componentInstance.data =
-      accion === AccionMantenimiento.ACTUALIZAR ? this.filaSeleccionada : null;
+    this.abrirModal(null);
+  }
+
+  mostrarModalEditar(): void {
+    if (
+      !this.puedeEditar ||
+      !this.filaSeleccionada ||
+      !this.filaSeleccionada.activo
+    ) {
+      return;
+    }
+
+    this.abrirModal(this.filaSeleccionada);
+  }
+
+  cambiarEstado(): void {
+    const puerto = this.filaSeleccionada;
+
+    if (
+      !this.puedeCambiarEstado ||
+      !puerto
+    ) {
+      return;
+    }
+
+    const accion = puerto.activo
+      ? 'desactivar'
+      : 'activar';
+
+    const confirmado = window.confirm(
+      `¿Deseas ${accion} el puerto ` +
+      `"${puerto.puerto} - ${puerto.pais}"?`
+    );
+
+    if (!confirmado) {
+      return;
+    }
+
+    this.puertoService
+      .cambiarEstado(puerto.id)
+      .subscribe((resultado) => {
+        if (!resultado) {
+          return;
+        }
+
+        const accionBitacora = resultado.activo
+          ? AccionBitacora.ACTIVAR
+          : AccionBitacora.DESACTIVAR;
+
+        this.registrarEventoPuerto(
+          accionBitacora,
+          resultado,
+          resultado.activo
+            ? `Se activó el puerto ${resultado.puerto} - ${resultado.pais}.`
+            : `Se desactivó el puerto ${resultado.puerto} - ${resultado.pais}.`
+        );
+
+        this.cargarPuertos();
+      });
+  }
+
+  private cargarPuertos(): void {
+    const query: PuertoLlegadaQuery = {
+      ...this.filtro,
+      page: this.page,
+      pageSize: this.pageSize
+    };
+
+    this.loading = true;
+    this.filaSeleccionada = null;
+
+    this.puertoService
+      .listar(query)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe((resultado) => {
+        this.puertos = resultado.items;
+        this.totalItems = resultado.totalItems;
+      });
+  }
+
+  private abrirModal(
+    puerto: PuertoLlegada | null
+  ): void {
+    const modalRef = this.modalService.open(
+      ModalUpsertPuertoLlegadaComponent,
+      {
+        backdrop: 'static',
+        keyboard: false,
+        size: 'lg',
+        centered: true
+      }
+    );
+
+    modalRef.componentInstance.titleModal = puerto
+      ? 'EDITAR PUERTO DE LLEGADA'
+      : 'REGISTRAR PUERTO DE LLEGADA';
+
+    modalRef.componentInstance.data = puerto;
 
     modalRef.result
-      .then((result: { accion: AccionMantenimiento; pais: string; puerto: string }) => {
-        if (result) this.onGuardarModal(result.accion, result.pais, result.puerto);
-      })
+      .then(
+        (resultado: PuertoLlegadaFormData) => {
+          if (resultado) {
+            this.guardarPuerto(
+              resultado,
+              puerto
+            );
+          }
+        }
+      )
       .catch(() => {});
   }
 
-  eliminarPuertoLlegada() {
-    const target = this.todosPuertosLlegada.find(
-      (item) => item.idPuertoLlegada === this.filaSeleccionada?.idPuertoLlegada
-    );
-    if (target) target.activo = !target.activo;
-    this.aplicarGrilla();
-  }
+  private guardarPuerto(
+    data: PuertoLlegadaFormData,
+    puerto: PuertoLlegada | null
+  ): void {
+    forkJoin({
+      existeCodigo:
+        this.puertoService.existeCodigo(
+          data.codigo,
+          puerto?.id
+        ),
+      existePuerto:
+        this.puertoService.existePuerto(
+          data.pais,
+          data.puerto,
+          puerto?.id
+        )
+    })
+      .pipe(
+        switchMap(
+          ({ existeCodigo, existePuerto }) => {
+            if (existeCodigo) {
+              window.alert(
+                'Ya existe un puerto con ese código.'
+              );
 
-  private aplicarGrilla() {
-    this.filaSeleccionada = null;
+              return EMPTY;
+            }
 
-    const filtrados = this.todosPuertosLlegada.filter((item) => {
-      if (this.queryFilter.pais && item.pais !== this.queryFilter.pais) return false;
-      if (this.queryFilter.puerto && !item.puerto.toUpperCase().includes(this.queryFilter.puerto.toUpperCase())) return false;
-      if (this.queryFilter.estado != null) {
-        const activo = this.queryFilter.estado === 1;
-        if (item.activo !== activo) return false;
-      }
-      return true;
-    });
+            if (existePuerto) {
+              window.alert(
+                'Ya existe ese puerto para el país indicado.'
+              );
 
-    this.totalItems = filtrados.length;
-    const inicio = (this.page - 1) * this.pageSize;
-    this.dataPuertosLlegada = filtrados.slice(inicio, inicio + this.pageSize);
-  }
+              return EMPTY;
+            }
 
-  private onGuardarModal(
-    accion: AccionMantenimiento,
-    pais: string,
-    puerto: string
-  ) {
-    if (accion === AccionMantenimiento.CREAR) {
-      const nuevoId =
-        this.todosPuertosLlegada.length > 0
-          ? Math.max(...this.todosPuertosLlegada.map((item) => item.idPuertoLlegada)) + 1
-          : 1;
-      this.todosPuertosLlegada.unshift({
-        idPuertoLlegada: nuevoId,
-        pais,
-        puerto,
-        activo: true
+            if (!puerto) {
+              return this.puertoService.crear(data);
+            }
+
+            return this.puertoService.actualizar(
+              puerto.id,
+              data
+            );
+          }
+        )
+      )
+      .subscribe((puertoGuardado) => {
+        if (!puertoGuardado) {
+          return;
+        }
+
+        if (!puerto) {
+          this.registrarEventoPuerto(
+            AccionBitacora.CREAR,
+            puertoGuardado,
+            `Se creó el puerto ` +
+              `${puertoGuardado.puerto} - ` +
+              `${puertoGuardado.pais}.`
+          );
+        } else {
+          this.registrarEventoPuerto(
+            AccionBitacora.EDITAR,
+            puertoGuardado,
+            `Se actualizó el puerto ` +
+              `${puertoGuardado.puerto} - ` +
+              `${puertoGuardado.pais}.`
+          );
+        }
+
+        this.page = 1;
+        this.cargarPuertos();
       });
-    } else {
-      const target = this.todosPuertosLlegada.find(
-        (item) => item.idPuertoLlegada === this.filaSeleccionada?.idPuertoLlegada
-      );
-      if (target) {
-        target.pais = pais;
-        target.puerto = puerto;
-      }
+  }
+
+  private cargarPermisos(): void {
+    forkJoin({
+      crear: this.authService.tienePermiso(
+        ModuloSistema.PUERTOS_LLEGADA,
+        AccionPermiso.CREAR
+      ),
+      editar: this.authService.tienePermiso(
+        ModuloSistema.PUERTOS_LLEGADA,
+        AccionPermiso.EDITAR
+      ),
+      cambiarEstado:
+        this.authService.tienePermiso(
+          ModuloSistema.PUERTOS_LLEGADA,
+          AccionPermiso.ELIMINAR
+        )
+    }).subscribe((permisos) => {
+      this.puedeCrear = permisos.crear;
+      this.puedeEditar = permisos.editar;
+      this.puedeCambiarEstado =
+        permisos.cambiarEstado;
+    });
+  }
+
+  private registrarEventoPuerto(
+    accion: AccionBitacora,
+    puerto: PuertoLlegada,
+    detalle: string
+  ): void {
+    const sesion =
+      this.authService.obtenerSesionActual();
+
+    if (!sesion) {
+      return;
     }
 
-    this.page = 1;
-    this.aplicarGrilla();
+    const evento: RegistroBitacoraCrearData = {
+      usuarioId: sesion.usuarioId,
+      nombreUsuario: sesion.nombreUsuario,
+      modulo: ModuloSistema.PUERTOS_LLEGADA,
+      accion,
+      entidad: 'Puerto de llegada',
+      registroId: puerto.id,
+      detalle,
+      resultado: ResultadoBitacora.EXITO
+    };
+
+    this.bitacoraService
+      .registrar(evento)
+      .subscribe();
   }
 }

@@ -1,65 +1,140 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  Component,
+  Input,
+  OnInit
+} from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { AccionMantenimiento } from '../../../../shared/enums/accion-mantenimiento.enum';
+import { NgSelectModule } from '@ng-select/ng-select';
 
-interface Variedad {
-  idVariedad: number;
-  descripcion: string;
-  activo: boolean;
-}
+import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { Producto } from '../../../productos/models/producto.model';
+import { ProductoService } from '../../../productos/services/producto.service';
+import {
+  Variedad,
+  VariedadFormData
+} from '../../models/variedad.model';
+
+type NombreControl =
+  | 'productoId'
+  | 'nombre';
 
 @Component({
   selector: 'app-modal-upsert-variedad',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AgrihusaButtonComponent],
-  templateUrl: './modal-upsert-variedad.component.html'
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NgSelectModule,
+    AgrihusaButtonComponent
+  ],
+  templateUrl:
+    './modal-upsert-variedad.component.html',
+  styleUrls: [
+    './modal-upsert-variedad.component.scss'
+  ]
 })
-export class ModalUpsertVariedadComponent implements OnInit {
-  readonly AccionMantenimiento = AccionMantenimiento;
-
+export class ModalUpsertVariedadComponent
+  implements OnInit {
   @Input() titleModal = '';
-  @Input() accion: AccionMantenimiento = AccionMantenimiento.CREAR;
   @Input() data: Variedad | null = null;
 
-  formulario!: FormGroup;
+  productos: Producto[] = [];
   submitted = false;
 
-  constructor(private fb: FormBuilder, public activeModal: NgbActiveModal) {}
+  readonly formulario = new FormGroup({
+    productoId: new FormControl<number | null>(
+      null,
+      {
+        validators: [Validators.required]
+      }
+    ),
+    nombre: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.maxLength(100),
+        Validators.pattern(
+          /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9\s.'()-]+$/
+        )
+      ]
+    })
+  });
+
+  constructor(
+    public activeModal: NgbActiveModal,
+    private productoService: ProductoService
+  ) {}
 
   ngOnInit(): void {
-    this.formulario = this.fb.group({
-      txtVariedad: ['', [Validators.required]]
-    });
+    this.cargarProductos();
 
-    if (this.accion === AccionMantenimiento.ACTUALIZAR && this.data) {
-      this.txtVariedad?.setValue(this.data.descripcion);
-    }
-  }
-
-  onGuardar() {
-    this.submitted = true;
-    if (this.formulario.invalid) {
-      Object.values(this.formulario.controls).forEach((control) => control.markAllAsTouched());
+    if (!this.data) {
       return;
     }
-    this.activeModal.close({
-      accion: this.accion,
-      descripcion: this.txtVariedad?.value
+
+    this.formulario.patchValue({
+      productoId: this.data.productoId,
+      nombre: this.data.nombre
     });
   }
 
-  onCerrarModal() {
-    this.activeModal.close();
+  onGuardar(): void {
+    this.submitted = true;
+    this.formulario.markAllAsTouched();
+
+    if (this.formulario.invalid) {
+      return;
+    }
+
+    const value = this.formulario.getRawValue();
+
+    if (value.productoId === null) {
+      return;
+    }
+
+    const resultado: VariedadFormData = {
+      productoId: value.productoId,
+      nombre: value.nombre.trim()
+    };
+
+    this.activeModal.close(resultado);
   }
 
-  esControlInvalido(control: any): boolean {
-    return !!(control && control.invalid && (control.touched || this.submitted));
+  onCerrarModal(): void {
+    this.activeModal.dismiss();
   }
 
-  get txtVariedad() {
-    return this.formulario.get('txtVariedad');
+  controlInvalido(
+    nombreControl: NombreControl
+  ): boolean {
+    const control =
+      this.formulario.controls[nombreControl];
+
+    return (
+      control.invalid &&
+      (control.touched || this.submitted)
+    );
+  }
+
+  private cargarProductos(): void {
+    this.productoService
+      .listar({
+        page: 1,
+        pageSize: Number.MAX_SAFE_INTEGER
+      })
+      .subscribe((resultado) => {
+        this.productos = this.data
+          ? resultado.items
+          : resultado.items.filter(
+              (producto) => producto.activo
+            );
+      });
   }
 }

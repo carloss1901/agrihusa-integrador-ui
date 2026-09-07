@@ -1,0 +1,227 @@
+<div ngbAccordion [closeOthers]="false">
+  <div ngbAccordionItem [collapsed]="false">
+    <h2 ngbAccordionHeader>
+      <button
+        ngbAccordionButton
+        class="d-flex justify-content-between w-100"
+        type="button"
+      >
+        <span class="title-group-uppercase">
+          Filtros del reporte
+        </span>
+      </button>
+    </h2>
+
+    <div ngbAccordionCollapse>
+      <div ngbAccordionBody>
+        <ng-template>
+          <form [formGroup]="formulario">
+            <div class="container-fluid px-0">
+              <div class="row gx-3">
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="form-group">
+                    <label
+                      class="form-label"
+                      for="reporteFechaDesde"
+                    >
+                      Fecha desde:
+                    </label>
+
+                    <input
+                      id="reporteFechaDesde"
+                      type="date"
+                      class="form-control"
+                      formControlName="fechaDesde"
+                    />
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="form-group">
+                    <label
+                      class="form-label"
+                      for="reporteFechaHasta"
+                    >
+                      Fecha hasta:
+                    </label>
+
+                    <input
+                      id="reporteFechaHasta"
+                      type="date"
+                      class="form-control"
+                      formControlName="fechaHasta"
+                    />
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="form-group">
+                    <label
+                      class="form-label"
+                      for="reporteCliente"
+                    >
+                      Cliente:
+                    </label>
+
+                    <ng-select
+                      inputId="reporteCliente"
+                      [items]="clientes"
+                      bindLabel="razonSocial"
+                      bindValue="id"
+                      placeholder="-- SELECCIONAR --"
+                      [clearable]="true"
+                      [searchable]="true"
+                      formControlName="clienteId"
+                    ></ng-select>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="form-group">
+                    <label
+                      class="form-label"
+                      for="reporteVia"
+                    >
+                      Vía:
+                    </label>
+
+                    <ng-select
+                      inputId="reporteVia"
+                      [items]="vias"
+                      bindLabel="descripcion"
+                      bindValue="id"
+                      placeholder="-- SELECCIONAR --"
+                      [clearable]="true"
+                      [searchable]="true"
+                      formControlName="viaId"
+                    ></ng-select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row gx-3 mt-2">
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="form-group">
+                    <label
+                      class="form-label"
+                      for="reporteProducto"
+                    >
+                      Producto:
+                    </label>
+
+                    <ng-select
+                      inputId="reporteProducto"
+                      [items]="productos"
+                      bindLabel="nombre"
+                      bindValue="id"
+                      placeholder="-- SELECCIONAR --"
+                      [clearable]="true"
+                      [searchable]="true"
+                      formControlName="productoId"
+                    ></ng-select>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="form-group">
+                    <label
+                      class="form-label"
+                      for="reporteVariedad"
+                    >
+                      Variedad:
+                    </label>
+
+                    <ng-select
+                      inputId="reporteVariedad"
+                      [items]="variedades"
+                      bindLabel="nombre"
+                      bindValue="id"
+                      placeholder="-- SELECCIONAR --"
+                      [clearable]="true"
+                      [searchable]="true"
+                      [readonly]="
+                        !formulario.controls.productoId.value
+                      "
+                      formControlName="variedadId"
+                    ></ng-select>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="form-group">
+                    <label
+                      class="form-label"
+                      for="reporteSituacion"
+                    >
+                      Situación:
+                    </label>
+
+                    <ng-select
+                      inputId="reporteSituacion"
+                      [items]="situaciones"
+                      bindLabel="descripcion"
+                      bindValue="id"
+                      placeholder="-- SELECCIONAR --"
+                      [clearable]="true"
+                      [searchable]="true"
+                      formControlName="situacionId"
+                    ></ng-select>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="form-group">
+                    <label
+                      class="form-label"
+                      for="reporteEstado"
+                    >
+                      Estado:
+                    </label>
+
+                    <ng-select
+                      inputId="reporteEstado"
+                      class="text-uppercase"
+                      [items]="estados"
+                      bindLabel="descripcion"
+                      bindValue="valor"
+                      placeholder="-- SELECCIONAR --"
+                      [clearable]="true"
+                      [searchable]="false"
+                      formControlName="estado"
+                    ></ng-select>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="
+                  row
+                  gx-2
+                  justify-content-end
+                  mt-3
+                "
+              >
+                <div class="col-auto">
+                  <div class="d-flex gap-2">
+                    <agrihusa-button
+                      texto="Limpiar"
+                      icon="refresh-ccw"
+                      color="secondary"
+                      (click)="onLimpiar()"
+                    ></agrihusa-button>
+
+                    <agrihusa-button
+                      texto="Generar reporte"
+                      icon="search"
+                      (click)="onBuscar()"
+                    ></agrihusa-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

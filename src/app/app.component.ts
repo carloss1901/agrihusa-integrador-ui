@@ -27,6 +27,10 @@ import { AuthService } from './core/services/auth.service';
 import { PerfilUsuarioComponent } from './features/perfil-usuario/views/perfil-usuario/perfil-usuario.component';
 import { MantenimientoClientesComponent } from './features/clientes/views/mantenimiento-clientes/mantenimiento-clientes.component';
 import { MantenimientoOperadoresLogisticosComponent } from './features/operadores-logisticos/views/mantenimiento-operadores-logisticos/mantenimiento-operadores-logisticos.component';
+import { MantenimientoProductosComponent } from './features/productos/views/mantenimiento-productos/mantenimiento-productos.component';
+import { MantenimientoSituacionesComponent } from './features/situaciones/views/mantenimiento-situaciones/mantenimiento-situaciones.component';
+import { RegistroDespachoComponent } from './features/registro-despacho/views/registro-despacho/registro-despacho.component';
+import { ReporteDespachoComponent } from './features/reporte-despacho/views/reporte-despacho/reporte-despacho.component';
 
 @Component({
   selector: 'app-root',
@@ -46,7 +50,11 @@ import { MantenimientoOperadoresLogisticosComponent } from './features/operadore
     AuditoriaComponent,
     PerfilUsuarioComponent,
     MantenimientoClientesComponent,
-    MantenimientoOperadoresLogisticosComponent
+    MantenimientoOperadoresLogisticosComponent,
+    MantenimientoProductosComponent,
+    MantenimientoSituacionesComponent,
+    RegistroDespachoComponent,
+    ReporteDespachoComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -66,6 +74,10 @@ export class AppComponent {
   mostrarAuditoria = false;
   mostrarPerfilUsuario = false;
   mostrarClientes = false;
+  mostrarProductos = false;
+  mostrarSituaciones = false;
+  mostrarRegistroDespacho = false;
+  mostrarReporteDespacho = false;
   mostrarOperadoresLogisticos = false;
   toggleMenu(esCerrar: boolean): void {
     this.menuVisible = !esCerrar;
@@ -148,6 +160,21 @@ export class AppComponent {
           case ModuloSistema.OPERADORES_LOGISTICOS:
             this.mostrarOperadoresLogisticos = true;
             break;
+
+          case ModuloSistema.PRODUCTOS:
+            this.mostrarProductos = true;
+            break;
+
+          case ModuloSistema.SITUACIONES:
+            this.mostrarSituaciones = true;
+            break;
+
+          case ModuloSistema.REGISTRO_DESPACHO:
+            this.mostrarRegistroDespacho = true;
+            break;
+          case ModuloSistema.REPORTE_DESPACHO:
+            this.mostrarReporteDespacho = true;
+            break;
         }
       });
   }
@@ -159,10 +186,14 @@ export class AppComponent {
     this.mostrarVariedades = false;
     this.mostrarNavieras = false;
     this.mostrarRoles = false;
+    this.mostrarSituaciones = false;
+    this.mostrarProductos = false;
     this.mostrarPuertosLlegada = false;
     this.mostrarAuditoria = false;
     this.mostrarPerfilUsuario = false;
     this.mostrarClientes = false;
+    this.mostrarRegistroDespacho = false;
+    this.mostrarReporteDespacho = false;
     this.mostrarOperadoresLogisticos = false;
   }
 

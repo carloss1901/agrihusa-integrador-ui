@@ -1,10 +1,24 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  Component,
+  EventEmitter,
+  Output
+} from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule
+} from '@angular/forms';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
+
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { IQueryMantVia } from '../../views/mantenimiento-vias/mantenimiento-vias.component';
+import { ViaFilter } from '../../models/via.model';
+
+interface EstadoOption {
+  valor: boolean;
+  descripcion: string;
+}
 
 @Component({
   selector: 'app-filtro-mant-vias',
@@ -16,39 +30,55 @@ import { IQueryMantVia } from '../../views/mantenimiento-vias/mantenimiento-vias
     NgSelectModule,
     AgrihusaButtonComponent
   ],
-  templateUrl: './filtro-mant-vias.component.html'
+  templateUrl:
+    './filtro-mant-vias.component.html'
 })
-export class FiltroMantViasComponent implements OnInit {
-  @Output() buscarVia = new EventEmitter<IQueryMantVia>();
-  @Output() limpiar = new EventEmitter<void>();
+export class FiltroMantViasComponent {
+  @Output()
+  buscar = new EventEmitter<ViaFilter>();
 
-  frmFiltro!: FormGroup;
-  lstCboEstado: any[] = [];
+  @Output()
+  limpiar = new EventEmitter<void>();
 
-  constructor(private fb: FormBuilder) {}
+  readonly estados: EstadoOption[] = [
+    {
+      valor: true,
+      descripcion: 'ACTIVO'
+    },
+    {
+      valor: false,
+      descripcion: 'INACTIVO'
+    }
+  ];
 
-  ngOnInit(): void {
-    this.frmFiltro = this.fb.group({
-      txtVia: [''],
-      cboEstado: [null]
+  readonly formulario = new FormGroup({
+    texto: new FormControl('', {
+      nonNullable: true
+    }),
+    estado: new FormControl<boolean | null>(null)
+  });
+
+  onBuscar(): void {
+    const value = this.formulario.getRawValue();
+    const filtro: ViaFilter = {};
+
+    if (value.texto.trim()) {
+      filtro.texto = value.texto.trim();
+    }
+
+    if (value.estado !== null) {
+      filtro.estado = value.estado;
+    }
+
+    this.buscar.emit(filtro);
+  }
+
+  onLimpiar(): void {
+    this.formulario.reset({
+      texto: '',
+      estado: null
     });
 
-    this.lstCboEstado = [
-      { maestroId: 1, descripcion: 'ACTIVO' },
-      { maestroId: 0, descripcion: 'INACTIVO' }
-    ];
-  }
-
-  onBuscar() {
-    const value = this.frmFiltro.value;
-    const query: IQueryMantVia = {};
-    if (value.txtVia) query.descripcion = value.txtVia;
-    if (value.cboEstado != null) query.estado = value.cboEstado;
-    this.buscarVia.emit(query);
-  }
-
-  onLimpiar() {
-    this.frmFiltro.reset();
     this.limpiar.emit();
   }
 }

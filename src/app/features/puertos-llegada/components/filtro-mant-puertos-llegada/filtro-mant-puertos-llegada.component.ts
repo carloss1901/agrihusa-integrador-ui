@@ -1,59 +1,92 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  Component,
+  EventEmitter,
+  Output
+} from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule
+} from '@angular/forms';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
+
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { IQueryMantPuertoLlegada } from '../../views/mantenimiento-puertos-llegada/mantenimiento-puertos-llegada.component';
+import { PuertoLlegadaFilter } from '../../models/puerto-llegada.model';
+
+interface EstadoOption {
+  valor: boolean;
+  descripcion: string;
+}
 
 @Component({
   selector: 'app-filtro-mant-puertos-llegada',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgbAccordionModule, NgSelectModule, AgrihusaButtonComponent],
-  templateUrl: './filtro-mant-puertos-llegada.component.html'
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NgbAccordionModule,
+    NgSelectModule,
+    AgrihusaButtonComponent
+  ],
+  templateUrl:
+    './filtro-mant-puertos-llegada.component.html'
 })
-export class FiltroMantPuertosLlegadaComponent implements OnInit {
-  @Output() buscarPuertoLlegada = new EventEmitter<IQueryMantPuertoLlegada>();
-  @Output() limpiar = new EventEmitter<void>();
+export class FiltroMantPuertosLlegadaComponent {
+  @Output()
+  buscar = new EventEmitter<PuertoLlegadaFilter>();
 
-  frmFiltro!: FormGroup;
-  lstCboEstado: any[] = [];
-  lstCboPais: any[] = [];
+  @Output()
+  limpiar = new EventEmitter<void>();
 
-  constructor(private fb: FormBuilder) {}
+  readonly estados: EstadoOption[] = [
+    {
+      valor: true,
+      descripcion: 'ACTIVO'
+    },
+    {
+      valor: false,
+      descripcion: 'INACTIVO'
+    }
+  ];
 
-  ngOnInit(): void {
-    this.frmFiltro = this.fb.group({
-      cboPais: [null],
-      txtPuerto: [''],
-      cboEstado: [null]
+  readonly formulario = new FormGroup({
+    texto: new FormControl('', {
+      nonNullable: true
+    }),
+    pais: new FormControl('', {
+      nonNullable: true
+    }),
+    estado: new FormControl<boolean | null>(null)
+  });
+
+  onBuscar(): void {
+    const value = this.formulario.getRawValue();
+    const filtro: PuertoLlegadaFilter = {};
+
+    if (value.texto.trim()) {
+      filtro.texto = value.texto.trim();
+    }
+
+    if (value.pais.trim()) {
+      filtro.pais = value.pais.trim();
+    }
+
+    if (value.estado !== null) {
+      filtro.estado = value.estado;
+    }
+
+    this.buscar.emit(filtro);
+  }
+
+  onLimpiar(): void {
+    this.formulario.reset({
+      texto: '',
+      pais: '',
+      estado: null
     });
 
-    this.lstCboEstado = [
-      { maestroId: 1, descripcion: 'ACTIVO' },
-      { maestroId: 0, descripcion: 'INACTIVO' }
-    ];
-
-    this.lstCboPais = [
-      { maestroId: 'PERU', descripcion: 'PERU' },
-      { maestroId: 'CHILE', descripcion: 'CHILE' },
-      { maestroId: 'COLOMBIA', descripcion: 'COLOMBIA' },
-      { maestroId: 'ECUADOR', descripcion: 'ECUADOR' },
-      { maestroId: 'MEXICO', descripcion: 'MEXICO' }
-    ];
-  }
-
-  onBuscar() {
-    const value = this.frmFiltro.value;
-    const query: IQueryMantPuertoLlegada = {};
-    if (value.cboPais) query.pais = value.cboPais;
-    if (value.txtPuerto) query.puerto = value.txtPuerto;
-    if (value.cboEstado != null) query.estado = value.cboEstado;
-    this.buscarPuertoLlegada.emit(query);
-  }
-
-  onLimpiar() {
-    this.frmFiltro.reset();
     this.limpiar.emit();
   }
 }

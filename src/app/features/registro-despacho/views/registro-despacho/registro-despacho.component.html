@@ -1,0 +1,107 @@
+<div class="frame-layout">
+  <div class="frame-layout__header">
+    <div class="col-12 my-2">
+      <agrihusa-topbar
+        [titulo]="titulo"
+        subtitulo="Gestión y seguimiento de despachos"
+        [showCancel]="false"
+      ></agrihusa-topbar>
+    </div>
+  </div>
+
+  <div class="frame-layout__body">
+    <div class="agrihusa-card mb-component">
+      <app-filtro-despachos
+        (buscar)="onBuscar($event)"
+        (limpiar)="onLimpiarFiltro()"
+      ></app-filtro-despachos>
+    </div>
+
+    <div class="agrihusa-card">
+      <div
+        class="
+          p-content
+          d-flex
+          justify-content-between
+          align-items-center
+        "
+      >
+        <span class="title-group-uppercase">
+          Lista de despachos
+        </span>
+
+        <div class="d-flex gap-2">
+          <div title="Registrar despacho">
+            <agrihusa-button
+              color="primary"
+              variant="outlined"
+              icon="plus"
+              [esIcono]="true"
+              [disabled]="!puedeCrear"
+              (click)="mostrarModalCrear()"
+            ></agrihusa-button>
+          </div>
+
+          <div title="Editar despacho">
+            <agrihusa-button
+              color="secondary"
+              variant="outlined"
+              icon="edit"
+              [esIcono]="true"
+              [disabled]="
+                !puedeEditar ||
+                !filaSeleccionada ||
+                !filaSeleccionada.activo
+              "
+              (click)="mostrarModalEditar()"
+            ></agrihusa-button>
+          </div>
+
+          <div
+            [title]="
+              filaSeleccionada?.activo
+                ? 'Desactivar despacho'
+                : 'Activar despacho'
+            "
+          >
+            <agrihusa-button
+              [color]="
+                filaSeleccionada?.activo
+                  ? 'secondary'
+                  : 'success'
+              "
+              variant="outlined"
+              [icon]="
+                filaSeleccionada?.activo
+                  ? 'trash'
+                  : 'refresh-ccw'
+              "
+              [esIcono]="true"
+              [disabled]="
+                !puedeCambiarEstado ||
+                !filaSeleccionada
+              "
+              (click)="cambiarEstado()"
+            ></agrihusa-button>
+          </div>
+        </div>
+      </div>
+
+      <app-tabla-despachos
+        [datasource]="despachos"
+        [clientes]="clientes"
+        [destinos]="destinos"
+        [productos]="productos"
+        [variedades]="variedades"
+        [situaciones]="situaciones"
+        [loading]="loading"
+        [totalItems]="totalItems"
+        [page]="page"
+        [pageSize]="pageSize"
+        [filaSeleccionada]="filaSeleccionada"
+        (seleccionar)="onSeleccionarDespacho($event)"
+        (paginar)="onChangePaginate($event)"
+      ></app-tabla-despachos>
+    </div>
+  </div>
+</div>

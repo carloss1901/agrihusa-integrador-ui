@@ -1,0 +1,59 @@
+.situacion-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.situacion-programado {
+  color: #174ea6;
+  background-color: #dce9ff;
+  border-color: #a9c8ff;
+}
+
+.situacion-preparacion {
+  color: #7a4b00;
+  background-color: #fff0c2;
+  border-color: #f2cf72;
+}
+
+.situacion-despachado {
+  color: #5a2b82;
+  background-color: #eadcff;
+  border-color: #ccb0f1;
+}
+
+.situacion-transito {
+  color: #075b69;
+  background-color: #d3f2f6;
+  border-color: #91d7e0;
+}
+
+.situacion-entregado {
+  color: #176437;
+  background-color: #d8f3e2;
+  border-color: #9bd5b0;
+}
+
+.situacion-cancelado {
+  color: #9f2430;
+  background-color: #ffe0e3;
+  border-color: #f3aeb5;
+}
+
+.situacion-observado {
+  color: #874000;
+  background-color: #ffe7cf;
+  border-color: #f3bd87;
+}
+
+.situacion-default {
+  color: #44504a;
+  background-color: #e9eeeb;
+  border-color: #c9d2cc;
+}
