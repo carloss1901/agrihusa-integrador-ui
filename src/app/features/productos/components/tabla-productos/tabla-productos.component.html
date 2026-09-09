@@ -1,0 +1,96 @@
+<div
+  class="table-responsive"
+  [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }"
+>
+  <table class="table tbl-grid m-0 head-no-rounded">
+    <caption class="d-none">
+      Tabla de productos
+    </caption>
+
+    <thead>
+      <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Código</th>
+        <th scope="col">Producto</th>
+        <th scope="col">Descripción</th>
+        <th scope="col">Estado</th>
+      </tr>
+    </thead>
+
+    <tbody *ngIf="!loading">
+      <tr
+        *ngFor="
+          let producto of datasource;
+          index as i;
+          trackBy: trackByProductoId
+        "
+        tabindex="0"
+        [class]="'c-pointer tbl-row tbl-row-' + i"
+        [ngClass]="{
+          active: producto.id === itemId
+        }"
+        [attr.aria-selected]="producto.id === itemId"
+        (click)="onSeleccionarFila(producto)"
+        (keydown.enter)="onSeleccionarFila(producto)"
+      >
+        <td>{{ producto.id }}</td>
+
+        <td>
+          <strong>{{ producto.codigo }}</strong>
+        </td>
+
+        <td>{{ producto.nombre }}</td>
+
+        <td
+          class="text-truncate"
+          style="max-width: 360px"
+          [title]="producto.descripcion"
+        >
+          {{ producto.descripcion }}
+        </td>
+
+        <td>
+          <span
+            class="labels"
+            [ngClass]="{
+              'labels-activo': producto.activo,
+              'labels-inactivo': !producto.activo
+            }"
+          >
+            <span
+              class="labels_circle"
+              aria-hidden="true"
+            ></span>
+
+            <span>
+              {{
+                producto.activo
+                  ? 'ACTIVO'
+                  : 'INACTIVO'
+              }}
+            </span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-container *ngIf="!loading && !totalItems">
+    <agrihusa-no-results></agrihusa-no-results>
+  </ng-container>
+
+  <ng-container *ngIf="loading">
+    <agrihusa-loading></agrihusa-loading>
+  </ng-container>
+</div>
+
+<table-footer-pagination
+  [totalItems]="totalItems"
+  [totalItemsPerPage]="datasource.length"
+  [page]="page"
+  [pageSize]="pageSize"
+  (changePaginate)="onChangePaginate($event)"
+></table-footer-pagination>

@@ -1,0 +1,152 @@
+<div class="modal-header">
+  <div>
+    <p class="modal-eyebrow mb-1">
+      Gestión de productos
+    </p>
+
+    <h5 class="modal-title">
+      {{ titleModal }}
+    </h5>
+  </div>
+
+  <button
+    type="button"
+    class="btn-close"
+    aria-label="Cerrar"
+    title="Cerrar"
+    (click)="onCerrarModal()"
+  ></button>
+</div>
+
+<div class="modal-body">
+  <form
+    id="formularioProducto"
+    [formGroup]="formulario"
+    (ngSubmit)="onGuardar()"
+  >
+    <section class="form-section">
+      <h6 class="form-section-title">
+        Información del producto
+      </h6>
+
+      <div class="row gx-3">
+        <div class="col-12 col-md-4">
+          <div class="form-group mb-3 mb-md-0">
+            <label
+              class="form-label"
+              for="codigoProducto"
+            >
+              Código:
+              <span class="text-danger">*</span>
+            </label>
+
+            <input
+              id="codigoProducto"
+              type="text"
+              class="form-control text-uppercase"
+              formControlName="codigo"
+              maxlength="10"
+              autocomplete="off"
+              placeholder="Ejemplo: P001"
+              [class.is-invalid]="
+                controlInvalido('codigo')
+              "
+            />
+
+            <div
+              *ngIf="controlInvalido('codigo')"
+              class="invalid-feedback"
+            >
+              Ingresa entre 3 y 10 letras, números o
+              guiones.
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-8">
+          <div class="form-group mb-3 mb-md-0">
+            <label
+              class="form-label"
+              for="nombreProducto"
+            >
+              Producto:
+              <span class="text-danger">*</span>
+            </label>
+
+            <input
+              id="nombreProducto"
+              type="text"
+              class="form-control text-uppercase"
+              formControlName="nombre"
+              maxlength="100"
+              autocomplete="off"
+              placeholder="Ejemplo: UVA"
+              [class.is-invalid]="
+                controlInvalido('nombre')
+              "
+            />
+
+            <div
+              *ngIf="controlInvalido('nombre')"
+              class="invalid-feedback"
+            >
+              Ingresa un nombre válido de máximo
+              100 caracteres.
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 mt-3">
+          <div class="form-group">
+            <label
+              class="form-label"
+              for="descripcionProducto"
+            >
+              Descripción:
+              <span class="text-danger">*</span>
+            </label>
+
+            <textarea
+              id="descripcionProducto"
+              class="form-control text-uppercase"
+              formControlName="descripcion"
+              maxlength="250"
+              rows="4"
+              placeholder="Describe brevemente el producto"
+              [class.is-invalid]="
+                controlInvalido('descripcion')
+              "
+            ></textarea>
+
+            <div
+              *ngIf="controlInvalido('descripcion')"
+              class="invalid-feedback"
+            >
+              Ingresa una descripción válida de máximo
+              250 caracteres.
+            </div>
+
+            <small class="form-text text-muted">
+              Máximo 250 caracteres.
+            </small>
+          </div>
+        </div>
+      </div>
+    </section>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <agrihusa-button
+    texto="Cancelar"
+    color="danger"
+    icon="x"
+    (click)="onCerrarModal()"
+  ></agrihusa-button>
+
+  <agrihusa-button
+    texto="Guardar"
+    icon="check"
+    (click)="onGuardar()"
+  ></agrihusa-button>
+</div>

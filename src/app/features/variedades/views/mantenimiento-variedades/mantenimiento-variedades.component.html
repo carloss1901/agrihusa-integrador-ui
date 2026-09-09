@@ -1,0 +1,103 @@
+<div class="frame-layout">
+  <div class="frame-layout__header">
+    <div class="col-12 my-2">
+      <agrihusa-topbar
+        [titulo]="titulo"
+        subtitulo="Administración de variedades por producto"
+        [showCancel]="false"
+      ></agrihusa-topbar>
+    </div>
+  </div>
+
+  <div class="frame-layout__body">
+    <div class="agrihusa-card mb-component">
+      <app-filtro-mant-variedades
+        (buscar)="onBuscar($event)"
+        (limpiar)="onLimpiarFiltro()"
+      ></app-filtro-mant-variedades>
+    </div>
+
+    <div class="agrihusa-card">
+      <div
+        class="
+          p-content
+          d-flex
+          justify-content-between
+          align-items-center
+        "
+      >
+        <span class="title-group-uppercase">
+          Lista de variedades
+        </span>
+
+        <div class="d-flex gap-2">
+          <div title="Registrar variedad">
+            <agrihusa-button
+              color="primary"
+              variant="outlined"
+              icon="plus"
+              [esIcono]="true"
+              [disabled]="!puedeCrear"
+              (click)="mostrarModalCrear()"
+            ></agrihusa-button>
+          </div>
+
+          <div title="Editar variedad">
+            <agrihusa-button
+              color="secondary"
+              variant="outlined"
+              icon="edit"
+              [esIcono]="true"
+              [disabled]="
+                !puedeEditar ||
+                !filaSeleccionada ||
+                !filaSeleccionada.activo
+              "
+              (click)="mostrarModalEditar()"
+            ></agrihusa-button>
+          </div>
+
+          <div
+            [title]="
+              filaSeleccionada?.activo
+                ? 'Desactivar variedad'
+                : 'Activar variedad'
+            "
+          >
+            <agrihusa-button
+              [color]="
+                filaSeleccionada?.activo
+                  ? 'secondary'
+                  : 'success'
+              "
+              variant="outlined"
+              [icon]="
+                filaSeleccionada?.activo
+                  ? 'trash'
+                  : 'refresh-ccw'
+              "
+              [esIcono]="true"
+              [disabled]="
+                !puedeCambiarEstado ||
+                !filaSeleccionada
+              "
+              (click)="cambiarEstado()"
+            ></agrihusa-button>
+          </div>
+        </div>
+      </div>
+
+      <app-tabla-mant-variedades
+        [datasource]="variedades"
+        [productos]="productos"
+        [loading]="loading"
+        [totalItems]="totalItems"
+        [page]="page"
+        [pageSize]="pageSize"
+        [filaSeleccionada]="filaSeleccionada"
+        (seleccionar)="onSeleccionarVariedad($event)"
+        (paginar)="onChangePaginate($event)"
+      ></app-tabla-mant-variedades>
+    </div>
+  </div>
+</div>

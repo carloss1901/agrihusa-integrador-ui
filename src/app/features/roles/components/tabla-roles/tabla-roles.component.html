@@ -1,0 +1,80 @@
+<div
+  class="table-responsive"
+  [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }"
+>
+  <table class="table tbl-grid m-0 head-no-rounded">
+    <caption class="d-none">
+      Tabla de mantenimiento de roles
+    </caption>
+
+    <thead>
+      <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Nombre</th>
+        <th scope="col">Descripción</th>
+        <th scope="col">Permisos</th>
+        <th scope="col">Tipo</th>
+        <th scope="col">Estado</th>
+      </tr>
+    </thead>
+
+    <tbody *ngIf="!loading">
+      <tr
+        *ngFor="
+          let rol of datasource;
+          index as i;
+          trackBy: trackByRolId
+        "
+        tabindex="0"
+        [class]="'c-pointer tbl-row tbl-row-' + i"
+        [ngClass]="{
+          active: rol.id === itemId
+        }"
+        [attr.aria-selected]="rol.id === itemId"
+        (click)="onSeleccionarFila(rol)"
+        (keydown.enter)="onSeleccionarFila(rol)"
+      >
+        <td>{{ rol.id }}</td>
+        <td>{{ rol.nombre }}</td>
+        <td>{{ rol.descripcion }}</td>
+        <td>{{ rol.permisos.length }}</td>
+        <td>
+          {{ rol.esSistema ? 'SISTEMA' : 'PERSONALIZADO' }}
+        </td>
+        <td>
+          <span
+            class="labels"
+            [ngClass]="{
+              'labels-activo': rol.activo,
+              'labels-inactivo': !rol.activo
+            }"
+          >
+            <span class="labels_circle"></span>
+            <span>
+              {{ rol.activo ? 'ACTIVO' : 'INACTIVO' }}
+            </span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-container *ngIf="!loading && !totalItems">
+    <agrihusa-no-results></agrihusa-no-results>
+  </ng-container>
+
+  <ng-container *ngIf="loading">
+    <agrihusa-loading></agrihusa-loading>
+  </ng-container>
+</div>
+
+<table-footer-pagination
+  [totalItems]="totalItems"
+  [totalItemsPerPage]="datasource.length"
+  [page]="page"
+  [pageSize]="pageSize"
+  (changePaginate)="onChangePaginate($event)"
+></table-footer-pagination>

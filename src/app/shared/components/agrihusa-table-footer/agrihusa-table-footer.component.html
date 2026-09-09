@@ -1,0 +1,38 @@
+<div
+  class="table-footer border-top px-2"
+  [ngClass]="{ 'd-none': !totalItems }"
+>
+  <div class="d-flex align-items-center">
+    <span class="label-regular me-2">Filas</span>
+    <select
+      class="form-control form-select"
+      [(ngModel)]="localPageSize"
+      (ngModelChange)="onChangePageSize($event)"
+    >
+      <option *ngFor="let size of pageSizes" [ngValue]="size">
+        {{ size }}
+      </option>
+    </select>
+  </div>
+  <div class="content-pagination">
+    <span class="label-regular"
+      >{{ to }} a {{ from }} de {{ totalItems }} registros</span
+    >
+    <ngb-pagination
+      [maxSize]="3"
+      [rotate]="true"
+      [ellipses]="false"
+      [collectionSize]="totalItems"
+      [page]="localPage"
+      [pageSize]="localPageSize"
+      (pageChange)="onChangePaginate($event)"
+    >
+      <ng-template ngbPaginationPrevious>
+        <span class="feather icon-chevron-left"></span>
+      </ng-template>
+      <ng-template ngbPaginationNext>
+        <span class="feather icon-chevron-right"></span>
+      </ng-template>
+    </ngb-pagination>
+  </div>
+</div>

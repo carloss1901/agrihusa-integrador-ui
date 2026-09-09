@@ -1,0 +1,30 @@
+<aside class="agrihusa-sidebar" id="agrihusa-aside-menu">
+  <div>
+    <div class="d-flex justify-content-between align-items-center content-header-menu">
+      <span class="text-white mb-0">MENU</span>
+      <span
+        (click)="toggleMenu(true)"
+        class="menu-collapse-icon text-white"
+      >
+        ‹
+      </span>
+    </div>
+  </div>
+
+  <div class="menu-group" *ngFor="let menuItem of menuArrAgrihusa">
+    <div class="accordion-button">
+      <span>{{ menuItem.nombreModulo | uppercase }}</span>
+    </div>
+    <div class="accordion-body">
+      <ul>
+        <li
+          *ngFor="let subItem of menuItem.subMenu"
+          [class.active]="subItem.codigo === menuSeleccionadoId"
+          (click)="onClickMenu(subItem)"
+        >
+          <span>{{ subItem.nombre }}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</aside>

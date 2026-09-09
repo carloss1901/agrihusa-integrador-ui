@@ -1,0 +1,84 @@
+<div
+  class="table-responsive"
+  [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }"
+>
+  <table class="table tbl-grid m-0 head-no-rounded">
+    <caption class="d-none">
+      Tabla de situaciones
+    </caption>
+
+    <thead>
+      <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Situación</th>
+        <th scope="col">Estado</th>
+      </tr>
+    </thead>
+
+    <tbody *ngIf="!loading">
+      <tr
+        *ngFor="
+          let situacion of datasource;
+          index as i;
+          trackBy: trackBySituacionId
+        "
+        tabindex="0"
+        [class]="'c-pointer tbl-row tbl-row-' + i"
+        [ngClass]="{
+          active: situacion.id === itemId
+        }"
+        [attr.aria-selected]="situacion.id === itemId"
+        (click)="onSeleccionarFila(situacion)"
+        (keydown.enter)="onSeleccionarFila(situacion)"
+      >
+        <td>{{ situacion.id }}</td>
+
+        <td>
+          <strong>{{ situacion.descripcion }}</strong>
+        </td>
+
+        <td>
+          <span
+            class="labels"
+            [ngClass]="{
+              'labels-activo': situacion.activo,
+              'labels-inactivo': !situacion.activo
+            }"
+          >
+            <span
+              class="labels_circle"
+              aria-hidden="true"
+            ></span>
+
+            <span>
+              {{
+                situacion.activo
+                  ? 'ACTIVO'
+                  : 'INACTIVO'
+              }}
+            </span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-container *ngIf="!loading && !totalItems">
+    <agrihusa-no-results></agrihusa-no-results>
+  </ng-container>
+
+  <ng-container *ngIf="loading">
+    <agrihusa-loading></agrihusa-loading>
+  </ng-container>
+</div>
+
+<table-footer-pagination
+  [totalItems]="totalItems"
+  [totalItemsPerPage]="datasource.length"
+  [page]="page"
+  [pageSize]="pageSize"
+  (changePaginate)="onChangePaginate($event)"
+></table-footer-pagination>

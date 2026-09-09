@@ -1,0 +1,102 @@
+<div class="frame-layout">
+  <div class="frame-layout__header">
+    <div class="col-12 my-2">
+      <agrihusa-topbar
+        [titulo]="titulo"
+        subtitulo="Administración de proveedores logísticos"
+        [showCancel]="false"
+      ></agrihusa-topbar>
+    </div>
+  </div>
+
+  <div class="frame-layout__body">
+    <div class="agrihusa-card mb-component">
+      <app-filtro-operadores-logisticos
+        (buscar)="onBuscar($event)"
+        (limpiar)="onLimpiarFiltro()"
+      ></app-filtro-operadores-logisticos>
+    </div>
+
+    <div class="agrihusa-card">
+      <div
+        class="
+          p-content
+          d-flex
+          justify-content-between
+          align-items-center
+        "
+      >
+        <span class="title-group-uppercase">
+          Lista de operadores logísticos
+        </span>
+
+        <div class="d-flex gap-2">
+          <div title="Registrar operador logístico">
+            <agrihusa-button
+              color="primary"
+              variant="outlined"
+              icon="plus"
+              [esIcono]="true"
+              [disabled]="!puedeCrear"
+              (click)="mostrarModalCrear()"
+            ></agrihusa-button>
+          </div>
+
+          <div title="Editar operador logístico">
+            <agrihusa-button
+              color="secondary"
+              variant="outlined"
+              icon="edit"
+              [esIcono]="true"
+              [disabled]="
+                !puedeEditar ||
+                !filaSeleccionada ||
+                !filaSeleccionada.activo
+              "
+              (click)="mostrarModalEditar()"
+            ></agrihusa-button>
+          </div>
+
+          <div
+            [title]="
+              filaSeleccionada?.activo
+                ? 'Desactivar operador'
+                : 'Activar operador'
+            "
+          >
+            <agrihusa-button
+              [color]="
+                filaSeleccionada?.activo
+                  ? 'secondary'
+                  : 'success'
+              "
+              variant="outlined"
+              [icon]="
+                filaSeleccionada?.activo
+                  ? 'trash'
+                  : 'refresh-ccw'
+              "
+              [esIcono]="true"
+              [disabled]="
+                !puedeCambiarEstado ||
+                !filaSeleccionada
+              "
+              (click)="cambiarEstado()"
+            ></agrihusa-button>
+          </div>
+        </div>
+      </div>
+
+      <app-tabla-operadores-logisticos
+        [datasource]="operadores"
+        [loading]="loading"
+        [totalItems]="totalItems"
+        [page]="page"
+        [pageSize]="pageSize"
+        [filaSeleccionada]="filaSeleccionada"
+        (seleccionar)="onSeleccionarOperador($event)"
+        (paginar)="onChangePaginate($event)"
+      ></app-tabla-operadores-logisticos>
+    </div>
+  </div>
+</div>

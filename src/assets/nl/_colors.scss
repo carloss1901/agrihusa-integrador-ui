@@ -1,0 +1,49 @@
+.agrihusa {
+	&-white {
+        color: $nl-white;
+    }
+    &-black {
+        color: $nl-black;
+    }
+    &-red {
+        color: $dgpmi-primary;
+        &-dark {
+            color: $dgpmi-primary-dark;
+        }
+        &-ligth {
+            color: $dgpmi-primary-light;
+        }
+    }
+    &-grey {
+        &-10 {
+            color: $nl-grey-10;
+        }
+        &-20 {
+            color: $nl-grey-20;
+        }
+        &-30 {
+            color: $nl-grey-30;
+        }
+        &-40 {
+            color: $nl-grey-40;
+        }
+    }
+    &-green {
+        color: $nl-green;
+        &-luz {
+            color: $nl-green-light;
+        }
+    }
+    &-blue {
+        color: $nl-blue;
+        &-luz {
+            color: $nl-blue-light;
+        }
+    }
+    &-orange {
+        color: $nl-orange;
+        &-luz {
+            color: $nl-orange-light;
+        }
+    }
+}

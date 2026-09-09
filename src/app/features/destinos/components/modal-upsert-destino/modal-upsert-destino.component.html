@@ -1,0 +1,116 @@
+<div class="modal-header">
+  <div>
+    <p class="modal-eyebrow mb-1">
+      Gestión logística
+    </p>
+
+    <h5 class="modal-title">
+      {{ titleModal }}
+    </h5>
+  </div>
+
+  <button
+    type="button"
+    class="btn-close"
+    aria-label="Cerrar"
+    title="Cerrar"
+    (click)="onCerrarModal()"
+  ></button>
+</div>
+
+<div class="modal-body">
+  <form
+    id="formularioDestino"
+    [formGroup]="formulario"
+    (ngSubmit)="onGuardar()"
+  >
+    <section class="form-section">
+      <h6 class="form-section-title">
+        Ubicación del destino
+      </h6>
+
+      <div class="row gx-3">
+        <div class="col-12 col-md-6">
+          <div class="form-group mb-3 mb-md-0">
+            <label
+              class="form-label"
+              for="paisDestino"
+            >
+              País:
+              <span class="text-danger">*</span>
+            </label>
+
+            <input
+              id="paisDestino"
+              type="text"
+              class="form-control text-uppercase"
+              formControlName="pais"
+              maxlength="80"
+              autocomplete="off"
+              placeholder="Ejemplo: PERÚ"
+              [class.is-invalid]="
+                controlInvalido('pais')
+              "
+            />
+
+            <div
+              *ngIf="controlInvalido('pais')"
+              class="invalid-feedback"
+            >
+              Ingresa un país válido de máximo
+              80 caracteres.
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="form-group">
+            <label
+              class="form-label"
+              for="ciudadDestino"
+            >
+              Ciudad:
+              <span class="text-danger">*</span>
+            </label>
+
+            <input
+              id="ciudadDestino"
+              type="text"
+              class="form-control text-uppercase"
+              formControlName="ciudad"
+              maxlength="100"
+              autocomplete="off"
+              placeholder="Ejemplo: LIMA"
+              [class.is-invalid]="
+                controlInvalido('ciudad')
+              "
+            />
+
+            <div
+              *ngIf="controlInvalido('ciudad')"
+              class="invalid-feedback"
+            >
+              Ingresa una ciudad válida de máximo
+              100 caracteres.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <agrihusa-button
+    texto="Cancelar"
+    color="danger"
+    icon="x"
+    (click)="onCerrarModal()"
+  ></agrihusa-button>
+
+  <agrihusa-button
+    texto="Guardar"
+    icon="check"
+    (click)="onGuardar()"
+  ></agrihusa-button>
+</div>

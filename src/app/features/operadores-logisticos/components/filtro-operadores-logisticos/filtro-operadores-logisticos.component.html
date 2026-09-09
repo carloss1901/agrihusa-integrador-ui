@@ -1,0 +1,92 @@
+<div ngbAccordion [closeOthers]="false">
+  <div ngbAccordionItem [collapsed]="false">
+    <h2 ngbAccordionHeader>
+      <button
+        ngbAccordionButton
+        class="d-flex justify-content-between w-100"
+        type="button"
+      >
+        <span class="title-group-uppercase">
+          Filtros de búsqueda
+        </span>
+      </button>
+    </h2>
+
+    <div ngbAccordionCollapse>
+      <div ngbAccordionBody>
+        <ng-template>
+          <form [formGroup]="formulario">
+            <div class="container-fluid px-0">
+              <div
+                class="row gx-3 align-items-baseline mb-2"
+              >
+                <div class="col-12 col-lg-8">
+                  <div class="form-group">
+                    <label
+                      class="form-label"
+                      for="filtroOperadorTexto"
+                    >
+                      Operador logístico:
+                    </label>
+
+                    <input
+                      id="filtroOperadorTexto"
+                      class="form-control"
+                      type="search"
+                      formControlName="texto"
+                      placeholder="RUC, razón social, nombre o contacto"
+                      autocomplete="off"
+                      (keyup.enter)="onBuscar()"
+                    />
+                  </div>
+                </div>
+
+                <div class="col-12 col-lg-4">
+                  <div class="form-group">
+                    <label
+                      class="form-label"
+                      for="filtroOperadorEstado"
+                    >
+                      Estado:
+                    </label>
+
+                    <ng-select
+                      inputId="filtroOperadorEstado"
+                      class="text-uppercase"
+                      [items]="estados"
+                      bindLabel="descripcion"
+                      bindValue="valor"
+                      placeholder="-- SELECCIONAR --"
+                      [clearable]="true"
+                      [searchable]="false"
+                      formControlName="estado"
+                    ></ng-select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row gx-2 justify-content-end">
+                <div class="col-auto">
+                  <div class="d-flex gap-2">
+                    <agrihusa-button
+                      texto="Limpiar"
+                      icon="refresh-ccw"
+                      color="secondary"
+                      (click)="onLimpiar()"
+                    ></agrihusa-button>
+
+                    <agrihusa-button
+                      texto="Buscar"
+                      icon="search"
+                      (click)="onBuscar()"
+                    ></agrihusa-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

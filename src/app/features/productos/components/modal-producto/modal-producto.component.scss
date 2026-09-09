@@ -1,0 +1,101 @@
+:host {
+  display: block;
+  color: #26332a;
+}
+
+.modal-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #dbe5de;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(0, 99, 42, 0.08),
+      transparent 60%
+    ),
+    #ffffff;
+}
+
+.modal-eyebrow {
+  color: #00632a;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.modal-title {
+  color: #18251d;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.modal-body {
+  padding: 1.25rem;
+  background-color: #f7f9f7;
+}
+
+.form-section {
+  padding: 1rem;
+  border: 1px solid #dfe7e1;
+  border-radius: 6px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 7px rgba(25, 52, 34, 0.06);
+}
+
+.form-section + .form-section {
+  margin-top: 1rem;
+}
+
+.form-section-title {
+  margin: 0 0 1rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 2px solid #e2eee6;
+  color: #00632a;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.form-label {
+  color: #34463a;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.form-control {
+  min-height: 38px;
+  font-size: 0.82rem;
+}
+
+textarea.form-control {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.form-control:focus {
+  border-color: #168148;
+  box-shadow:
+    0 0 0 0.18rem rgba(0, 99, 42, 0.12);
+}
+
+.modal-footer {
+  padding: 0.8rem 1.25rem;
+  border-top: 1px solid #dbe5de;
+  background-color: #ffffff;
+}
+
+:host ::ng-deep ng-select.is-invalid .ng-select-container {
+  border-color: #dc3545;
+}
+
+@media (max-width: 767.98px) {
+  .modal-body {
+    padding: 0.85rem;
+  }
+
+  .form-section {
+    padding: 0.85rem;
+  }
+}

@@ -1,0 +1,54 @@
+// agregar separacion hacia abajo
+.mb-component {
+	margin-bottom: $spacio-separacion !important;
+}
+
+// agregar separacion hacia arriba
+.mt-component {
+	margin-top: $spacio-separacion !important;
+}
+
+// agregar separacion hacia abajo y arriba
+.my-component {
+	@extend .mb-component;
+	@extend .mt-component;
+}
+
+// agregar espaciado entre el borde de pantalla y el contenido
+// por ruta lo recomendable es agregar 1 sola vez
+.frame-view {
+	padding: 1.25rem 1rem !important;
+}
+
+// agrega espaciado, padding , entre el borde mas cercado y el contenido
+// usar la clase px-3, py-3, pb-3, pt-3, => 1rem
+
+// pading content entre border componente y su contenido
+.pt-content {
+	padding-top: 1rem !important;
+}
+.pb-content {
+	padding-bottom: 1rem !important;
+}
+.py-content {
+	@extend .pb-content;
+	@extend .pt-content;
+}
+// padding start
+.ps-content {
+	padding-left: 1rem !important;
+}
+
+// pading end
+.pe-content {
+	padding-right: 1rem !important;
+}
+.px-content {
+	@extend .ps-content;
+	@extend .pe-content;
+}
+
+.p-content {
+	@extend .px-content;
+	@extend .py-content;
+}

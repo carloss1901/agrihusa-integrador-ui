@@ -1,0 +1,132 @@
+<div class="frame-layout">
+  <div class="frame-layout__header">
+    <div class="col-12 my-2">
+      <agrihusa-topbar
+        [titulo]="titulo"
+        subtitulo="Consulta consolidada y exportación de despachos"
+        [showCancel]="false"
+      ></agrihusa-topbar>
+    </div>
+  </div>
+
+  <div class="frame-layout__body">
+    <div class="agrihusa-card mb-component">
+      <app-filtro-reporte-despacho
+        (buscar)="onBuscar($event)"
+        (limpiar)="onLimpiarFiltro()"
+      ></app-filtro-reporte-despacho>
+    </div>
+
+    <section
+      class="summary-grid mb-component"
+      aria-label="Resumen del reporte"
+    >
+      <article
+        class="
+          summary-card
+          summary-card--total
+        "
+      >
+        <span class="summary-card__label">
+          Total de despachos
+        </span>
+
+        <strong class="summary-card__value">
+          {{ resumen.totalRegistros }}
+        </strong>
+      </article>
+
+      <article
+        class="
+          summary-card
+          summary-card--active
+        "
+      >
+        <span class="summary-card__label">
+          Registros activos
+        </span>
+
+        <strong class="summary-card__value">
+          {{ resumen.totalActivos }}
+        </strong>
+      </article>
+
+      <article
+        class="
+          summary-card
+          summary-card--transit
+        "
+      >
+        <span class="summary-card__label">
+          En tránsito
+        </span>
+
+        <strong class="summary-card__value">
+          {{ resumen.totalEnTransito }}
+        </strong>
+      </article>
+
+      <article
+        class="
+          summary-card
+          summary-card--delivered
+        "
+      >
+        <span class="summary-card__label">
+          Entregados
+        </span>
+
+        <strong class="summary-card__value">
+          {{ resumen.totalEntregados }}
+        </strong>
+      </article>
+    </section>
+
+    <div class="agrihusa-card">
+      <div
+        class="
+          p-content
+          d-flex
+          justify-content-between
+          align-items-center
+        "
+      >
+        <div>
+          <span class="title-group-uppercase">
+            Resultado del reporte
+          </span>
+
+          <p class="report-caption mb-0">
+            Los indicadores y la exportación
+            respetan los filtros seleccionados.
+          </p>
+        </div>
+
+        <agrihusa-button
+          [texto]="
+            exportando
+              ? 'Generando Excel...'
+              : 'Exportar Excel'
+          "
+          icon="download"
+          color="primary"
+          [disabled]="
+            !puedeExportar ||
+            !totalItems ||
+            exportando
+          "
+          (click)="exportarExcel()"
+        ></agrihusa-button>
+      </div>
+
+      <app-tabla-reporte-despacho
+        [datasource]="datasource"
+        [loading]="loading"
+        [totalItems]="totalItems"
+        [page]="page"
+        [pageSize]="pageSize"
+        (paginar)="onChangePaginate($event)"
+      ></app-tabla-reporte-despacho>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,131 @@
+<div class="modal-header">
+  <div>
+    <p class="modal-eyebrow mb-1">
+      Catálogo de productos
+    </p>
+
+    <h5 class="modal-title">
+      {{ titleModal }}
+    </h5>
+  </div>
+
+  <button
+    type="button"
+    class="btn-close"
+    aria-label="Cerrar"
+    title="Cerrar"
+    (click)="onCerrarModal()"
+  ></button>
+</div>
+
+<div class="modal-body">
+  <form
+    id="formularioVariedad"
+    [formGroup]="formulario"
+    (ngSubmit)="onGuardar()"
+  >
+    <section class="form-section">
+      <h6 class="form-section-title">
+        Relación producto y variedad
+      </h6>
+
+      <div class="row gx-3">
+        <div class="col-12 col-md-6">
+          <div class="form-group mb-3 mb-md-0">
+            <label
+              class="form-label"
+              for="productoVariedad"
+            >
+              Producto:
+              <span class="text-danger">*</span>
+            </label>
+
+            <ng-select
+              inputId="productoVariedad"
+              [items]="productos"
+              bindLabel="nombre"
+              bindValue="id"
+              placeholder="-- SELECCIONAR --"
+              [clearable]="true"
+              [searchable]="true"
+              formControlName="productoId"
+              [class.is-invalid]="
+                controlInvalido('productoId')
+              "
+            ></ng-select>
+
+            <div
+              *ngIf="controlInvalido('productoId')"
+              class="invalid-feedback d-block"
+            >
+              Selecciona el producto al que pertenece
+              la variedad.
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="form-group">
+            <label
+              class="form-label"
+              for="nombreVariedad"
+            >
+              Variedad:
+              <span class="text-danger">*</span>
+            </label>
+
+            <input
+              id="nombreVariedad"
+              type="text"
+              class="form-control text-uppercase"
+              formControlName="nombre"
+              maxlength="100"
+              autocomplete="off"
+              placeholder="Ejemplo: HASS"
+              [class.is-invalid]="
+                controlInvalido('nombre')
+              "
+            />
+
+            <div
+              *ngIf="controlInvalido('nombre')"
+              class="invalid-feedback"
+            >
+              Ingresa una variedad válida de máximo
+              100 caracteres.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="relationship-note mt-4">
+        <span
+          class="relationship-note__icon"
+          aria-hidden="true"
+        >
+          ↳
+        </span>
+
+        <span>
+          La variedad quedará vinculada al producto
+          seleccionado.
+        </span>
+      </div>
+    </section>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <agrihusa-button
+    texto="Cancelar"
+    color="danger"
+    icon="x"
+    (click)="onCerrarModal()"
+  ></agrihusa-button>
+
+  <agrihusa-button
+    texto="Guardar"
+    icon="check"
+    (click)="onGuardar()"
+  ></agrihusa-button>
+</div>

@@ -1,0 +1,89 @@
+<div
+  class="table-responsive"
+  [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }"
+>
+  <table class="table tbl-grid m-0 head-no-rounded">
+    <caption class="d-none">
+      Tabla de mantenimiento de variedades
+    </caption>
+
+    <thead>
+      <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Producto</th>
+        <th scope="col">Variedad</th>
+        <th scope="col">Estado</th>
+      </tr>
+    </thead>
+
+    <tbody *ngIf="!loading">
+      <tr
+        *ngFor="
+          let variedad of datasource;
+          index as i;
+          trackBy: trackByVariedadId
+        "
+        tabindex="0"
+        [class]="'c-pointer tbl-row tbl-row-' + i"
+        [ngClass]="{
+          active: variedad.id === itemId
+        }"
+        [attr.aria-selected]="variedad.id === itemId"
+        (click)="onSeleccionarFila(variedad)"
+        (keydown.enter)="onSeleccionarFila(variedad)"
+      >
+        <td>{{ variedad.id }}</td>
+
+        <td>
+          <strong>
+            {{ obtenerNombreProducto(variedad.productoId) }}
+          </strong>
+        </td>
+
+        <td>{{ variedad.nombre }}</td>
+
+        <td>
+          <span
+            class="labels"
+            [ngClass]="{
+              'labels-activo': variedad.activo,
+              'labels-inactivo': !variedad.activo
+            }"
+          >
+            <span
+              class="labels_circle"
+              aria-hidden="true"
+            ></span>
+
+            <span>
+              {{
+                variedad.activo
+                  ? 'ACTIVO'
+                  : 'INACTIVO'
+              }}
+            </span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-container *ngIf="!loading && !totalItems">
+    <agrihusa-no-results></agrihusa-no-results>
+  </ng-container>
+
+  <ng-container *ngIf="loading">
+    <agrihusa-loading></agrihusa-loading>
+  </ng-container>
+</div>
+
+<table-footer-pagination
+  [totalItems]="totalItems"
+  [totalItemsPerPage]="datasource.length"
+  [page]="page"
+  [pageSize]="pageSize"
+  (changePaginate)="onChangePaginate($event)"
+></table-footer-pagination>

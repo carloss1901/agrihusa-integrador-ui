@@ -1,0 +1,102 @@
+.agrihusa {
+	.ng-dropdown-panel {
+		box-shadow: $box-shadow-lg;
+		// width: 250px;
+		.ng-dropdown-panel-items {
+			max-height: 222px;
+		}
+		.ng-option {
+			&.ng-option-marked {
+				background-color: $nl-grey-10;
+			}
+			&.ng-option-selected {
+				color: $dgpmi-primary !important;
+				background-color: $dgpmi-primary-light !important;
+			}
+		}
+	}
+
+	.ng-select {
+		.ng-select-container {
+			font-size: 14px;
+			height: 32px !important;
+			min-height: 32px;
+			color: $nl-black;
+			border: 1px solid $nl-grey-20;
+			.ng-arrow {
+				border-color: $nl-grey-30 transparent transparent;
+			}
+		}
+		&.ng-select-opened .ng-arrow {
+			border-color: transparent transparent $nl-grey-30;
+		}
+		.ng-dropdown-panel {
+			box-shadow: $box-shadow-lg;
+			.ng-dropdown-panel-items {
+				max-height: 222px;
+			}
+			.ng-option {
+				&.ng-option-marked {
+					background-color: $nl-grey-10;
+				}
+				&.ng-option-selected {
+					color: $dgpmi-primary !important;
+					background-color: $active-row !important;
+				}
+			}
+		}
+		&.ng-select-focused:not(.ng-select-opened) > .ng-select-container {
+			border: 1px solid $nl-focus;
+			box-shadow: 0 0 0 3px $nl-blue-light;
+		}
+		&.ng-invalid {
+			.ng-select-container {
+				border-color: $nl-red;
+			}
+			&.ng-untouched {
+				.ng-select-container {
+					border-color: $nl-grey-20;
+				}
+			}
+		}
+		&.ng-select-disabled > .ng-select-container {
+			border: 1px solid $nl-grey-20;
+		  	color: $nl-grey-30;
+			box-shadow: none;
+			background-color: $nl-grey-10;
+
+			.ng-arrow {
+				border-color: $nl-grey-20 transparent transparent !important;
+			}
+		}
+	}
+	.left {
+		.ng-select-container {
+			border-top-right-radius: 0;
+			border-bottom-right-radius: 0;
+		}
+	}
+	.rigth {
+		.ng-select-container {
+			border-left: 0;
+			border-top-left-radius: 0;
+			border-bottom-left-radius: 0;
+		}
+	}
+	.ng-select.custom {
+		.ng-select-container {
+			height: auto !important;
+			min-height: 32px;
+			flex-wrap: wrap;           // permite que las etiquetas seleccionadas se dividan en varias líneas
+			overflow: visible;         // evita que se corten las etiquetas
+		}
+
+		.ng-value-container {
+			flex-wrap: wrap;           // también para el contenedor de valores
+		}
+
+		.ng-value {
+			margin: 2px 4px;           // espacio entre etiquetas
+		}
+	}
+}

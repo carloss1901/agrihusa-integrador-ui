@@ -1,0 +1,19 @@
+/* Calibri Normal */
+@font-face {
+  font-family: "Calibri";
+  src: url("../fonts/Calibri/Calibri.woff2") format("woff2"),
+       url("../fonts/Calibri/Calibri.woff") format("woff"),
+       url("../fonts/Calibri/Calibri.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Calibri Bold */
+@font-face {
+  font-family: "Calibri";
+  src: url("../fonts/Calibri/Calibri-Bold.woff2") format("woff2"),
+       url("../fonts/Calibri/Calibri-Bold.woff") format("woff"),
+       url("../fonts/Calibri/Calibri-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}

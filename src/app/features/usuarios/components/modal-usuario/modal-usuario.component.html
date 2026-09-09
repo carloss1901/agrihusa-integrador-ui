@@ -1,0 +1,266 @@
+<div class="modal-header">
+    <div>
+        <p class="modal-eyebrow mb-1">
+            Administración de seguridad
+        </p>
+
+        <h5 class="modal-title">
+            {{ titleModal }}
+        </h5>
+    </div>
+
+    <button type="button" class="btn-close" aria-label="Cerrar" title="Cerrar" (click)="onCerrarModal()"></button>
+</div>
+
+<div class="modal-body">
+    <div *ngIf="data?.esSistema" class="alert alert-info py-2" role="status">
+        Este es un usuario del sistema. Su identificador y rol
+        están protegidos.
+    </div>
+
+    <form id="formularioUsuario" [formGroup]="formulario" (ngSubmit)="onGuardar()">
+        <section class="form-section">
+            <h6 class="form-section-title">
+                Datos de acceso
+            </h6>
+
+            <div class="row gx-3">
+                <div class="col-12 col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="nombreUsuario">
+                            Nombre de usuario:
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input id="nombreUsuario" type="text" class="form-control" formControlName="nombreUsuario"
+                            maxlength="30" autocomplete="off" placeholder="Ejemplo: OPERADOR01" [class.is-invalid]="
+                controlInvalido('nombreUsuario')
+              " />
+
+                        <div *ngIf="controlInvalido('nombreUsuario')" class="invalid-feedback">
+                            <span *ngIf="
+                  formulario.controls.nombreUsuario.hasError(
+                    'required'
+                  )
+                ">
+                                El nombre de usuario es obligatorio.
+                            </span>
+
+                            <span *ngIf="
+                  formulario.controls.nombreUsuario.hasError(
+                    'maxlength'
+                  )
+                ">
+                                Permite un máximo de 30 caracteres.
+                            </span>
+
+                            <span *ngIf="
+                  formulario.controls.nombreUsuario.hasError(
+                    'pattern'
+                  )
+                ">
+                                Solo puede utilizar letras, números, puntos,
+                                guiones y guion bajo.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="rolUsuario">
+                            Rol:
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <ng-select inputId="rolUsuario" [items]="rolesDisponibles" bindLabel="nombre" bindValue="id"
+                            placeholder="-- SELECCIONAR --" [clearable]="false" [searchable]="true"
+                            formControlName="rolId" [class.is-invalid]="
+                            controlInvalido('rolId')
+                        "></ng-select>
+
+                        <div *ngIf="controlInvalido('rolId')" class="invalid-feedback d-block">
+                            Selecciona un rol.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="estadoUsuario">
+                            Estado:
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <ng-select inputId="estadoUsuario" [items]="estados" bindLabel="descripcion" bindValue="valor"
+                            placeholder="-- SELECCIONAR --" [clearable]="false" [searchable]="false"
+                            formControlName="activo"></ng-select>
+
+                        <p class="field-help mb-0">
+                            Los usuarios inactivos no pueden iniciar sesión.
+                        </p>
+                    </div>
+                </div>
+
+                <div *ngIf="!modoEdicion" class="col-12">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="passwordUsuario">
+                            Contraseña temporal:
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <div class="input-group">
+                            <input id="passwordUsuario" [type]="
+                  mostrarPassword ? 'text' : 'password'
+                " class="form-control" formControlName="password" maxlength="64" autocomplete="new-password"
+                                placeholder="Ingrese una contraseña segura" [class.is-invalid]="
+                  controlInvalido('password')
+                " />
+                            <button type="button" class="btn password-toggle" aria-label="Mostrar u ocultar contraseña"
+                                title="Mostrar u ocultar contraseña" (click)="alternarVisibilidadPassword()">
+                                <span class="feather" [ngClass]="
+                                mostrarPassword
+                                    ? 'icon-eye-off'
+                                    : 'icon-eye'
+                                " aria-hidden="true"></span>
+
+                                <span class="visually-hidden">
+                                    Mostrar u ocultar contraseña
+                                </span>
+                            </button>
+
+                        </div>
+
+                        <div *ngIf="controlInvalido('password')" class="invalid-feedback d-block">
+                            <span *ngIf="
+                  formulario.controls.password.hasError(
+                    'required'
+                  )
+                ">
+                                La contraseña es obligatoria.
+                            </span>
+
+                            <span *ngIf="
+                  formulario.controls.password.hasError(
+                    'minlength'
+                  )
+                ">
+                                Debe contener al menos 8 caracteres.
+                            </span>
+
+                            <span *ngIf="
+                  formulario.controls.password.hasError(
+                    'maxlength'
+                  )
+                ">
+                                Permite un máximo de 64 caracteres.
+                            </span>
+
+                            <span *ngIf="
+                  formulario.controls.password.hasError(
+                    'pattern'
+                  )
+                ">
+                                Debe incluir mayúscula, minúscula, número y
+                                símbolo.
+                            </span>
+                        </div>
+
+                        <p class="password-help mb-0">
+                            El usuario deberá cambiar esta contraseña cuando
+                            se implemente ese flujo.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <h6 class="form-section-title">
+                Información personal
+            </h6>
+
+            <div class="row gx-3">
+                <div class="col-12 col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="nombresUsuario">
+                            Nombres:
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input id="nombresUsuario" type="text" class="form-control" formControlName="nombres"
+                            maxlength="80" [class.is-invalid]="
+                controlInvalido('nombres')
+              " />
+
+                        <div *ngIf="controlInvalido('nombres')" class="invalid-feedback">
+                            Los nombres son obligatorios y permiten un máximo
+                            de 80 caracteres.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="apellidosUsuario">
+                            Apellidos:
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input id="apellidosUsuario" type="text" class="form-control" formControlName="apellidos"
+                            maxlength="80" [class.is-invalid]="
+                controlInvalido('apellidos')
+              " />
+
+                        <div *ngIf="controlInvalido('apellidos')" class="invalid-feedback">
+                            Los apellidos son obligatorios y permiten un
+                            máximo de 80 caracteres.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-7">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="correoUsuario">
+                            Correo:
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input id="correoUsuario" type="email" class="form-control" formControlName="correo"
+                            maxlength="120" placeholder="usuario@empresa.com" [class.is-invalid]="
+                controlInvalido('correo')
+              " />
+
+                        <div *ngIf="controlInvalido('correo')" class="invalid-feedback">
+                            Ingresa un correo válido de máximo 120 caracteres.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-5">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="telefonoUsuario">
+                            Teléfono:
+                        </label>
+
+                        <input id="telefonoUsuario" type="tel" class="form-control" formControlName="telefono"
+                            maxlength="20" placeholder="+51 999 999 999" [class.is-invalid]="
+                controlInvalido('telefono')
+              " />
+
+                        <div *ngIf="controlInvalido('telefono')" class="invalid-feedback">
+                            Ingresa un teléfono válido de máximo 20
+                            caracteres.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <agrihusa-button texto="Cancelar" color="danger" icon="x" (click)="onCerrarModal()"></agrihusa-button>
+
+    <agrihusa-button texto="Guardar" icon="check" (click)="onGuardar()"></agrihusa-button>
+</div>

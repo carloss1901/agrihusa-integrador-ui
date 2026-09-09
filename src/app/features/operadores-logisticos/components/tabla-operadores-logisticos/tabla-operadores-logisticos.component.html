@@ -1,0 +1,113 @@
+<div
+  class="table-responsive"
+  [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }"
+>
+  <table class="table tbl-grid m-0 head-no-rounded">
+    <caption class="d-none">
+      Tabla de operadores logísticos
+    </caption>
+
+    <thead>
+      <tr>
+        <th scope="col">Id</th>
+        <th scope="col">RUC</th>
+        <th scope="col">Razón social</th>
+        <th scope="col">Nombre comercial</th>
+        <th scope="col">Contacto</th>
+        <th scope="col">Teléfono</th>
+        <th scope="col">Dirección</th>
+        <th scope="col">Estado</th>
+      </tr>
+    </thead>
+
+    <tbody *ngIf="!loading">
+      <tr
+        *ngFor="
+          let operador of datasource;
+          index as i;
+          trackBy: trackByOperadorId
+        "
+        tabindex="0"
+        [class]="'c-pointer tbl-row tbl-row-' + i"
+        [ngClass]="{
+          active: operador.id === itemId
+        }"
+        [attr.aria-selected]="operador.id === itemId"
+        (click)="onSeleccionarFila(operador)"
+        (keydown.enter)="onSeleccionarFila(operador)"
+      >
+        <td>{{ operador.id }}</td>
+
+        <td>
+          <strong>{{ operador.ruc }}</strong>
+        </td>
+
+        <td>{{ operador.razonSocial }}</td>
+
+        <td>
+          {{ operador.nombreComercial || '—' }}
+        </td>
+
+        <td>
+          <div>{{ operador.contacto || '—' }}</div>
+
+          <small class="text-muted">
+            {{ operador.correo || 'SIN CORREO' }}
+          </small>
+        </td>
+
+        <td>{{ operador.telefono || '—' }}</td>
+
+        <td
+          class="text-truncate"
+          style="max-width: 220px"
+          [title]="operador.direccion"
+        >
+          {{ operador.direccion || '—' }}
+        </td>
+
+        <td>
+          <span
+            class="labels"
+            [ngClass]="{
+              'labels-activo': operador.activo,
+              'labels-inactivo': !operador.activo
+            }"
+          >
+            <span
+              class="labels_circle"
+              aria-hidden="true"
+            ></span>
+
+            <span>
+              {{
+                operador.activo
+                  ? 'ACTIVO'
+                  : 'INACTIVO'
+              }}
+            </span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-container *ngIf="!loading && !totalItems">
+    <agrihusa-no-results></agrihusa-no-results>
+  </ng-container>
+
+  <ng-container *ngIf="loading">
+    <agrihusa-loading></agrihusa-loading>
+  </ng-container>
+</div>
+
+<table-footer-pagination
+  [totalItems]="totalItems"
+  [totalItemsPerPage]="datasource.length"
+  [page]="page"
+  [pageSize]="pageSize"
+  (changePaginate)="onChangePaginate($event)"
+></table-footer-pagination>

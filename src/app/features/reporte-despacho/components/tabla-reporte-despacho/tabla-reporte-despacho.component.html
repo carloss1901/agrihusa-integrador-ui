@@ -1,0 +1,168 @@
+<div
+  class="table-responsive"
+  [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }"
+>
+  <table class="table tbl-grid m-0 head-no-rounded">
+    <caption class="d-none">
+      Reporte detallado de despachos
+    </caption>
+
+    <thead>
+      <tr>
+        <th scope="col">Despacho</th>
+        <th scope="col">Fechas</th>
+        <th scope="col">Cliente</th>
+        <th scope="col">Producto</th>
+        <th scope="col">Transporte</th>
+        <th scope="col">Destino</th>
+        <th scope="col">Carga</th>
+        <th scope="col">Situación</th>
+        <th scope="col">Estado</th>
+      </tr>
+    </thead>
+
+    <tbody *ngIf="!loading">
+      <tr
+        *ngFor="
+          let item of datasource;
+          trackBy: trackByReporteId
+        "
+        class="reporte-row"
+        [title]="item.observaciones"
+      >
+        <td>
+          <div class="cell-main">
+            {{ item.codigo }}
+          </div>
+
+          <div class="cell-secondary">
+            {{ item.numeroContenedor }}
+          </div>
+        </td>
+
+        <td>
+          <div class="cell-main">
+            {{ formatearFecha(item.fechaDespacho) }}
+          </div>
+
+          <div class="cell-secondary">
+            Llegada:
+            {{
+              formatearFecha(
+                item.fechaEstimadaLlegada
+              )
+            }}
+          </div>
+        </td>
+
+        <td>
+          <div class="cell-main">
+            {{ item.cliente }}
+          </div>
+        </td>
+
+        <td>
+          <div class="cell-main">
+            {{ item.producto }}
+          </div>
+
+          <div class="cell-secondary">
+            {{ item.variedad }}
+          </div>
+        </td>
+
+        <td>
+          <div class="cell-main">
+            {{ item.via }}
+          </div>
+
+          <div class="cell-secondary">
+            {{ item.naviera }}
+          </div>
+
+          <div class="cell-tertiary">
+            {{ item.operadorLogistico }}
+          </div>
+        </td>
+
+        <td>
+          <div class="cell-main">
+            {{ item.destino }}
+          </div>
+
+          <div class="cell-secondary">
+            {{ item.puertoLlegada }}
+          </div>
+        </td>
+
+        <td>
+          <div class="cell-main">
+            {{
+              item.cantidad
+                | number: '1.0-2'
+            }}
+          </div>
+
+          <div class="cell-secondary">
+            {{ item.unidadMedida }}
+          </div>
+        </td>
+
+        <td>
+          <span
+            class="situacion-badge"
+            [ngClass]="
+              obtenerClaseSituacion(
+                item.situacion
+              )
+            "
+          >
+            {{ item.situacion }}
+          </span>
+        </td>
+
+        <td>
+          <span
+            class="labels"
+            [ngClass]="{
+              'labels-activo': item.activo,
+              'labels-inactivo': !item.activo
+            }"
+          >
+            <span
+              class="labels_circle"
+              aria-hidden="true"
+            ></span>
+
+            <span>
+              {{
+                item.activo
+                  ? 'ACTIVO'
+                  : 'INACTIVO'
+              }}
+            </span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-container *ngIf="!loading && !totalItems">
+    <agrihusa-no-results></agrihusa-no-results>
+  </ng-container>
+
+  <ng-container *ngIf="loading">
+    <agrihusa-loading></agrihusa-loading>
+  </ng-container>
+</div>
+
+<table-footer-pagination
+  [totalItems]="totalItems"
+  [totalItemsPerPage]="datasource.length"
+  [page]="page"
+  [pageSize]="pageSize"
+  (changePaginate)="onChangePaginate($event)"
+></table-footer-pagination>

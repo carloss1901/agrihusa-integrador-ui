@@ -1,0 +1,95 @@
+<div
+  class="table-responsive"
+  [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }"
+>
+  <table class="table tbl-grid m-0 head-no-rounded">
+    <caption class="d-none">
+      Tabla de puertos de llegada
+    </caption>
+
+    <thead>
+      <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Código</th>
+        <th scope="col">Puerto</th>
+        <th scope="col">País</th>
+        <th scope="col">Descripción</th>
+        <th scope="col">Estado</th>
+      </tr>
+    </thead>
+
+    <tbody *ngIf="!loading">
+      <tr
+        *ngFor="
+          let puerto of datasource;
+          index as i;
+          trackBy: trackByPuertoId
+        "
+        tabindex="0"
+        [class]="'c-pointer tbl-row tbl-row-' + i"
+        [ngClass]="{
+          active: puerto.id === itemId
+        }"
+        [attr.aria-selected]="puerto.id === itemId"
+        (click)="onSeleccionarFila(puerto)"
+        (keydown.enter)="onSeleccionarFila(puerto)"
+      >
+        <td>{{ puerto.id }}</td>
+
+        <td>
+          <strong>{{ puerto.codigo }}</strong>
+        </td>
+
+        <td>{{ puerto.puerto }}</td>
+
+        <td>{{ puerto.pais }}</td>
+
+        <td>
+          {{ puerto.puerto }} - {{ puerto.pais }}
+        </td>
+
+        <td>
+          <span
+            class="labels"
+            [ngClass]="{
+              'labels-activo': puerto.activo,
+              'labels-inactivo': !puerto.activo
+            }"
+          >
+            <span
+              class="labels_circle"
+              aria-hidden="true"
+            ></span>
+
+            <span>
+              {{
+                puerto.activo
+                  ? 'ACTIVO'
+                  : 'INACTIVO'
+              }}
+            </span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-container *ngIf="!loading && !totalItems">
+    <agrihusa-no-results></agrihusa-no-results>
+  </ng-container>
+
+  <ng-container *ngIf="loading">
+    <agrihusa-loading></agrihusa-loading>
+  </ng-container>
+</div>
+
+<table-footer-pagination
+  [totalItems]="totalItems"
+  [totalItemsPerPage]="datasource.length"
+  [page]="page"
+  [pageSize]="pageSize"
+  (changePaginate)="onChangePaginate($event)"
+></table-footer-pagination>

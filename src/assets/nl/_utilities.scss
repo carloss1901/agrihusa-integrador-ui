@@ -1,0 +1,25 @@
+.c-pointer {
+	cursor: pointer !important;
+}
+.c-inherit {
+	cursor: inherit !important;
+}
+.u-disabled {
+	opacity: .4 !important;
+	pointer-events: none !important;
+}
+.c-pointer-none {
+    pointer-events: none !important;
+}
+::-webkit-scrollbar {
+    width: 0.55rem;
+    height: 0.55rem;
+    background-color: $nl-grey-10;
+    border-left: 1px solid transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 1rem;
+    background-color: $nl-grey-20;
+    outline: 0.5rem solid transparent;
+}

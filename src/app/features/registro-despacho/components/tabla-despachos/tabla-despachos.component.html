@@ -1,0 +1,151 @@
+<div
+  class="table-responsive"
+  [ngClass]="{
+    'table-sticky table-sticky--height':
+      datasource.length > 10
+  }"
+>
+  <table class="table tbl-grid m-0 head-no-rounded">
+    <caption class="d-none">
+      Tabla de registros de despacho
+    </caption>
+
+    <thead>
+      <tr>
+        <th scope="col">Código</th>
+        <th scope="col">Fecha</th>
+        <th scope="col">Cliente</th>
+        <th scope="col">Producto / Variedad</th>
+        <th scope="col">Destino</th>
+        <th scope="col">Cantidad</th>
+        <th scope="col">Situación</th>
+        <th scope="col">Estado</th>
+      </tr>
+    </thead>
+
+    <tbody *ngIf="!loading">
+      <tr
+        *ngFor="
+          let despacho of datasource;
+          index as i;
+          trackBy: trackByDespachoId
+        "
+        tabindex="0"
+        [class]="'c-pointer tbl-row tbl-row-' + i"
+        [ngClass]="{
+          active: despacho.id === itemId
+        }"
+        [attr.aria-selected]="despacho.id === itemId"
+        (click)="onSeleccionarFila(despacho)"
+        (keydown.enter)="onSeleccionarFila(despacho)"
+      >
+        <td>
+          <strong>{{ despacho.codigo }}</strong>
+        </td>
+
+        <td>
+          {{ formatearFecha(despacho.fechaDespacho) }}
+        </td>
+
+        <td>
+          {{ obtenerNombreCliente(despacho.clienteId) }}
+        </td>
+
+        <td>
+          <div class="d-flex flex-column">
+            <strong>
+              {{
+                obtenerNombreProducto(
+                  despacho.productoId
+                )
+              }}
+            </strong>
+
+            <small class="text-muted">
+              {{
+                obtenerNombreVariedad(
+                  despacho.variedadId
+                )
+              }}
+            </small>
+          </div>
+        </td>
+
+        <td>
+          {{ obtenerNombreDestino(despacho.destinoId) }}
+        </td>
+
+        <td>
+          <div class="d-flex flex-column">
+            <strong>
+              {{
+                despacho.cantidad
+                  | number: '1.0-2'
+              }}
+            </strong>
+
+            <small class="text-muted">
+              {{ despacho.unidadMedida }}
+            </small>
+          </div>
+        </td>
+
+        <td>
+        <span
+        class="situacion-badge"
+        [ngClass]="
+            obtenerClaseSituacion(
+            despacho.situacionId
+            )
+        "
+        >
+        {{
+            obtenerNombreSituacion(
+            despacho.situacionId
+            )
+        }}
+        </span>
+        </td>
+
+        <td>
+          <span
+            class="labels"
+            [ngClass]="{
+              'labels-activo': despacho.activo,
+              'labels-inactivo': !despacho.activo
+            }"
+          >
+            <span
+              class="labels_circle"
+              aria-hidden="true"
+            ></span>
+
+            <span>
+              {{
+                despacho.activo
+                  ? 'ACTIVO'
+                  : 'INACTIVO'
+              }}
+            </span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-container *ngIf="!loading && !totalItems">
+    <agrihusa-no-results></agrihusa-no-results>
+  </ng-container>
+
+  <ng-container *ngIf="loading">
+    <agrihusa-loading></agrihusa-loading>
+  </ng-container>
+</div>
+
+<table-footer-pagination
+  [totalItems]="totalItems"
+  [totalItemsPerPage]="datasource.length"
+  [page]="page"
+  [pageSize]="pageSize"
+  (changePaginate)="onChangePaginate($event)"
+></table-footer-pagination>
