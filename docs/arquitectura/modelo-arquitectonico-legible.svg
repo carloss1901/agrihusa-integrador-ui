@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2200" viewBox="0 0 1600 2200" role="img" aria-labelledby="title desc">
+  <title id="title">Modelo arquitectónico del Sistema de Despacho Agrihusa</title>
+  <desc id="desc">Arquitectura vertical de cuatro capas: usuario y navegador, presentación, aplicación y negocio, y persistencia local.</desc>
+
+  <defs>
+    <linearGradient id="header" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#073b3a"/>
+      <stop offset="1" stop-color="#0a5663"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#075c3b"/>
+      <stop offset="1" stop-color="#0b7a50"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#064f71"/>
+      <stop offset="1" stop-color="#08749a"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#092f36" flood-opacity="0.13"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#0b7a50"/>
+    </marker>
+    <style>
+      .font { font-family: "Segoe UI", Arial, sans-serif; }
+      .section-title { font: 700 34px "Segoe UI", Arial, sans-serif; fill: #ffffff; letter-spacing: .4px; }
+      .section-subtitle { font: 600 25px "Segoe UI", Arial, sans-serif; fill: #23404a; }
+      .card-title { font: 700 27px "Segoe UI", Arial, sans-serif; fill: #073b3a; }
+      .body { font: 500 24px "Segoe UI", Arial, sans-serif; fill: #263d47; }
+      .body-small { font: 500 22px "Segoe UI", Arial, sans-serif; fill: #263d47; }
+      .number { font: 700 38px "Segoe UI", Arial, sans-serif; fill: #073b3a; }
+      .label { font: 700 24px "Segoe UI", Arial, sans-serif; fill: #075c3b; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="2200" fill="#f5f8f8"/>
+
+  <rect x="40" y="35" width="1520" height="125" rx="12" fill="url(#header)"/>
+  <rect x="68" y="63" width="5" height="70" fill="#d9ad5b"/>
+  <text x="800" y="92" text-anchor="middle" class="font" font-size="46" font-weight="700" fill="#ffffff">
+    MODELO ARQUITECTÓNICO – SISTEMA DE DESPACHO AGRIHUSA
+  </text>
+  <text x="800" y="132" text-anchor="middle" class="font" font-size="25" font-weight="500" fill="#dcebec">
+    Sprint 1 · Frontend Angular 18 con persistencia local
+  </text>
+
+  <!-- CAPA 1 -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="205" width="1400" height="235" rx="16" fill="#ffffff" stroke="#bad4d0" stroke-width="2"/>
+    <rect x="100" y="205" width="1400" height="68" rx="16" fill="url(#green)"/>
+    <rect x="100" y="255" width="1400" height="18" fill="url(#green)"/>
+  </g>
+  <circle cx="155" cy="239" r="39" fill="#f2d598" stroke="#ffffff" stroke-width="3"/>
+  <text x="155" y="252" text-anchor="middle" class="number">1</text>
+  <text x="220" y="250" class="section-title">USUARIO Y NAVEGADOR</text>
+  <text x="800" y="313" text-anchor="middle" class="section-subtitle">Interacción del usuario</text>
+  <rect x="255" y="337" width="480" height="72" rx="10" fill="#eef6f3"/>
+  <text x="495" y="383" text-anchor="middle" class="body"><tspan font-weight="700">Usuario final</tspan> · Opera el sistema</text>
+  <rect x="865" y="337" width="480" height="72" rx="10" fill="#eef6f3"/>
+  <text x="1105" y="383" text-anchor="middle" class="body"><tspan font-weight="700">Navegador web</tspan> · Ejecuta Angular</text>
+
+  <line x1="800" y1="448" x2="800" y2="482" stroke="#0b7a50" stroke-width="7" marker-end="url(#arrow)"/>
+
+  <!-- CAPA 2 -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="500" width="1400" height="485" rx="16" fill="#ffffff" stroke="#bad4d0" stroke-width="2"/>
+    <rect x="100" y="500" width="1400" height="68" rx="16" fill="url(#blue)"/>
+    <rect x="100" y="550" width="1400" height="18" fill="url(#blue)"/>
+  </g>
+  <circle cx="155" cy="534" r="39" fill="#f2d598" stroke="#ffffff" stroke-width="3"/>
+  <text x="155" y="547" text-anchor="middle" class="number">2</text>
+  <text x="220" y="545" class="section-title">CAPA DE PRESENTACIÓN</text>
+  <text x="800" y="608" text-anchor="middle" class="section-subtitle">Componentes y vistas Angular</text>
+
+  <rect x="135" y="640" width="630" height="105" rx="12" fill="#f4f8fb" stroke="#c5d8e2"/>
+  <text x="165" y="679" class="card-title">App Shell</text>
+  <text x="165" y="718" class="body">AppComponent · Login · Header · Menú</text>
+
+  <rect x="835" y="640" width="630" height="105" rx="12" fill="#f4f8fb" stroke="#c5d8e2"/>
+  <text x="865" y="679" class="card-title">Seguridad</text>
+  <text x="865" y="718" class="body">Roles · Usuarios · Bitácora · Perfil</text>
+
+  <rect x="135" y="765" width="1330" height="112" rx="12" fill="#eef6f3" stroke="#bad4d0"/>
+  <text x="165" y="804" class="card-title">Catálogos</text>
+  <text x="165" y="842" class="body-small">Clientes · Navieras · Destinos · Operadores logísticos · Puertos · Productos · Variedades · Vías · Situaciones</text>
+
+  <rect x="135" y="897" width="630" height="60" rx="12" fill="#f4f8fb" stroke="#c5d8e2"/>
+  <text x="165" y="936" class="body"><tspan font-weight="700">Despacho:</tspan> Registro · Reporte</text>
+  <rect x="835" y="897" width="630" height="60" rx="12" fill="#f4f8fb" stroke="#c5d8e2"/>
+  <text x="865" y="936" class="body"><tspan font-weight="700">UI:</tspan> Filtros · Tablas · Modales · Paginación · Loading</text>
+
+  <line x1="800" y1="993" x2="800" y2="1027" stroke="#0b7a50" stroke-width="7" marker-end="url(#arrow)"/>
+
+  <!-- CAPA 3 -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="1045" width="1400" height="565" rx="16" fill="#ffffff" stroke="#bad4d0" stroke-width="2"/>
+    <rect x="100" y="1045" width="1400" height="68" rx="16" fill="url(#green)"/>
+    <rect x="100" y="1095" width="1400" height="18" fill="url(#green)"/>
+  </g>
+  <circle cx="155" cy="1079" r="39" fill="#f2d598" stroke="#ffffff" stroke-width="3"/>
+  <text x="155" y="1092" text-anchor="middle" class="number">3</text>
+  <text x="220" y="1090" class="section-title">CAPA DE APLICACIÓN Y NEGOCIO</text>
+  <text x="800" y="1153" text-anchor="middle" class="section-subtitle">Servicios inyectables, permisos y reglas de negocio</text>
+
+  <rect x="135" y="1185" width="1330" height="92" rx="12" fill="#eef6f3" stroke="#bad4d0"/>
+  <text x="165" y="1222" class="card-title">Seguridad y acceso</text>
+  <text x="165" y="1258" class="body-small">AuthService · PasswordHashService · Guards · Permisos · Sesión</text>
+
+  <rect x="135" y="1297" width="1330" height="160" rx="12" fill="#f4f8fb" stroke="#c5d8e2"/>
+  <text x="165" y="1334" class="card-title">Servicios de dominio</text>
+  <text x="165" y="1372" class="body-small">RolService · UsuarioService · ClienteService · NavieraService · DestinoService</text>
+  <text x="165" y="1407" class="body-small">OperadorLogisticoService · PuertoLlegadaService · ProductoService · VariedadService</text>
+  <text x="165" y="1442" class="body-small">ViaService · SituacionService</text>
+
+  <rect x="135" y="1477" width="830" height="105" rx="12" fill="#eef6f3" stroke="#bad4d0"/>
+  <text x="165" y="1515" class="card-title">Despacho, reporte y auditoría</text>
+  <text x="165" y="1555" class="body-small">DespachoService · ReporteDespachoService · BitacoraService · ExcelJS</text>
+  <rect x="995" y="1477" width="470" height="105" rx="12" fill="#f4f8fb" stroke="#c5d8e2"/>
+  <text x="1230" y="1518" text-anchor="middle" class="card-title">Comunicación reactiva</text>
+  <text x="1230" y="1556" text-anchor="middle" class="body">RxJS · Observable&lt;T&gt;</text>
+
+  <line x1="800" y1="1618" x2="800" y2="1652" stroke="#0b7a50" stroke-width="7" marker-end="url(#arrow)"/>
+
+  <!-- CAPA 4 -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="1670" width="1400" height="345" rx="16" fill="#ffffff" stroke="#bad4d0" stroke-width="2"/>
+    <rect x="100" y="1670" width="1400" height="68" rx="16" fill="url(#blue)"/>
+    <rect x="100" y="1720" width="1400" height="18" fill="url(#blue)"/>
+  </g>
+  <circle cx="155" cy="1704" r="39" fill="#f2d598" stroke="#ffffff" stroke-width="3"/>
+  <text x="155" y="1717" text-anchor="middle" class="number">4</text>
+  <text x="220" y="1715" class="section-title">CAPA DE PERSISTENCIA LOCAL</text>
+  <text x="800" y="1778" text-anchor="middle" class="section-subtitle">Datos almacenados en el navegador</text>
+
+  <rect x="135" y="1810" width="630" height="72" rx="12" fill="#f4f8fb" stroke="#c5d8e2"/>
+  <text x="165" y="1855" class="body">LocalStorageService · STORAGE_KEYS</text>
+  <rect x="835" y="1810" width="630" height="72" rx="12" fill="#f4f8fb" stroke="#c5d8e2"/>
+  <text x="865" y="1855" class="body">JSON.stringify · JSON.parse</text>
+  <rect x="135" y="1902" width="630" height="72" rx="12" fill="#eef6f3" stroke="#bad4d0"/>
+  <text x="165" y="1947" class="body">Archivos seed por módulo</text>
+  <rect x="835" y="1902" width="630" height="72" rx="12" fill="#eef6f3" stroke="#bad4d0"/>
+  <text x="865" y="1947" class="body">APP_INITIALIZER · StorageInitializerService</text>
+
+  <rect x="100" y="2045" width="1400" height="72" rx="12" fill="#e3f1eb" stroke="#0b7a50" stroke-width="2"/>
+  <text x="800" y="2091" text-anchor="middle" class="font" font-size="29" font-weight="700" fill="#073b3a">SEGURIDAD · PERMISOS · AUDITORÍA TRANSVERSAL</text>
+
+  <text x="800" y="2160" text-anchor="middle" class="font" font-size="25" font-weight="600" fill="#075c3b">
+    Flujo principal: Usuario → UI Angular → Servicios → localStorage
+  </text>
+  <text x="800" y="2192" text-anchor="middle" class="font" font-size="20" fill="#526973">Arquitectura actual del Sprint 1 · Sin API ni backend · Datos por navegador</text>
+</svg>
