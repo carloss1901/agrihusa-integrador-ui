@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, EventEmitter, Output } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -8,19 +9,19 @@ import {
 } from '@angular/forms';
 import { finalize } from 'rxjs';
 
-import { AuthService } from '../../core/services/auth.service';
+import { MessageResponse } from '../../api/api/models/message-response';
+import { LoginControllerService } from '../../api/api/services/login-controller.service';
+import { AlertService } from '../../core/services/alert.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent { 
+export class LoginComponent {
+  @Output() readonly loginSuccess = new EventEmitter<void>();
 
   readonly formulario = new FormGroup({
     nombreUsuario: new FormControl('', {
@@ -37,7 +38,10 @@ export class LoginComponent {
   submitted = false;
   errorMessage = '';
 
-  constructor(private authService: AuthService) { }
+  constructor(
+    private loginControllerService: LoginControllerService,
+    private alertService: AlertService
+  ) {}
 
   iniciarSesion(): void {
     this.submitted = true;
@@ -49,37 +53,49 @@ export class LoginComponent {
     }
 
     const credentials = this.formulario.getRawValue();
-
+    const nombreUsuario = credentials.nombreUsuario.trim();
     this.loading = true;
 
-    this.authService
+    this.loginControllerService
       .login({
-        nombreUsuario:
-          credentials.nombreUsuario.trim(),
-        password: credentials.password
+        body: {
+          usuario: nombreUsuario,
+          contrasenia: credentials.password
+        }
       })
-      .pipe(
-        finalize(() => {
-          this.loading = false;
-        })
-      )
-      .subscribe((resultado) => {
-        if (!resultado.success) {
-          this.errorMessage = resultado.message;
-          return;
-        }       
+      .pipe(finalize(() => (this.loading = false)))
+      .subscribe({
+        next: (respuesta: MessageResponse) => {
+          if (respuesta.success === true) {
+            this.alertService.success(
+              respuesta.message ?? 'Inicio de sesion correcto.'
+            );
+
+            const token = respuesta.data as unknown as string;
+            if (token) {
+              localStorage.setItem('token', token);
+            }
+
+            this.loginSuccess.emit();
+            return;
+          }
+
+          this.alertService.error(
+            respuesta.message ?? 'No se pudo iniciar sesion.'
+          );
+        },
+        error: (error: HttpErrorResponse) => {
+          const respuesta = error.error as MessageResponse;
+          this.errorMessage = respuesta?.message ?? 'Error al iniciar sesion.';
+          this.alertService.error(this.errorMessage);
+        }
       });
   }
 
   controlInvalido(
     controlName: 'nombreUsuario' | 'password'
   ): boolean {
-    const control =
-      this.formulario.controls[controlName];
-
-    return (
-      control.invalid &&
-      (control.touched || this.submitted)
-    );
+    const control = this.formulario.controls[controlName];
+    return control.invalid && (control.touched || this.submitted);
   }
 }

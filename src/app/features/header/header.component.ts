@@ -1,17 +1,13 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
-  DestroyRef,
   EventEmitter,
   inject,
   Output,
   ViewEncapsulation
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { of, switchMap } from 'rxjs';
 
-import { AuthService } from '../../core/services/auth.service';
-import { RolService } from '../roles/services/rol.service';
+import { TokenService } from '../../core/services/token.service';
 
 @Component({
   selector: 'app-header',
@@ -25,9 +21,7 @@ export class HeaderComponent {
   @Output() onToggleSideNav = new EventEmitter<boolean>();
   @Output() onLogout = new EventEmitter<void>();
 
-  private readonly authService = inject(AuthService);
-  private readonly rolService = inject(RolService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly tokenService = inject(TokenService);
 
   empresa = 'AGRIHUSA';
   nombreUsuario = '';
@@ -37,7 +31,14 @@ export class HeaderComponent {
   nombreRol = '';
 
   constructor() {
-    this.cargarDatosSesion();
+    const payload = this.tokenService.obtenerPayload();
+    this.nombreUsuario = this.tokenService.obtenerUsuario();
+    this.nombreCompleto = this.nombreUsuario;
+    this.inicialesUsuario = this.obtenerIniciales(this.nombreCompleto);
+    this.fechaSesion = payload?.iat
+      ? this.formatearFecha(new Date(payload.iat * 1000).toISOString())
+      : '';
+    this.nombreRol = this.tokenService.obtenerRolPrincipal();
   }
 
   toggleMenu(esCerrar: boolean): void {
@@ -46,33 +47,6 @@ export class HeaderComponent {
 
   logout(): void {
     this.onLogout.emit();
-  }
-
-  private cargarDatosSesion(): void {
-    this.authService.sesion$
-      .pipe(
-        switchMap((sesion) => {
-          if (!sesion) {
-            this.limpiarDatosSesion();
-            return of(null);
-          }
-
-          this.nombreUsuario = sesion.nombreUsuario;
-          this.nombreCompleto = sesion.nombreCompleto;
-          this.inicialesUsuario = this.obtenerIniciales(
-            sesion.nombreCompleto
-          );
-          this.fechaSesion = this.formatearFecha(
-            sesion.fechaInicio
-          );
-
-          return this.rolService.obtenerPorId(sesion.rolId);
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe((rol) => {
-        this.nombreRol = rol?.nombre ?? 'Sin rol';
-      });
   }
 
   private obtenerIniciales(nombreCompleto: string): string {

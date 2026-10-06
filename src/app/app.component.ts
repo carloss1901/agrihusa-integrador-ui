@@ -3,7 +3,6 @@ import {
   Component,
   DestroyRef
 } from '@angular/core';
-import { take } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MantenimientoUsuariosComponent } from './features/usuarios/views/mantenimiento-usuarios/mantenimiento-usuarios.component';
 import { AuditoriaComponent } from './features/auditoria/views/auditoria/auditoria.component';
@@ -24,6 +23,7 @@ import {
   ModuloSistema
 } from './core/models/permiso.model';
 import { AuthService } from './core/services/auth.service';
+import { TokenService } from './core/services/token.service';
 import { PerfilUsuarioComponent } from './features/perfil-usuario/views/perfil-usuario/perfil-usuario.component';
 import { MantenimientoClientesComponent } from './features/clientes/views/mantenimiento-clientes/mantenimiento-clientes.component';
 import { MantenimientoOperadoresLogisticosComponent } from './features/operadores-logisticos/views/mantenimiento-operadores-logisticos/mantenimiento-operadores-logisticos.component';
@@ -31,6 +31,7 @@ import { MantenimientoProductosComponent } from './features/productos/views/mant
 import { MantenimientoSituacionesComponent } from './features/situaciones/views/mantenimiento-situaciones/mantenimiento-situaciones.component';
 import { RegistroDespachoComponent } from './features/registro-despacho/views/registro-despacho/registro-despacho.component';
 import { ReporteDespachoComponent } from './features/reporte-despacho/views/reporte-despacho/reporte-despacho.component';
+import { AgrihusaAlertComponent } from './shared/components/agrihusa-alert/agrihusa-alert.component';
 
 @Component({
   selector: 'app-root',
@@ -54,7 +55,8 @@ import { ReporteDespachoComponent } from './features/reporte-despacho/views/repo
     MantenimientoProductosComponent,
     MantenimientoSituacionesComponent,
     RegistroDespachoComponent,
-    ReporteDespachoComponent
+    ReporteDespachoComponent,
+    AgrihusaAlertComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -83,6 +85,13 @@ export class AppComponent {
     this.menuVisible = !esCerrar;
   }
 
+  onLoginSuccess(): void {
+    this.isAuthenticated = true;
+    this.menuVisible = true;
+    this.resetPantallas();
+    this.selectedMenuLabel = 'Seleccione una opción del menú';
+  }
+
   logout(): void {
     this.authService.logout();
   }
@@ -100,21 +109,18 @@ export class AppComponent {
         'Cambio de contraseña requerido';
       return;
     }
-    this.authService.tienePermiso(
+    const tieneAcceso = this.tokenService.tienePermiso(
       item.modulo,
       AccionPermiso.CONSULTAR
-    )
-      .pipe(take(1))
-      .subscribe((tieneAcceso) => {
-        this.resetPantallas();
+    );
+    this.resetPantallas();
 
-        if (!tieneAcceso) {
-          this.selectedMenuLabel =
-            'Acceso no autorizado';
-          return;
-        }
+    if (!tieneAcceso) {
+      this.selectedMenuLabel = 'Acceso no autorizado';
+      return;
+    }
 
-        this.selectedMenuLabel = item.nombre;
+    this.selectedMenuLabel = item.nombre;
 
         switch (item.modulo) {
           case ModuloSistema.ROLES:
@@ -175,8 +181,7 @@ export class AppComponent {
           case ModuloSistema.REPORTE_DESPACHO:
             this.mostrarReporteDespacho = true;
             break;
-        }
-      });
+    }
   }
 
   private resetPantallas(): void {
@@ -199,14 +204,35 @@ export class AppComponent {
 
   constructor(
     private authService: AuthService,
+    private tokenService: TokenService,
     destroyRef: DestroyRef
   ) {
+    this.isAuthenticated = this.tokenService.estaVigente();
+
+    if (this.isAuthenticated) {
+      const expiracion = this.tokenService.obtenerPayload()?.exp;
+      if (expiracion) {
+        setTimeout(() => {
+          localStorage.removeItem('token');
+          this.isAuthenticated = false;
+          this.menuVisible = true;
+          this.resetPantallas();
+        }, Math.max(0, expiracion * 1000 - Date.now()));
+      }
+    }
+
     this.authService.sesion$
       .pipe(takeUntilDestroyed(destroyRef))
       .subscribe((sesion) => {
-        this.isAuthenticated = sesion !== null;
+        if (!sesion && this.tokenService.estaVigente()) {
+          this.isAuthenticated = true;
+          return;
+        }
 
-        if (!sesion) {
+        this.isAuthenticated = sesion !== null
+          && this.tokenService.estaVigente();
+
+        if (!sesion || !this.isAuthenticated) {
           this.menuVisible = true;
           this.selectedMenuLabel =
             'Seleccione una opción del menú';

@@ -1,26 +1,17 @@
 import { CommonModule, UpperCasePipe } from '@angular/common';
 import {
   Component,
-  DestroyRef,
   EventEmitter,
   inject,
   Output,
   ViewEncapsulation
 } from '@angular/core';
 
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-
 import {
   AccionPermiso,
   ModuloSistema
 } from '../../core/models/permiso.model';
-import {
-  forkJoin,
-  map,
-  of,
-  switchMap
-} from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
+import { TokenService } from '../../core/services/token.service';
 
 export interface MenuItem {
   nombre: string;
@@ -46,11 +37,11 @@ export class MenuComponent {
   @Output() onToggleSideNav = new EventEmitter<boolean>();
   @Output() onSelectItem = new EventEmitter<MenuItem>();
 
-  private readonly authService = inject(AuthService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly tokenService = inject(TokenService);
 
   menuSeleccionadoId = 0;
   menuArrAgrihusa: MenuGroup[] = [];
+  private readonly gruposAbiertos = new Set<number>();
 
   private readonly menuCompleto: MenuGroup[] = [
     {
@@ -161,83 +152,21 @@ export class MenuComponent {
   ];
 
   constructor() {
-    this.authService.sesion$
-      .pipe(
-        switchMap((sesion) => {
-          this.menuSeleccionadoId = 0;
+    this.menuArrAgrihusa = this.menuCompleto
+      .map((grupo) => ({
+        ...grupo,
+        subMenu: grupo.subMenu.filter((item) =>
+          this.tokenService.tienePermiso(
+            item.modulo,
+            AccionPermiso.CONSULTAR
+          )
+        )
+      }))
+      .filter((grupo) => grupo.subMenu.length > 0);
 
-          if (!sesion) {
-            return of<MenuGroup[]>([]);
-          }
-
-          if (sesion.debeCambiarPassword) {
-            const grupoPerfil = this.menuCompleto.find(
-              (grupo) =>
-                grupo.subMenu.some(
-                  (item) =>
-                    item.modulo ===
-                    ModuloSistema.PERFIL_USUARIO
-                )
-            );
-
-            const itemPerfil =
-              grupoPerfil?.subMenu.find(
-                (item) =>
-                  item.modulo ===
-                  ModuloSistema.PERFIL_USUARIO
-              );
-
-            if (!grupoPerfil || !itemPerfil) {
-              return of<MenuGroup[]>([]);
-            }
-
-            return of<MenuGroup[]>([
-              {
-                ...grupoPerfil,
-                subMenu: [itemPerfil]
-              }
-            ]);
-          }
-
-          const gruposConPermisos =
-            this.menuCompleto.map((grupo) =>
-              forkJoin(
-                grupo.subMenu.map((item) =>
-                  this.authService
-                    .tienePermiso(
-                      item.modulo,
-                      AccionPermiso.CONSULTAR
-                    )
-                    .pipe(
-                      map((permitido) =>
-                        permitido ? item : null
-                      )
-                    )
-                )
-              ).pipe(
-                map((items) => ({
-                  ...grupo,
-                  subMenu: items.filter(
-                    (item): item is MenuItem =>
-                      item !== null
-                  )
-                }))
-              )
-            );
-
-          return forkJoin(gruposConPermisos).pipe(
-            map((grupos) =>
-              grupos.filter(
-                (grupo) => grupo.subMenu.length > 0
-              )
-            )
-          );
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe((gruposPermitidos) => {
-        this.menuArrAgrihusa = gruposPermitidos;
-      });
+    this.menuArrAgrihusa.forEach((grupo) =>
+      this.gruposAbiertos.add(grupo.codigo)
+    );
   }
 
   toggleMenu(esCerrar: boolean): void {
@@ -247,5 +176,17 @@ export class MenuComponent {
   onClickMenu(subItem: MenuItem): void {
     this.menuSeleccionadoId = subItem.codigo;
     this.onSelectItem.emit(subItem);
+  }
+
+  estaGrupoAbierto(codigo: number): boolean {
+    return this.gruposAbiertos.has(codigo);
+  }
+
+  alternarGrupo(codigo: number): void {
+    if (this.gruposAbiertos.has(codigo)) {
+      this.gruposAbiertos.delete(codigo);
+    } else {
+      this.gruposAbiertos.add(codigo);
+    }
   }
 }

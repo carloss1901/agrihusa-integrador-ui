@@ -1,19 +1,18 @@
-import { APP_INITIALIZER,  ApplicationConfig} from '@angular/core';
-import { StorageInitializerService } from './core/services/storage-initializer.service';
-
-export function inicializarStorageFactory(
-  storageInitializerService: StorageInitializerService
-): () => Promise<void> {
-  return () => storageInitializerService.inicializar();
-}
+import {
+  provideHttpClient,
+  withInterceptors
+} from '@angular/common/http';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+  provideZoneChangeDetection
+} from '@angular/core';
+import { tokenInterceptor } from './core/interceptors/token.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    {
-      provide: APP_INITIALIZER,
-      useFactory: inicializarStorageFactory,
-      deps: [StorageInitializerService],
-      multi: true
-    }
+    provideHttpClient(withInterceptors([tokenInterceptor])),
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideBrowserGlobalErrorListeners()
   ]
 };

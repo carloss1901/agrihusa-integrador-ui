@@ -1,7 +1,3 @@
-$color-active-row: #ebf5f9; //#ffcdd2
-$color-hover-row: #ebf5f9; //#ffebee
-$spacio-separacion: 1.125rem;
-
 .rounded-top-0 {
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
@@ -9,7 +5,7 @@ $spacio-separacion: 1.125rem;
 
 .agrihusa {
 	.nav-tabs {
-		@extend .border-bottom;
+		@extend .border-bottom !optional;
 	}
 }
 
