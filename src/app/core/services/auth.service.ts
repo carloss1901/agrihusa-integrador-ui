@@ -36,6 +36,7 @@ import { Usuario } from '../../features/usuarios/models/usuario.model';
 })
 export class AuthService {
     private readonly duracionSesionHoras = 8;
+    private readonly tokenStorageKey = 'token';
 
     private readonly sesionSubject =
         new BehaviorSubject<SesionUsuario | null>(null);
@@ -80,8 +81,34 @@ export class AuthService {
         this.localStorageService.eliminar(
             STORAGE_KEYS.SESION
         );
+        localStorage.removeItem(this.tokenStorageKey);
 
         this.sesionSubject.next(null);
+    }
+
+    establecerSesionBackend(
+        token: string,
+        nombreUsuario: string
+    ): void {
+        const fechaInicio = new Date();
+        const fechaExpiracion = new Date(
+            fechaInicio.getTime() +
+            this.duracionSesionHoras * 60 * 60 * 1000
+        );
+        const sesion: SesionUsuario = {
+            token,
+            usuarioId: 0,
+            nombreUsuario,
+            nombreCompleto: nombreUsuario,
+            rolId: 0,
+            fechaInicio: fechaInicio.toISOString(),
+            fechaExpiracion: fechaExpiracion.toISOString(),
+            debeCambiarPassword: false
+        };
+
+        localStorage.setItem(this.tokenStorageKey, token);
+        this.localStorageService.guardar(STORAGE_KEYS.SESION, sesion);
+        this.sesionSubject.next(sesion);
     }
 
     obtenerSesionActual(): SesionUsuario | null {

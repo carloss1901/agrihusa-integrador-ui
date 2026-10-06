@@ -1,3 +1,5 @@
+@use "variables" as *;
+
 // agregar separacion hacia abajo
 .mb-component {
 	margin-bottom: $spacio-separacion !important;

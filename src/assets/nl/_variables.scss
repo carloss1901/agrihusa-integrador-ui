@@ -36,6 +36,9 @@ $nl-focus: #80bdff;
 $glass-bg-weak:   rgba(255, 255, 255, 0.1);
 $glass-bg-strong: rgba(255, 255, 255, 0.15);
 $glass-border:    rgba(255, 255, 255, 0.3);
+$color-active-row: #ebf5f9;
+$color-hover-row: #ebf5f9;
+$spacio-separacion: 1.125rem;
 // Espaciado
 $nl-extra-small:              8px;
 $nl-small:                    16px;
@@ -68,8 +71,8 @@ $grid-breakpoints: (
 $container-max-widths: (
   sm: 540px,
   md: 960px,
-  lg: 960px,
-  xl: 1100px
+  lg: 1100px,
+  xl: 1200px
 );
 // Colores
 $success:                   	$nl-green;

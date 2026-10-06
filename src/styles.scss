@@ -1,7 +1,12 @@
-@import "assets/nl/nl";
-@import "@ng-select/ng-select/themes/default.theme.css";
-@import "bootstrap/scss/bootstrap";
-@import "assets/icons/css/iconfont.css";
+@use "assets/nl/variables" as *;
+@use "bootstrap/scss/bootstrap" with (
+  $theme-colors: $theme-colors,
+  $grid-breakpoints: $grid-breakpoints,
+  $container-max-widths: $container-max-widths
+);
+@use "assets/nl/nl" as *;
+@use "@ng-select/ng-select/themes/default.theme.css";
+@use "assets/icons/css/iconfont.css";
 
 html,
 body {

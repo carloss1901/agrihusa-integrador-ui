@@ -1,0 +1,14 @@
+export { ViaControllerService } from './services/via-controller.service';
+export { VariedadControllerService } from './services/variedad-controller.service';
+export { UsuarioControllerService } from './services/usuario-controller.service';
+export { SituacionControllerService } from './services/situacion-controller.service';
+export { RolControllerService } from './services/rol-controller.service';
+export { PuertoLlegadaControllerService } from './services/puerto-llegada-controller.service';
+export { ProductoControllerService } from './services/producto-controller.service';
+export { OperadorLogisticoControllerService } from './services/operador-logistico-controller.service';
+export { NavieraControllerService } from './services/naviera-controller.service';
+export { DestinoControllerService } from './services/destino-controller.service';
+export { DespachoControllerService } from './services/despacho-controller.service';
+export { ClienteControllerService } from './services/cliente-controller.service';
+export { LoginControllerService } from './services/login-controller.service';
+export { BitacoraControllerService } from './services/bitacora-controller.service';

@@ -1,0 +1,24 @@
+<div class="toast__animation pt-4" *ngIf="alertService.toasts.length">
+  <ngb-toast
+    *ngFor="let toast of alertService.toasts"
+    [class]="'bg-alert-' + toast.type + ' mb-1'"
+    [autohide]="true"
+    [delay]="toast.delay || 5000"
+    (hidden)="alertService.remove(toast)">
+    <div class="alert alert-flotante" role="alert">
+      <span class="feather" [class]="getIcon(toast.type)"></span>
+      <div class="w-100 mx-3 d-flex flex-column">
+        <span class="label-large siaf-grey-30">
+          {{ toast.message }}
+        </span>
+      </div>
+      <button
+        type="button"
+        class="btn-close-toast ms-auto"
+        aria-label="Cerrar"
+        (click)="alertService.remove(toast)">
+        <i class="feather icon-x"></i>
+      </button>
+    </div>
+  </ngb-toast>
+</div>

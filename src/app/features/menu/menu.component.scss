@@ -38,6 +38,10 @@
   border: 0;
 }
 
+#agrihusa-aside-menu .menu-group {
+  width: 100%;
+}
+
 #agrihusa-aside-menu .accordion-button {
   padding: 10px 15px 10px 5px !important;
   background-color: #606062 !important;
@@ -45,14 +49,30 @@
   height: 40px;
   font-size: 13px;
   box-shadow: none !important;
+  cursor: pointer;
+  display: block;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 #agrihusa-aside-menu .accordion-button span {
   padding-left: 10px !important;
 }
 
-#agrihusa-aside-menu .accordion-button::after {
-  filter: brightness(10);
+.accordion-chevron {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  color: #fff;
+  transform: translateY(-50%);
+  transition: transform 0.2s ease;
+}
+
+.accordion-chevron.expanded {
+  transform: translateY(-50%) rotate(180deg);
 }
 
 #agrihusa-aside-menu .accordion-body {
@@ -67,14 +87,45 @@
 }
 
 #agrihusa-aside-menu .accordion-body ul li {
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
   color: white;
   display: flex;
+  min-height: 40px;
+  padding: 0 15px 0 10px;
+  position: relative;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#agrihusa-aside-menu .accordion-body ul li:last-child {
+  border-bottom: 0;
+}
+
+#agrihusa-aside-menu .accordion-body ul li:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+#agrihusa-aside-menu .accordion-body ul li.active {
+  background-color: #49494d !important;
+  color: #fff;
+  font-weight: 600;
+}
+
+#agrihusa-aside-menu .accordion-body ul li.active::before {
+  background-color: #e6b800;
+  content: '';
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 4px;
 }
 
 #agrihusa-aside-menu .accordion-body ul li span {
   max-height: 40px;
-  width: 80%;
+  flex: 1;
   line-height: 40px;
   display: inline-block;
   overflow: hidden;
@@ -84,7 +135,4 @@
   font-size: 13px;
 }
 
-#agrihusa-aside-menu .accordion-body ul li.active {
-  background-color: #49494d !important;
-}
 

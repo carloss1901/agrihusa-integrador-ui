@@ -1,3 +1,5 @@
+@use "variables" as *;
+
 // clase general layout de una vista
 .frame-layout {
 	height: 100vh;
@@ -17,9 +19,11 @@
 		flex-grow: 1;
 		min-height: 0;
 		overflow-y: auto;
+		background-color: $nl-grey-10;
+		padding: 1.25rem 1rem !important;
 
-		@extend .frame-view;
-		@extend .bg-secondary;
+		@extend .frame-view !optional;
+		@extend .bg-secondary !optional;
 	}
 }
 
