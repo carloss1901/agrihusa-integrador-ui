@@ -26,10 +26,10 @@ import {
 } from '../models/permiso.model';
 import { STORAGE_KEYS } from '../constants/storage-keys.constant';
 import { RolService } from '../../features/roles/services/rol.service';
-import { UsuarioService } from '../../features/usuarios/services/usuario.service';
+import { UsuarioService } from './usuario.service';
 import { LocalStorageService } from './local-storage.service';
 import { PasswordHashService } from './password-hash.service';
-import { Usuario } from '../../features/usuarios/models/usuario.model';
+import { Usuario } from '../models/usuario.model';
 
 @Injectable({
     providedIn: 'root'

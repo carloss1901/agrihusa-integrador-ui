@@ -85,23 +85,23 @@ export class ViaControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation actualizar
+   * Path part for operation actualizarVia
    */
-  static readonly ActualizarPath = '/api/vias';
+  static readonly ActualizarViaPath = '/api/vias';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizar()` instead.
+   * To access only the response body, use `actualizarVia()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar$Response(params: {
+  actualizarVia$Response(params: {
     context?: HttpContext
     body: ViaRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ViaControllerService.ActualizarPath, 'put');
+    const rb = new RequestBuilder(this.rootUrl, ViaControllerService.ActualizarViaPath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -120,39 +120,39 @@ export class ViaControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizar$Response()` instead.
+   * To access the full response (for headers, for example), `actualizarVia$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar(params: {
+  actualizarVia(params: {
     context?: HttpContext
     body: ViaRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.actualizar$Response(params).pipe(
+    return this.actualizarVia$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation registrar
+   * Path part for operation registrarVia
    */
-  static readonly RegistrarPath = '/api/vias';
+  static readonly RegistrarViaPath = '/api/vias';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `registrar()` instead.
+   * To access only the response body, use `registrarVia()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar$Response(params: {
+  registrarVia$Response(params: {
     context?: HttpContext
     body: ViaRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ViaControllerService.RegistrarPath, 'post');
+    const rb = new RequestBuilder(this.rootUrl, ViaControllerService.RegistrarViaPath, 'post');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -171,40 +171,40 @@ export class ViaControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `registrar$Response()` instead.
+   * To access the full response (for headers, for example), `registrarVia$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar(params: {
+  registrarVia(params: {
     context?: HttpContext
     body: ViaRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.registrar$Response(params).pipe(
+    return this.registrarVia$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation cambiarEstado
+   * Path part for operation cambiarEstadoVia
    */
-  static readonly CambiarEstadoPath = '/api/vias';
+  static readonly CambiarEstadoViaPath = '/api/vias';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarEstado()` instead.
+   * To access only the response body, use `cambiarEstadoVia()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado$Response(params: {
+  cambiarEstadoVia$Response(params: {
     viaId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ViaControllerService.CambiarEstadoPath, 'delete');
+    const rb = new RequestBuilder(this.rootUrl, ViaControllerService.CambiarEstadoViaPath, 'delete');
     if (params) {
       rb.query('viaId', params.viaId, {});
       rb.query('activo', params.activo, {});
@@ -224,18 +224,18 @@ export class ViaControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarEstado$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarEstadoVia$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado(params: {
+  cambiarEstadoVia(params: {
     viaId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<MessageResponse> {
 
-    return this.cambiarEstado$Response(params).pipe(
+    return this.cambiarEstadoVia$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }

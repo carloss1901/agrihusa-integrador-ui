@@ -8,4 +8,5 @@ export interface UsuarioRegistroRequest {
   nombres: string;
   rolId: number;
   telefono?: string;
+  usuarioId?: number;
 }

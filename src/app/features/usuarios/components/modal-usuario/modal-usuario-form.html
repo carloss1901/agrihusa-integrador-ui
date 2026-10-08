@@ -1,0 +1,93 @@
+<div class="modal-header">
+    <div>
+        <p class="modal-eyebrow mb-1">Administración de seguridad</p>
+        <h5 class="modal-title">{{ titleModal }}</h5>
+    </div>
+    <button type="button" class="btn-close" aria-label="Cerrar" title="Cerrar" (click)="onCerrarModal()"></button>
+</div>
+
+<div class="modal-body">
+    <div *ngIf="data?.esSistema" class="alert alert-info py-2" role="status">
+        Este es un usuario del sistema. Su identificador y rol están protegidos.
+    </div>
+
+    <form id="formularioUsuario" [formGroup]="formulario" (ngSubmit)="onGuardar()">
+        <section class="form-section">
+            <h6 class="form-section-title">Datos de acceso</h6>
+            <div class="row gx-3">
+                <div class="col-12 col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="nombreUsuario">DNI: <span class="text-danger">*</span></label>
+                        <input id="nombreUsuario" type="text" class="form-control" formControlName="nombreUsuario"
+                            [appSoloNumeros]="8" maxlength="8" inputmode="numeric" autocomplete="off" placeholder="Ingrese el DNI"
+                            [class.is-invalid]="controlInvalido('nombreUsuario')" />
+                        <div *ngIf="controlInvalido('nombreUsuario')" class="invalid-feedback">
+                            El DNI es obligatorio y solo admite letras, números, puntos, guiones y guion bajo.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="rolUsuario">Rol: <span class="text-danger">*</span></label>
+                        <ng-select inputId="rolUsuario" [items]="rolesDisponibles" bindLabel="nombre" bindValue="id"
+                            placeholder="-- SELECCIONAR --" [clearable]="false" [searchable]="true"
+                            formControlName="rolId" [class.is-invalid]="controlInvalido('rolId')"></ng-select>
+                        <div *ngIf="controlInvalido('rolId')" class="invalid-feedback d-block">Selecciona un rol.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <h6 class="form-section-title">Información personal</h6>
+            <div class="row gx-3">
+                <div class="col-12 col-md-4">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="nombresUsuario">Nombres: <span class="text-danger">*</span></label>
+                        <input id="nombresUsuario" type="text" class="form-control" formControlName="nombres"
+                            maxlength="80" [class.is-invalid]="controlInvalido('nombres')" />
+                        <div *ngIf="controlInvalido('nombres')" class="invalid-feedback">Los nombres son obligatorios.</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="apellidoPaternoUsuario">Apellido paterno: <span class="text-danger">*</span></label>
+                        <input id="apellidoPaternoUsuario" type="text" class="form-control" formControlName="apellidoPaterno"
+                            maxlength="80" [class.is-invalid]="controlInvalido('apellidoPaterno')" />
+                        <div *ngIf="controlInvalido('apellidoPaterno')" class="invalid-feedback">El apellido paterno es obligatorio.</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="apellidoMaternoUsuario">Apellido materno: <span class="text-danger">*</span></label>
+                        <input id="apellidoMaternoUsuario" type="text" class="form-control" formControlName="apellidoMaterno"
+                            maxlength="80" [class.is-invalid]="controlInvalido('apellidoMaterno')" />
+                        <div *ngIf="controlInvalido('apellidoMaterno')" class="invalid-feedback">El apellido materno es obligatorio.</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-7">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="correoUsuario">Correo: <span class="text-danger">*</span></label>
+                        <input id="correoUsuario" type="email" class="form-control" formControlName="correo"
+                            maxlength="120" placeholder="usuario@empresa.com" [class.is-invalid]="controlInvalido('correo')" />
+                        <div *ngIf="controlInvalido('correo')" class="invalid-feedback">Ingresa un correo válido.</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-5">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="telefonoUsuario">Teléfono:</label>
+                        <input id="telefonoUsuario" type="tel" class="form-control" formControlName="telefono"
+                            [appSoloNumeros]="9" maxlength="9" inputmode="numeric" placeholder="999999999"
+                            [class.is-invalid]="controlInvalido('telefono')" />
+                        <div *ngIf="controlInvalido('telefono')" class="invalid-feedback">Ingresa un teléfono válido.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <agrihusa-button texto="Cancelar" color="danger" icon="x" (click)="onCerrarModal()"></agrihusa-button>
+    <agrihusa-button texto="Guardar" icon="check" (click)="onGuardar()"></agrihusa-button>
+</div>

@@ -37,15 +37,15 @@ export class DestinoService {
   }
 
   crear(data: DestinoFormData): Observable<MessageResponse> {
-    return this.api.registrar9({ body: this.request(data) });
+    return this.api.registrarDestino({ body: this.request(data) });
   }
 
   actualizar(id: number, data: DestinoFormData): Observable<MessageResponse> {
-    return this.api.actualizar8({ body: this.request(data, id) });
+    return this.api.actualizarDestino({ body: this.request(data, id) });
   }
 
   cambiarEstado(id: number, activo: boolean): Observable<MessageResponse> {
-    return this.api.cambiarEstado8({ destinoId: id, activo });
+    return this.api.cambiarEstadoDestino({ destinoId: id, activo });
   }
 
   private request(data: DestinoFormData, destinoId = 0): DestinoRegistroRequest {

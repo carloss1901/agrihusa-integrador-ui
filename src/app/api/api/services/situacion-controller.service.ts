@@ -85,23 +85,23 @@ export class SituacionControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation actualizar2
+   * Path part for operation actualizarSituacion
    */
-  static readonly Actualizar2Path = '/api/situaciones';
+  static readonly ActualizarSituacionPath = '/api/situaciones';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizar2()` instead.
+   * To access only the response body, use `actualizarSituacion()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar2$Response(params: {
+  actualizarSituacion$Response(params: {
     context?: HttpContext
     body: SituacionRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, SituacionControllerService.Actualizar2Path, 'put');
+    const rb = new RequestBuilder(this.rootUrl, SituacionControllerService.ActualizarSituacionPath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -120,39 +120,39 @@ export class SituacionControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizar2$Response()` instead.
+   * To access the full response (for headers, for example), `actualizarSituacion$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar2(params: {
+  actualizarSituacion(params: {
     context?: HttpContext
     body: SituacionRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.actualizar2$Response(params).pipe(
+    return this.actualizarSituacion$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation registrar3
+   * Path part for operation registrarSituacion
    */
-  static readonly Registrar3Path = '/api/situaciones';
+  static readonly RegistrarSituacionPath = '/api/situaciones';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `registrar3()` instead.
+   * To access only the response body, use `registrarSituacion()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar3$Response(params: {
+  registrarSituacion$Response(params: {
     context?: HttpContext
     body: SituacionRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, SituacionControllerService.Registrar3Path, 'post');
+    const rb = new RequestBuilder(this.rootUrl, SituacionControllerService.RegistrarSituacionPath, 'post');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -171,40 +171,40 @@ export class SituacionControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `registrar3$Response()` instead.
+   * To access the full response (for headers, for example), `registrarSituacion$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar3(params: {
+  registrarSituacion(params: {
     context?: HttpContext
     body: SituacionRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.registrar3$Response(params).pipe(
+    return this.registrarSituacion$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation cambiarEstado2
+   * Path part for operation cambiarEstadoSituacion
    */
-  static readonly CambiarEstado2Path = '/api/situaciones';
+  static readonly CambiarEstadoSituacionPath = '/api/situaciones';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarEstado2()` instead.
+   * To access only the response body, use `cambiarEstadoSituacion()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado2$Response(params: {
+  cambiarEstadoSituacion$Response(params: {
     situacionId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, SituacionControllerService.CambiarEstado2Path, 'delete');
+    const rb = new RequestBuilder(this.rootUrl, SituacionControllerService.CambiarEstadoSituacionPath, 'delete');
     if (params) {
       rb.query('situacionId', params.situacionId, {});
       rb.query('activo', params.activo, {});
@@ -224,18 +224,18 @@ export class SituacionControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarEstado2$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarEstadoSituacion$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado2(params: {
+  cambiarEstadoSituacion(params: {
     situacionId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<MessageResponse> {
 
-    return this.cambiarEstado2$Response(params).pipe(
+    return this.cambiarEstadoSituacion$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }

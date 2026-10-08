@@ -2,14 +2,8 @@ import { Injectable } from '@angular/core';
 
 import { crearRolesIniciales } from '../../features/roles/data/roles.seed';
 import { Rol } from '../../features/roles/models/rol.model';
-import {
-  CREDENCIALES_ADMIN_INICIAL,
-  crearUsuariosIniciales
-} from '../../features/usuarios/data/usuarios.seed';
-import { Usuario } from '../../features/usuarios/models/usuario.model';
 import { STORAGE_KEYS } from '../constants/storage-keys.constant';
 import { LocalStorageService } from './local-storage.service';
-import { PasswordHashService } from './password-hash.service';
 import { crearClientesIniciales } from '../../features/clientes/data/clientes.seed';
 import { Cliente } from '../../features/clientes/models/cliente.model';
 import { crearNavierasIniciales } from '../../features/navieras/data/navieras.seed';
@@ -37,8 +31,7 @@ export class StorageInitializerService {
   private readonly versionActual = '1.0.0';
 
   constructor(
-    private localStorageService: LocalStorageService,
-    private passwordHashService: PasswordHashService
+    private localStorageService: LocalStorageService
   ) { }
 
   async inicializar(): Promise<void> {
@@ -53,7 +46,6 @@ export class StorageInitializerService {
     this.inicializarVias();
     this.inicializarSituaciones();
     this.inicializarDespachos();
-    await this.inicializarUsuarios();
   }
 
   private inicializarVersion(): void {
@@ -96,27 +88,6 @@ export class StorageInitializerService {
         crearClientesIniciales()
       );
     }
-  }
-
-  private async inicializarUsuarios(): Promise<void> {
-    const usuarios =
-      this.localStorageService.obtener<Usuario[]>(
-        STORAGE_KEYS.USUARIOS
-      );
-
-    if (usuarios !== null) {
-      return;
-    }
-
-    const passwordHash =
-      await this.passwordHashService.crearHash(
-        CREDENCIALES_ADMIN_INICIAL.password
-      );
-
-    this.localStorageService.guardar(
-      STORAGE_KEYS.USUARIOS,
-      crearUsuariosIniciales(passwordHash)
-    );
   }
 
   private inicializarNavieras(): void {

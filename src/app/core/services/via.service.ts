@@ -36,15 +36,15 @@ export class ViaService {
   }
 
   crear(data: ViaFormData): Observable<MessageResponse> {
-    return this.api.registrar({ body: this.request(data) });
+    return this.api.registrarVia({ body: this.request(data) });
   }
 
   actualizar(id: number, data: ViaFormData): Observable<MessageResponse> {
-    return this.api.actualizar({ body: this.request(data, id) });
+    return this.api.actualizarVia({ body: this.request(data, id) });
   }
 
   cambiarEstado(id: number, activo: boolean): Observable<MessageResponse> {
-    return this.api.cambiarEstado({ viaId: id, activo });
+    return this.api.cambiarEstadoVia({ viaId: id, activo });
   }
 
   private request(data: ViaFormData, viaId = 0): ViaRegistroRequest {

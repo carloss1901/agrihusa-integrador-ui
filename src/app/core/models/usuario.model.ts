@@ -1,5 +1,5 @@
-import { BaseEntity } from '../../../core/models/base-entity.model';
-import { PaginationQuery } from '../../../core/models/pagination.model';
+import { BaseEntity } from './base-entity.model';
+import { PaginationQuery } from './pagination.model';
 
 export interface Usuario extends BaseEntity {
   nombreUsuario: string;
@@ -17,18 +17,14 @@ export interface Usuario extends BaseEntity {
 export interface UsuarioCrearData {
   nombreUsuario: string;
   nombres: string;
-  apellidos: string;
+  apellidoPaterno: string;
+  apellidoMaterno: string;
   correo: string;
   telefono: string;
   rolId: number;
-  password: string;
-  activo: boolean;
 }
 
-export type UsuarioActualizarData = Omit<
-  UsuarioCrearData,
-  'password'
->;
+export type UsuarioActualizarData = UsuarioCrearData;
 
 export interface UsuarioQuery extends PaginationQuery {
   texto?: string;
@@ -36,7 +32,4 @@ export interface UsuarioQuery extends PaginationQuery {
   estado?: boolean;
 }
 
-export type UsuarioFilter = Omit<
-  UsuarioQuery,
-  'page' | 'pageSize'
->;
+export type UsuarioFilter = Omit<UsuarioQuery, 'page' | 'pageSize'>;

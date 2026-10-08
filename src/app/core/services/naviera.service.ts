@@ -12,7 +12,7 @@ export class NavieraService {
   constructor(private readonly api: NavieraControllerService) {}
 
   listar(query: NavieraQuery): Observable<PaginatedResult<Naviera>> {
-    return this.api.listar({
+    return this.api.listarNavieras({
       texto: query.texto?.trim() || undefined,
       pais: query.pais?.trim() || undefined,
       activo: query.estado,
@@ -39,15 +39,15 @@ export class NavieraService {
   }
 
   crear(data: NavieraFormData): Observable<MessageResponse> {
-    return this.api.registrar8({ body: this.request(data) });
+    return this.api.registrarNaviera({ body: this.request(data) });
   }
 
   actualizar(id: number, data: NavieraFormData): Observable<MessageResponse> {
-    return this.api.actualizar7({ body: this.request(data, id) });
+    return this.api.actualizarNaviera({ body: this.request(data, id) });
   }
 
   cambiarEstado(id: number, activo: boolean): Observable<MessageResponse> {
-    return this.api.cambiarEstado7({ navieraId: id, activo });
+    return this.api.cambiarEstadoNaviera({ navieraId: id, activo });
   }
 
   private request(data: NavieraFormData, navieraId = 0): NavieraRegistroRequest {

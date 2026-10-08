@@ -88,23 +88,23 @@ export class PuertoLlegadaControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation actualizar4
+   * Path part for operation actualizarPuertoLlegada
    */
-  static readonly Actualizar4Path = '/api/puertos-llegada';
+  static readonly ActualizarPuertoLlegadaPath = '/api/puertos-llegada';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizar4()` instead.
+   * To access only the response body, use `actualizarPuertoLlegada()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar4$Response(params: {
+  actualizarPuertoLlegada$Response(params: {
     context?: HttpContext
     body: PuertoLlegadaRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, PuertoLlegadaControllerService.Actualizar4Path, 'put');
+    const rb = new RequestBuilder(this.rootUrl, PuertoLlegadaControllerService.ActualizarPuertoLlegadaPath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -123,39 +123,39 @@ export class PuertoLlegadaControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizar4$Response()` instead.
+   * To access the full response (for headers, for example), `actualizarPuertoLlegada$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar4(params: {
+  actualizarPuertoLlegada(params: {
     context?: HttpContext
     body: PuertoLlegadaRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.actualizar4$Response(params).pipe(
+    return this.actualizarPuertoLlegada$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation registrar5
+   * Path part for operation registrarPuertoLlegada
    */
-  static readonly Registrar5Path = '/api/puertos-llegada';
+  static readonly RegistrarPuertoLlegadaPath = '/api/puertos-llegada';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `registrar5()` instead.
+   * To access only the response body, use `registrarPuertoLlegada()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar5$Response(params: {
+  registrarPuertoLlegada$Response(params: {
     context?: HttpContext
     body: PuertoLlegadaRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, PuertoLlegadaControllerService.Registrar5Path, 'post');
+    const rb = new RequestBuilder(this.rootUrl, PuertoLlegadaControllerService.RegistrarPuertoLlegadaPath, 'post');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -174,40 +174,40 @@ export class PuertoLlegadaControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `registrar5$Response()` instead.
+   * To access the full response (for headers, for example), `registrarPuertoLlegada$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar5(params: {
+  registrarPuertoLlegada(params: {
     context?: HttpContext
     body: PuertoLlegadaRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.registrar5$Response(params).pipe(
+    return this.registrarPuertoLlegada$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation cambiarEstado4
+   * Path part for operation cambiarEstadoPuertoLlegada
    */
-  static readonly CambiarEstado4Path = '/api/puertos-llegada';
+  static readonly CambiarEstadoPuertoLlegadaPath = '/api/puertos-llegada';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarEstado4()` instead.
+   * To access only the response body, use `cambiarEstadoPuertoLlegada()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado4$Response(params: {
+  cambiarEstadoPuertoLlegada$Response(params: {
     puertoLlegadaId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, PuertoLlegadaControllerService.CambiarEstado4Path, 'delete');
+    const rb = new RequestBuilder(this.rootUrl, PuertoLlegadaControllerService.CambiarEstadoPuertoLlegadaPath, 'delete');
     if (params) {
       rb.query('puertoLlegadaId', params.puertoLlegadaId, {});
       rb.query('activo', params.activo, {});
@@ -227,18 +227,18 @@ export class PuertoLlegadaControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarEstado4$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarEstadoPuertoLlegada$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado4(params: {
+  cambiarEstadoPuertoLlegada(params: {
     puertoLlegadaId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<MessageResponse> {
 
-    return this.cambiarEstado4$Response(params).pipe(
+    return this.cambiarEstadoPuertoLlegada$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }

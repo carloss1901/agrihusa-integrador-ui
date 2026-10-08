@@ -26,7 +26,6 @@ export class HeaderComponent {
   empresa = 'AGRIHUSA';
   nombreUsuario = '';
   nombreCompleto = '';
-  inicialesUsuario = '';
   fechaSesion = '';
   nombreRol = '';
 
@@ -34,7 +33,6 @@ export class HeaderComponent {
     const payload = this.tokenService.obtenerPayload();
     this.nombreUsuario = this.tokenService.obtenerUsuario();
     this.nombreCompleto = this.nombreUsuario;
-    this.inicialesUsuario = this.obtenerIniciales(this.nombreCompleto);
     this.fechaSesion = payload?.iat
       ? this.formatearFecha(new Date(payload.iat * 1000).toISOString())
       : '';
@@ -47,17 +45,6 @@ export class HeaderComponent {
 
   logout(): void {
     this.onLogout.emit();
-  }
-
-  private obtenerIniciales(nombreCompleto: string): string {
-    return nombreCompleto
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((palabra) => palabra.charAt(0))
-      .join('')
-      .toUpperCase();
   }
 
   private formatearFecha(fechaIso: string): string {
@@ -76,7 +63,6 @@ export class HeaderComponent {
   private limpiarDatosSesion(): void {
     this.nombreUsuario = '';
     this.nombreCompleto = '';
-    this.inicialesUsuario = '';
     this.fechaSesion = '';
     this.nombreRol = '';
   }

@@ -25,17 +25,17 @@ export class NavieraControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation listar
+   * Path part for operation listarNavieras
    */
-  static readonly ListarPath = '/api/navieras';
+  static readonly ListarNavierasPath = '/api/navieras';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `listar()` instead.
+   * To access only the response body, use `listarNavieras()` instead.
    *
    * This method doesn't expect any request body.
    */
-  listar$Response(params?: {
+  listarNavieras$Response(params?: {
     texto?: string;
     pais?: string;
     activo?: boolean;
@@ -45,7 +45,7 @@ export class NavieraControllerService extends BaseService {
   }
 ): Observable<StrictHttpResponse<CustomPageNavieraResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, NavieraControllerService.ListarPath, 'get');
+    const rb = new RequestBuilder(this.rootUrl, NavieraControllerService.ListarNavierasPath, 'get');
     if (params) {
       rb.query('texto', params.texto, {});
       rb.query('pais', params.pais, {});
@@ -68,11 +68,11 @@ export class NavieraControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `listar$Response()` instead.
+   * To access the full response (for headers, for example), `listarNavieras$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  listar(params?: {
+  listarNavieras(params?: {
     texto?: string;
     pais?: string;
     activo?: boolean;
@@ -82,29 +82,29 @@ export class NavieraControllerService extends BaseService {
   }
 ): Observable<CustomPageNavieraResponse> {
 
-    return this.listar$Response(params).pipe(
+    return this.listarNavieras$Response(params).pipe(
       map((r: StrictHttpResponse<CustomPageNavieraResponse>) => r.body as CustomPageNavieraResponse)
     );
   }
 
   /**
-   * Path part for operation actualizar7
+   * Path part for operation actualizarNaviera
    */
-  static readonly Actualizar7Path = '/api/navieras';
+  static readonly ActualizarNavieraPath = '/api/navieras';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizar7()` instead.
+   * To access only the response body, use `actualizarNaviera()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar7$Response(params: {
+  actualizarNaviera$Response(params: {
     context?: HttpContext
     body: NavieraRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, NavieraControllerService.Actualizar7Path, 'put');
+    const rb = new RequestBuilder(this.rootUrl, NavieraControllerService.ActualizarNavieraPath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -123,39 +123,39 @@ export class NavieraControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizar7$Response()` instead.
+   * To access the full response (for headers, for example), `actualizarNaviera$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar7(params: {
+  actualizarNaviera(params: {
     context?: HttpContext
     body: NavieraRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.actualizar7$Response(params).pipe(
+    return this.actualizarNaviera$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation registrar8
+   * Path part for operation registrarNaviera
    */
-  static readonly Registrar8Path = '/api/navieras';
+  static readonly RegistrarNavieraPath = '/api/navieras';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `registrar8()` instead.
+   * To access only the response body, use `registrarNaviera()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar8$Response(params: {
+  registrarNaviera$Response(params: {
     context?: HttpContext
     body: NavieraRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, NavieraControllerService.Registrar8Path, 'post');
+    const rb = new RequestBuilder(this.rootUrl, NavieraControllerService.RegistrarNavieraPath, 'post');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -174,40 +174,40 @@ export class NavieraControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `registrar8$Response()` instead.
+   * To access the full response (for headers, for example), `registrarNaviera$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar8(params: {
+  registrarNaviera(params: {
     context?: HttpContext
     body: NavieraRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.registrar8$Response(params).pipe(
+    return this.registrarNaviera$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation cambiarEstado7
+   * Path part for operation cambiarEstadoNaviera
    */
-  static readonly CambiarEstado7Path = '/api/navieras';
+  static readonly CambiarEstadoNavieraPath = '/api/navieras';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarEstado7()` instead.
+   * To access only the response body, use `cambiarEstadoNaviera()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado7$Response(params: {
+  cambiarEstadoNaviera$Response(params: {
     navieraId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, NavieraControllerService.CambiarEstado7Path, 'delete');
+    const rb = new RequestBuilder(this.rootUrl, NavieraControllerService.CambiarEstadoNavieraPath, 'delete');
     if (params) {
       rb.query('navieraId', params.navieraId, {});
       rb.query('activo', params.activo, {});
@@ -227,18 +227,18 @@ export class NavieraControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarEstado7$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarEstadoNaviera$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado7(params: {
+  cambiarEstadoNaviera(params: {
     navieraId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<MessageResponse> {
 
-    return this.cambiarEstado7$Response(params).pipe(
+    return this.cambiarEstadoNaviera$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }

@@ -85,23 +85,23 @@ export class OperadorLogisticoControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation actualizar6
+   * Path part for operation actualizarOperadorLogistico
    */
-  static readonly Actualizar6Path = '/api/operadores-logisticos';
+  static readonly ActualizarOperadorLogisticoPath = '/api/operadores-logisticos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizar6()` instead.
+   * To access only the response body, use `actualizarOperadorLogistico()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar6$Response(params: {
+  actualizarOperadorLogistico$Response(params: {
     context?: HttpContext
     body: OperadorLogisticoRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, OperadorLogisticoControllerService.Actualizar6Path, 'put');
+    const rb = new RequestBuilder(this.rootUrl, OperadorLogisticoControllerService.ActualizarOperadorLogisticoPath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -120,39 +120,39 @@ export class OperadorLogisticoControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizar6$Response()` instead.
+   * To access the full response (for headers, for example), `actualizarOperadorLogistico$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar6(params: {
+  actualizarOperadorLogistico(params: {
     context?: HttpContext
     body: OperadorLogisticoRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.actualizar6$Response(params).pipe(
+    return this.actualizarOperadorLogistico$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation registrar7
+   * Path part for operation registrarOperadorLogistico
    */
-  static readonly Registrar7Path = '/api/operadores-logisticos';
+  static readonly RegistrarOperadorLogisticoPath = '/api/operadores-logisticos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `registrar7()` instead.
+   * To access only the response body, use `registrarOperadorLogistico()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar7$Response(params: {
+  registrarOperadorLogistico$Response(params: {
     context?: HttpContext
     body: OperadorLogisticoRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, OperadorLogisticoControllerService.Registrar7Path, 'post');
+    const rb = new RequestBuilder(this.rootUrl, OperadorLogisticoControllerService.RegistrarOperadorLogisticoPath, 'post');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -171,40 +171,40 @@ export class OperadorLogisticoControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `registrar7$Response()` instead.
+   * To access the full response (for headers, for example), `registrarOperadorLogistico$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar7(params: {
+  registrarOperadorLogistico(params: {
     context?: HttpContext
     body: OperadorLogisticoRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.registrar7$Response(params).pipe(
+    return this.registrarOperadorLogistico$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation cambiarEstado6
+   * Path part for operation cambiarEstadoOperadorLogistico
    */
-  static readonly CambiarEstado6Path = '/api/operadores-logisticos';
+  static readonly CambiarEstadoOperadorLogisticoPath = '/api/operadores-logisticos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarEstado6()` instead.
+   * To access only the response body, use `cambiarEstadoOperadorLogistico()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado6$Response(params: {
+  cambiarEstadoOperadorLogistico$Response(params: {
     operadorLogisticoId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, OperadorLogisticoControllerService.CambiarEstado6Path, 'delete');
+    const rb = new RequestBuilder(this.rootUrl, OperadorLogisticoControllerService.CambiarEstadoOperadorLogisticoPath, 'delete');
     if (params) {
       rb.query('operadorLogisticoId', params.operadorLogisticoId, {});
       rb.query('activo', params.activo, {});
@@ -224,18 +224,18 @@ export class OperadorLogisticoControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarEstado6$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarEstadoOperadorLogistico$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado6(params: {
+  cambiarEstadoOperadorLogistico(params: {
     operadorLogisticoId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<MessageResponse> {
 
-    return this.cambiarEstado6$Response(params).pipe(
+    return this.cambiarEstadoOperadorLogistico$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }

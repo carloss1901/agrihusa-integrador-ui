@@ -13,7 +13,7 @@ import {
 import { AgrihusaLoadingComponent } from '../../../../shared/components/agrihusa-loading/agrihusa-loading.component';
 import { AgrihusaNoResultsComponent } from '../../../../shared/components/agrihusa-no-results/agrihusa-no-results.component';
 import { Rol } from '../../../roles/models/rol.model';
-import { Usuario } from '../../models/usuario.model';
+import { Usuario } from '../../../../core/models/usuario.model';
 
 @Component({
     selector: 'app-tabla-usuarios',
