@@ -31,25 +31,23 @@
         </span>
 
         <div class="d-flex gap-2">
-          <div title="Registrar variedad">
+          <div *ngIf="puedeRegistrar" title="Registrar variedad">
             <agrihusa-button
               color="primary"
               variant="outlined"
               icon="plus"
               [esIcono]="true"
-              [disabled]="!puedeCrear"
               (click)="mostrarModalCrear()"
             ></agrihusa-button>
           </div>
 
-          <div title="Editar variedad">
+          <div *ngIf="puedeEditar" title="Editar variedad">
             <agrihusa-button
               color="secondary"
               variant="outlined"
               icon="edit"
               [esIcono]="true"
               [disabled]="
-                !puedeEditar ||
                 !filaSeleccionada ||
                 !filaSeleccionada.activo
               "
@@ -57,7 +55,7 @@
             ></agrihusa-button>
           </div>
 
-          <div
+          <div *ngIf="puedeEliminar"
             [title]="
               filaSeleccionada?.activo
                 ? 'Desactivar variedad'
@@ -78,7 +76,6 @@
               "
               [esIcono]="true"
               [disabled]="
-                !puedeCambiarEstado ||
                 !filaSeleccionada
               "
               (click)="cambiarEstado()"

@@ -1,11 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, TemplateRef } from '@angular/core';
 import { NgbToast } from '@ng-bootstrap/ng-bootstrap';
-
-import {
-  AlertService,
-  AlertToast
-} from '../../../core/services/alert.service';
+import { AlertService, AlertToast } from '../../../core/services/alert.service';
 
 @Component({
   selector: 'agrihusa-alert',
@@ -16,36 +12,18 @@ import {
   host: { '[class.ngb-toasts]': 'true' }
 })
 export class AgrihusaAlertComponent {
-  constructor(public alertService: AlertService) {}
+  constructor(public readonly alertService: AlertService) {}
 
   isTemplate(toast: AlertToast | null): boolean {
-    return toast != null &&
-      (toast.message as unknown) instanceof TemplateRef;
+    return toast != null && (toast.message as unknown) instanceof TemplateRef;
   }
 
-  getIcon(type: string): string {
-    switch (type) {
-      case 'success':
-        return 'icon-check-circle';
-      case 'warning':
-        return 'icon-alert-triangle';
-      case 'info':
-        return 'icon-info';
-      default:
-        return 'icon-slash';
-    }
-  }
-
-  getTitle(type: string): string {
-    switch (type) {
-      case 'success':
-        return 'Mensaje de confirmación';
-      case 'warning':
-        return 'Mensaje de alerta';
-      case 'info':
-        return 'Mensaje informativo';
-      default:
-        return 'Mensaje fallido';
+  getIcon(classname?: string): string {
+    switch (classname?.split(' ')[0]) {
+      case 'bg-alert-success': return 'icon-check-circle';
+      case 'bg-alert-warning': return 'icon-alert-triangle';
+      case 'bg-alert-info': return 'icon-info';
+      default: return 'icon-slash';
     }
   }
 }

@@ -8,7 +8,7 @@ import {
 } from '../../../core/constants/storage-keys.constant';
 import { LocalStorageService } from '../../../core/services/local-storage.service';
 import { Cliente } from '../../clientes/models/cliente.model';
-import { Destino } from '../../destinos/models/destino.model';
+import { Destino } from '../../../core/models/destino.model';
 import { Naviera } from '../../navieras/models/naviera.model';
 import { OperadorLogistico } from '../../operadores-logisticos/models/operador-logistico.model';
 import { Producto } from '../../productos/models/producto.model';

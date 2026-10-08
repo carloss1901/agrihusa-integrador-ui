@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { CambiarContraseniaRequest } from '../models/cambiar-contrasenia-request';
+import { MessageResponse } from '../models/message-response';
 import { UsuarioRegistroRequest } from '../models/usuario-registro-request';
 
 @Injectable({
@@ -38,8 +39,7 @@ export class UsuarioControllerService extends BaseService {
     context?: HttpContext
     body: CambiarContraseniaRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.CambiarContraseniaPath, 'put');
     if (params) {
@@ -47,14 +47,13 @@ export class UsuarioControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -69,13 +68,10 @@ export class UsuarioControllerService extends BaseService {
     context?: HttpContext
     body: CambiarContraseniaRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.cambiarContrasenia$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
@@ -94,8 +90,7 @@ export class UsuarioControllerService extends BaseService {
     context?: HttpContext
     body: UsuarioRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.Registrar2Path, 'post');
     if (params) {
@@ -103,14 +98,13 @@ export class UsuarioControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -125,13 +119,10 @@ export class UsuarioControllerService extends BaseService {
     context?: HttpContext
     body: UsuarioRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.registrar2$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 

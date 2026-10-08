@@ -11,6 +11,7 @@ import { map, filter } from 'rxjs/operators';
 
 import { CustomPageDespachoResponse } from '../models/custom-page-despacho-response';
 import { DespachoRegistroRequest } from '../models/despacho-registro-request';
+import { MessageResponse } from '../models/message-response';
 
 @Injectable({
   providedIn: 'root',
@@ -104,8 +105,7 @@ export class DespachoControllerService extends BaseService {
     context?: HttpContext
     body: DespachoRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, DespachoControllerService.Actualizar9Path, 'put');
     if (params) {
@@ -113,14 +113,13 @@ export class DespachoControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -135,13 +134,10 @@ export class DespachoControllerService extends BaseService {
     context?: HttpContext
     body: DespachoRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.actualizar9$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
@@ -160,8 +156,7 @@ export class DespachoControllerService extends BaseService {
     context?: HttpContext
     body: DespachoRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, DespachoControllerService.Registrar10Path, 'post');
     if (params) {
@@ -169,14 +164,13 @@ export class DespachoControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -191,13 +185,10 @@ export class DespachoControllerService extends BaseService {
     context?: HttpContext
     body: DespachoRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.registrar10$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
@@ -217,8 +208,7 @@ export class DespachoControllerService extends BaseService {
     activo: boolean;
     context?: HttpContext
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, DespachoControllerService.CambiarEstado9Path, 'delete');
     if (params) {
@@ -227,14 +217,13 @@ export class DespachoControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -250,13 +239,10 @@ export class DespachoControllerService extends BaseService {
     activo: boolean;
     context?: HttpContext
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.cambiarEstado9$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 

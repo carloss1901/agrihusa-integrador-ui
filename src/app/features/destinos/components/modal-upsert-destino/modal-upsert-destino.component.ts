@@ -16,7 +16,7 @@ import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-
 import {
   Destino,
   DestinoFormData
-} from '../../models/destino.model';
+} from '../../../../core/models/destino.model';
 
 type NombreControl = 'pais' | 'ciudad';
 

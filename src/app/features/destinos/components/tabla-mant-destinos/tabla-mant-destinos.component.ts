@@ -12,7 +12,7 @@ import {
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaLoadingComponent } from '../../../../shared/components/agrihusa-loading/agrihusa-loading.component';
 import { AgrihusaNoResultsComponent } from '../../../../shared/components/agrihusa-no-results/agrihusa-no-results.component';
-import { Destino } from '../../models/destino.model';
+import { Destino } from '../../../../core/models/destino.model';
 
 @Component({
   selector: 'app-tabla-mant-destinos',
