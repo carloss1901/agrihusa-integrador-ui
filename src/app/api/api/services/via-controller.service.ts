@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { CustomPageViaResponse } from '../models/custom-page-via-response';
+import { MessageResponse } from '../models/message-response';
 import { ViaRegistroRequest } from '../models/via-registro-request';
 
 @Injectable({
@@ -52,8 +53,8 @@ export class ViaControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
@@ -98,8 +99,7 @@ export class ViaControllerService extends BaseService {
     context?: HttpContext
     body: ViaRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, ViaControllerService.ActualizarPath, 'put');
     if (params) {
@@ -107,14 +107,13 @@ export class ViaControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -129,13 +128,10 @@ export class ViaControllerService extends BaseService {
     context?: HttpContext
     body: ViaRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.actualizar$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
@@ -154,8 +150,7 @@ export class ViaControllerService extends BaseService {
     context?: HttpContext
     body: ViaRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, ViaControllerService.RegistrarPath, 'post');
     if (params) {
@@ -163,14 +158,13 @@ export class ViaControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -185,13 +179,10 @@ export class ViaControllerService extends BaseService {
     context?: HttpContext
     body: ViaRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.registrar$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
@@ -211,8 +202,7 @@ export class ViaControllerService extends BaseService {
     activo: boolean;
     context?: HttpContext
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, ViaControllerService.CambiarEstadoPath, 'delete');
     if (params) {
@@ -221,14 +211,13 @@ export class ViaControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -244,13 +233,10 @@ export class ViaControllerService extends BaseService {
     activo: boolean;
     context?: HttpContext
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.cambiarEstado$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 

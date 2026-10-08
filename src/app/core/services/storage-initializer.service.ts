@@ -14,8 +14,6 @@ import { crearClientesIniciales } from '../../features/clientes/data/clientes.se
 import { Cliente } from '../../features/clientes/models/cliente.model';
 import { crearNavierasIniciales } from '../../features/navieras/data/navieras.seed';
 import { Naviera } from '../../features/navieras/models/naviera.model';
-import { crearDestinosIniciales } from '../../features/destinos/data/destinos.seed';
-import { Destino } from '../../features/destinos/models/destino.model';
 import { crearOperadoresLogisticosIniciales } from '../../features/operadores-logisticos/data/operadores-logisticos.seed';
 import { OperadorLogistico } from '../../features/operadores-logisticos/models/operador-logistico.model';
 import { crearPuertosLlegadaIniciales } from '../../features/puertos-llegada/data/puertos-llegada.seed';
@@ -48,7 +46,6 @@ export class StorageInitializerService {
     this.inicializarRoles();
     this.inicializarClientes();
     this.inicializarNavieras();
-    this.inicializarDestinos();
     this.inicializarOperadoresLogisticos();
     this.inicializarPuertosLlegada();
     this.inicializarProductos();
@@ -136,19 +133,6 @@ export class StorageInitializerService {
     }
   }
 
-  private inicializarDestinos(): void {
-    const destinos =
-      this.localStorageService.obtener<Destino[]>(
-        STORAGE_KEYS.DESTINOS
-      );
-
-    if (destinos === null) {
-      this.localStorageService.guardar(
-        STORAGE_KEYS.DESTINOS,
-        crearDestinosIniciales()
-      );
-    }
-  }
   private inicializarOperadoresLogisticos(): void {
     const operadores =
       this.localStorageService.obtener<

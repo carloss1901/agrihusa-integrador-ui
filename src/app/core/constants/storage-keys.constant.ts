@@ -12,6 +12,7 @@ export const STORAGE_KEYS = {
   PRODUCTOS: 'agrihusa_productos',
   VARIEDADES: 'agrihusa_variedades',
   VIAS: 'agrihusa_vias',
+  MENU_SELECCIONADO: 'agrihusa_menu_seleccionado',
   SITUACIONES: 'agrihusa_situaciones',
   DESPACHOS: 'agrihusa_despachos'
 } as const;

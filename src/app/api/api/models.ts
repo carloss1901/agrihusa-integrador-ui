@@ -1,4 +1,5 @@
 export { ViaRegistroRequest } from './models/via-registro-request';
+export { MessageResponse } from './models/message-response';
 export { VariedadRegistroRequest } from './models/variedad-registro-request';
 export { CambiarContraseniaRequest } from './models/cambiar-contrasenia-request';
 export { SituacionRegistroRequest } from './models/situacion-registro-request';
@@ -13,7 +14,6 @@ export { DespachoRegistroRequest } from './models/despacho-registro-request';
 export { ClienteRegistroRequest } from './models/cliente-registro-request';
 export { UsuarioRegistroRequest } from './models/usuario-registro-request';
 export { LoginRequest } from './models/login-request';
-export { MessageResponse } from './models/message-response';
 export { BitacoraRegistroRequest } from './models/bitacora-registro-request';
 export { CustomPageViaResponse } from './models/custom-page-via-response';
 export { CustomPageable } from './models/custom-pageable';

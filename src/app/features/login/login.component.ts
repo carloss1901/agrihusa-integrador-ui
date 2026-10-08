@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, EventEmitter, Output } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   FormControl,
   FormGroup,
@@ -40,7 +41,8 @@ export class LoginComponent {
 
   constructor(
     private loginControllerService: LoginControllerService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private router: Router
   ) {}
 
   iniciarSesion(): void {
@@ -77,6 +79,7 @@ export class LoginComponent {
             }
 
             this.loginSuccess.emit();
+            void this.router.navigate(['/inicio']);
             return;
           }
 

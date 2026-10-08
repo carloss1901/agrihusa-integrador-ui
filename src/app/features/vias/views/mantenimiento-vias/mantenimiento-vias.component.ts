@@ -1,42 +1,32 @@
 import { CommonModule } from '@angular/common';
+import { inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   OnInit
 } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {
-  EMPTY,
-  finalize,
-  forkJoin,
-  switchMap
-} from 'rxjs';
+import { finalize } from 'rxjs';
 
-import {
-  AccionPermiso,
-  ModuloSistema
-} from '../../../../core/models/permiso.model';
-import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
-import {
-  AccionBitacora,
-  RegistroBitacoraCrearData,
-  ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
-import { FiltroMantViasComponent } from '../../components/filtro-mant-vias/filtro-mant-vias.component';
-import { ModalUpsertViaComponent } from '../../components/modal-upsert-via/modal-upsert-via.component';
-import { TablaMantViasComponent } from '../../components/tabla-mant-vias/tabla-mant-vias.component';
+import { AlertService } from '../../../../core/services/alert.service';
+import { AccionPermiso, ModuloSistema } from '../../../../core/models/permiso.model';
+import { TokenService } from '../../../../core/services/token.service';
+import { ViaService } from '../../../../core/services/via.service';
 import {
   Via,
   ViaFilter,
   ViaFormData,
   ViaQuery
-} from '../../models/via.model';
-import { ViaService } from '../../services/via.service';
+} from '../../../../core/models/via.model';
+import { FiltroMantViasComponent } from '../../components/filtro-mant-vias/filtro-mant-vias.component';
+import { ModalConfirmarViaComponent } from '../../components/modal-confirmar-via/modal-confirmar-via.component';
+import { ModalUpsertViaComponent } from '../../components/modal-upsert-via/modal-upsert-via.component';
+import { TablaMantViasComponent } from '../../components/tabla-mant-vias/tabla-mant-vias.component';
 
 @Component({
   selector: 'app-mantenimiento-vias',
@@ -53,6 +43,10 @@ import { ViaService } from '../../services/via.service';
 })
 export class MantenimientoViasComponent
   implements OnInit {
+  private readonly tokenService = inject(TokenService);
+  readonly puedeRegistrar = this.tokenService.tienePermiso(ModuloSistema.VIAS, AccionPermiso.CREAR);
+  readonly puedeEditar = this.tokenService.tienePermiso(ModuloSistema.VIAS, AccionPermiso.EDITAR);
+  readonly puedeEliminar = this.tokenService.tienePermiso(ModuloSistema.VIAS, AccionPermiso.ELIMINAR);
   readonly titulo = 'Mantenimiento de Vías';
 
   vias: Via[] = [];
@@ -62,21 +56,15 @@ export class MantenimientoViasComponent
   page = 1;
   pageSize = 10;
 
-  puedeCrear = false;
-  puedeEditar = false;
-  puedeCambiarEstado = false;
-
   private filtro: ViaFilter = {};
 
   constructor(
-    private viaService: ViaService,
-    private authService: AuthService,
-    private bitacoraService: BitacoraService,
-    private modalService: NgbModal
+    private readonly viaService: ViaService,
+    private readonly modalService: NgbModal,
+    private readonly alertService: AlertService
   ) {}
 
   ngOnInit(): void {
-    this.cargarPermisos();
     this.cargarVias();
   }
 
@@ -112,16 +100,11 @@ export class MantenimientoViasComponent
   }
 
   mostrarModalCrear(): void {
-    if (!this.puedeCrear) {
-      return;
-    }
-
     this.abrirModal(null);
   }
 
   mostrarModalEditar(): void {
     if (
-      !this.puedeEditar ||
       !this.filaSeleccionada ||
       !this.filaSeleccionada.activo
     ) {
@@ -133,48 +116,36 @@ export class MantenimientoViasComponent
 
   cambiarEstado(): void {
     const via = this.filaSeleccionada;
-
-    if (
-      !this.puedeCambiarEstado ||
-      !via
-    ) {
+    if (!via) {
       return;
     }
 
-    const accion = via.activo
-      ? 'desactivar'
-      : 'activar';
+    const modalRef = this.modalService.open(ModalConfirmarViaComponent, {
+      backdrop: 'static',
+      keyboard: false,
+      centered: true
+    });
+    modalRef.componentInstance.titulo = via.activo
+      ? 'Confirmar eliminación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
+      `¿Deseas ${via.activo ? 'desactivar' : 'activar'} la vía "${via.descripcion}"?`;
 
-    const confirmado = window.confirm(
-      `¿Deseas ${accion} la vía ` +
-      `"${via.descripcion}"?`
-    );
+    modalRef.result.then((confirmado: boolean) => {
+      if (!confirmado) {
+        return;
+      }
 
-    if (!confirmado) {
-      return;
-    }
-
-    this.viaService
-      .cambiarEstado(via.id)
-      .subscribe((resultado) => {
-        if (!resultado) {
-          return;
-        }
-
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
-
-        this.registrarEventoVia(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó la vía ${resultado.descripcion}.`
-            : `Se desactivó la vía ${resultado.descripcion}.`
-        );
-
-        this.cargarVias();
+      this.viaService.cambiarEstado(via.id, !via.activo).subscribe({
+        next: (response) => {
+          this.alertService.success(
+            response.message!
+          );
+          this.cargarVias();
+        },
+        error: (error: HttpErrorResponse) => this.mostrarError(error)
       });
+    }).catch(() => {});
   }
 
   private cargarVias(): void {
@@ -233,109 +204,24 @@ export class MantenimientoViasComponent
       .catch(() => {});
   }
 
-  private guardarVia(
-    data: ViaFormData,
-    via: Via | null
-  ): void {
-    this.viaService
-      .existeDescripcion(
-        data.descripcion,
-        via?.id
-      )
-      .pipe(
-        switchMap((existeDescripcion) => {
-          if (existeDescripcion) {
-            window.alert(
-              'Ya existe una vía con esa descripción.'
-            );
-
-            return EMPTY;
-          }
-
-          if (!via) {
-            return this.viaService.crear(data);
-          }
-
-          return this.viaService.actualizar(
-            via.id,
-            data
-          );
-        })
-      )
-      .subscribe((viaGuardada) => {
-        if (!viaGuardada) {
-          return;
-        }
-
-        if (!via) {
-          this.registrarEventoVia(
-            AccionBitacora.CREAR,
-            viaGuardada,
-            `Se creó la vía ` +
-              `${viaGuardada.descripcion}.`
-          );
-        } else {
-          this.registrarEventoVia(
-            AccionBitacora.EDITAR,
-            viaGuardada,
-            `Se actualizó la vía ` +
-              `${viaGuardada.descripcion}.`
-          );
-        }
-
+  private guardarVia(data: ViaFormData, via: Via | null): void {
+    (via
+      ? this.viaService.actualizar(via.id, data)
+      : this.viaService.crear(data)
+    ).subscribe({
+      next: (response) => {
+        this.alertService.success(response.message!);
         this.page = 1;
         this.cargarVias();
-      });
-  }
-
-  private cargarPermisos(): void {
-    forkJoin({
-      crear: this.authService.tienePermiso(
-        ModuloSistema.VIAS,
-        AccionPermiso.CREAR
-      ),
-      editar: this.authService.tienePermiso(
-        ModuloSistema.VIAS,
-        AccionPermiso.EDITAR
-      ),
-      cambiarEstado:
-        this.authService.tienePermiso(
-          ModuloSistema.VIAS,
-          AccionPermiso.ELIMINAR
-        )
-    }).subscribe((permisos) => {
-      this.puedeCrear = permisos.crear;
-      this.puedeEditar = permisos.editar;
-      this.puedeCambiarEstado =
-        permisos.cambiarEstado;
+      },
+      error: (error: HttpErrorResponse) => this.mostrarError(error)
     });
   }
 
-  private registrarEventoVia(
-    accion: AccionBitacora,
-    via: Via,
-    detalle: string
-  ): void {
-    const sesion =
-      this.authService.obtenerSesionActual();
-
-    if (!sesion) {
-      return;
-    }
-
-    const evento: RegistroBitacoraCrearData = {
-      usuarioId: sesion.usuarioId,
-      nombreUsuario: sesion.nombreUsuario,
-      modulo: ModuloSistema.VIAS,
-      accion,
-      entidad: 'Vía',
-      registroId: via.id,
-      detalle,
-      resultado: ResultadoBitacora.EXITO
-    };
-
-    this.bitacoraService
-      .registrar(evento)
-      .subscribe();
+  private mostrarError(error: HttpErrorResponse): void {
+    this.alertService.error(
+      (error.error as { message?: string }).message!
+    );
   }
+
 }

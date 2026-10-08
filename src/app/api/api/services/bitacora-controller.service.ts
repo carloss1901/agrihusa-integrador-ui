@@ -11,6 +11,7 @@ import { map, filter } from 'rxjs/operators';
 
 import { BitacoraRegistroRequest } from '../models/bitacora-registro-request';
 import { CustomPageBitacoraResponse } from '../models/custom-page-bitacora-response';
+import { MessageResponse } from '../models/message-response';
 
 @Injectable({
   providedIn: 'root',
@@ -110,8 +111,7 @@ export class BitacoraControllerService extends BaseService {
     context?: HttpContext
     body: BitacoraRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, BitacoraControllerService.Registrar12Path, 'post');
     if (params) {
@@ -119,14 +119,13 @@ export class BitacoraControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -141,13 +140,10 @@ export class BitacoraControllerService extends BaseService {
     context?: HttpContext
     body: BitacoraRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.registrar12$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 

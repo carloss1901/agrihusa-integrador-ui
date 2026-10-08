@@ -3,17 +3,10 @@ import {
   Component,
   DestroyRef
 } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MantenimientoUsuariosComponent } from './features/usuarios/views/mantenimiento-usuarios/mantenimiento-usuarios.component';
-import { AuditoriaComponent } from './features/auditoria/views/auditoria/auditoria.component';
-import { MantenimientoDestinosComponent } from './features/destinos/views/mantenimiento-destinos/mantenimiento-destinos.component';
 import { HeaderComponent } from './features/header/header.component';
-import { LoginComponent } from './features/login/login.component';
-import { MantenimientoNavierasComponent } from './features/navieras/views/mantenimiento-navieras/mantenimiento-navieras.component';
-import { MantenimientoPuertosLlegadaComponent } from './features/puertos-llegada/views/mantenimiento-puertos-llegada/mantenimiento-puertos-llegada.component';
-import { MantenimientoVariedadesComponent } from './features/variedades/views/mantenimiento-variedades/mantenimiento-variedades.component';
-import { MantenimientoViasComponent } from './features/vias/views/mantenimiento-vias/mantenimiento-vias.component';
-import { MantenimientoRolesComponent } from './features/roles/views/mantenimiento-roles/mantenimiento-roles.component';
 import {
   MenuComponent,
   MenuItem
@@ -24,13 +17,6 @@ import {
 } from './core/models/permiso.model';
 import { AuthService } from './core/services/auth.service';
 import { TokenService } from './core/services/token.service';
-import { PerfilUsuarioComponent } from './features/perfil-usuario/views/perfil-usuario/perfil-usuario.component';
-import { MantenimientoClientesComponent } from './features/clientes/views/mantenimiento-clientes/mantenimiento-clientes.component';
-import { MantenimientoOperadoresLogisticosComponent } from './features/operadores-logisticos/views/mantenimiento-operadores-logisticos/mantenimiento-operadores-logisticos.component';
-import { MantenimientoProductosComponent } from './features/productos/views/mantenimiento-productos/mantenimiento-productos.component';
-import { MantenimientoSituacionesComponent } from './features/situaciones/views/mantenimiento-situaciones/mantenimiento-situaciones.component';
-import { RegistroDespachoComponent } from './features/registro-despacho/views/registro-despacho/registro-despacho.component';
-import { ReporteDespachoComponent } from './features/reporte-despacho/views/reporte-despacho/reporte-despacho.component';
 import { AgrihusaAlertComponent } from './shared/components/agrihusa-alert/agrihusa-alert.component';
 
 @Component({
@@ -38,24 +24,9 @@ import { AgrihusaAlertComponent } from './shared/components/agrihusa-alert/agrih
   standalone: true,
   imports: [
     CommonModule,
+    RouterOutlet,
     HeaderComponent,
     MenuComponent,
-    LoginComponent,
-    MantenimientoUsuariosComponent,
-    MantenimientoDestinosComponent,
-    MantenimientoViasComponent,
-    MantenimientoVariedadesComponent,
-    MantenimientoNavierasComponent,
-    MantenimientoPuertosLlegadaComponent,
-    MantenimientoRolesComponent,
-    AuditoriaComponent,
-    PerfilUsuarioComponent,
-    MantenimientoClientesComponent,
-    MantenimientoOperadoresLogisticosComponent,
-    MantenimientoProductosComponent,
-    MantenimientoSituacionesComponent,
-    RegistroDespachoComponent,
-    ReporteDespachoComponent,
     AgrihusaAlertComponent
   ],
   templateUrl: './app.component.html',
@@ -90,13 +61,23 @@ export class AppComponent {
     this.menuVisible = true;
     this.resetPantallas();
     this.selectedMenuLabel = 'Seleccione una opción del menú';
+    void this.router.navigate(['/inicio']);
   }
 
   logout(): void {
     this.authService.logout();
+    void this.router.navigate(['/login']);
   }
 
   onSelectMenu(item: MenuItem): void {
+    const ruta = this.obtenerRuta(item.modulo);
+    if (ruta) {
+      void this.router.navigate([ruta]);
+    }
+
+    return;
+
+    /*
     const sesion = this.authService.obtenerSesionActual();
 
     if (
@@ -182,6 +163,29 @@ export class AppComponent {
             this.mostrarReporteDespacho = true;
             break;
     }
+    */
+  }
+
+  private obtenerRuta(modulo: ModuloSistema): string | null {
+    const rutas: Partial<Record<ModuloSistema, string>> = {
+      [ModuloSistema.ROLES]: '/roles',
+      [ModuloSistema.USUARIOS]: '/usuarios',
+      [ModuloSistema.DESTINOS]: '/destinos',
+      [ModuloSistema.VIAS]: '/vias',
+      [ModuloSistema.VARIEDADES]: '/variedades',
+      [ModuloSistema.NAVIERAS]: '/navieras',
+      [ModuloSistema.PUERTOS_LLEGADA]: '/puertos-llegada',
+      [ModuloSistema.BITACORA]: '/auditoria',
+      [ModuloSistema.PERFIL_USUARIO]: '/perfil-usuario',
+      [ModuloSistema.CLIENTES]: '/clientes',
+      [ModuloSistema.OPERADORES_LOGISTICOS]: '/operadores-logisticos',
+      [ModuloSistema.PRODUCTOS]: '/productos',
+      [ModuloSistema.SITUACIONES]: '/situaciones',
+      [ModuloSistema.REGISTRO_DESPACHO]: '/registro-despacho',
+      [ModuloSistema.REPORTE_DESPACHO]: '/reporte-despacho'
+    };
+
+    return rutas[modulo] ?? null;
   }
 
   private resetPantallas(): void {
@@ -205,9 +209,23 @@ export class AppComponent {
   constructor(
     private authService: AuthService,
     private tokenService: TokenService,
+    private router: Router,
     destroyRef: DestroyRef
   ) {
     this.isAuthenticated = this.tokenService.estaVigente();
+
+    if (this.isAuthenticated && this.router.url === '/login') {
+      void this.router.navigate(['/inicio']);
+    }
+
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(destroyRef)
+      )
+      .subscribe(() => {
+        this.isAuthenticated = this.tokenService.estaVigente();
+      });
 
     if (this.isAuthenticated) {
       const expiracion = this.tokenService.obtenerPayload()?.exp;

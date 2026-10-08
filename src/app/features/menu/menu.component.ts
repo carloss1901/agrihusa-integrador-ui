@@ -3,6 +3,7 @@ import {
   Component,
   EventEmitter,
   inject,
+  OnInit,
   Output,
   ViewEncapsulation
 } from '@angular/core';
@@ -11,6 +12,8 @@ import {
   AccionPermiso,
   ModuloSistema
 } from '../../core/models/permiso.model';
+import { STORAGE_KEYS } from '../../core/constants/storage-keys.constant';
+import { LocalStorageService } from '../../core/services/local-storage.service';
 import { TokenService } from '../../core/services/token.service';
 
 export interface MenuItem {
@@ -33,11 +36,12 @@ interface MenuGroup {
   styleUrls: ['./menu.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class MenuComponent {
+export class MenuComponent implements OnInit {
   @Output() onToggleSideNav = new EventEmitter<boolean>();
   @Output() onSelectItem = new EventEmitter<MenuItem>();
 
   private readonly tokenService = inject(TokenService);
+  private readonly localStorageService = inject(LocalStorageService);
 
   menuSeleccionadoId = 0;
   menuArrAgrihusa: MenuGroup[] = [];
@@ -169,12 +173,35 @@ export class MenuComponent {
     );
   }
 
+  ngOnInit(): void {
+    const codigoGuardado = this.localStorageService.obtener<number>(
+      STORAGE_KEYS.MENU_SELECCIONADO
+    );
+
+    if (codigoGuardado === null) {
+      return;
+    }
+
+    const menuGuardado = this.menuArrAgrihusa
+      .flatMap((grupo) => grupo.subMenu)
+      .find((item) => item.codigo === codigoGuardado);
+
+    if (menuGuardado) {
+      this.menuSeleccionadoId = menuGuardado.codigo;
+      this.onSelectItem.emit(menuGuardado);
+    }
+  }
+
   toggleMenu(esCerrar: boolean): void {
     this.onToggleSideNav.emit(esCerrar);
   }
 
   onClickMenu(subItem: MenuItem): void {
     this.menuSeleccionadoId = subItem.codigo;
+    this.localStorageService.guardar(
+      STORAGE_KEYS.MENU_SELECCIONADO,
+      subItem.codigo
+    );
     this.onSelectItem.emit(subItem);
   }
 

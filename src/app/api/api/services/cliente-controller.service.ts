@@ -11,6 +11,7 @@ import { map, filter } from 'rxjs/operators';
 
 import { ClienteRegistroRequest } from '../models/cliente-registro-request';
 import { CustomPageClienteResponse } from '../models/custom-page-cliente-response';
+import { MessageResponse } from '../models/message-response';
 
 @Injectable({
   providedIn: 'root',
@@ -54,8 +55,8 @@ export class ClienteControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
@@ -101,8 +102,7 @@ export class ClienteControllerService extends BaseService {
     context?: HttpContext
     body: ClienteRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, ClienteControllerService.Actualizar10Path, 'put');
     if (params) {
@@ -110,14 +110,13 @@ export class ClienteControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -132,13 +131,10 @@ export class ClienteControllerService extends BaseService {
     context?: HttpContext
     body: ClienteRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.actualizar10$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
@@ -157,8 +153,7 @@ export class ClienteControllerService extends BaseService {
     context?: HttpContext
     body: ClienteRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, ClienteControllerService.Registrar11Path, 'post');
     if (params) {
@@ -166,14 +161,13 @@ export class ClienteControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -188,13 +182,10 @@ export class ClienteControllerService extends BaseService {
     context?: HttpContext
     body: ClienteRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.registrar11$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
@@ -214,8 +205,7 @@ export class ClienteControllerService extends BaseService {
     activo: boolean;
     context?: HttpContext
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
     const rb = new RequestBuilder(this.rootUrl, ClienteControllerService.CambiarEstado10Path, 'delete');
     if (params) {
@@ -224,14 +214,13 @@ export class ClienteControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
@@ -247,13 +236,10 @@ export class ClienteControllerService extends BaseService {
     activo: boolean;
     context?: HttpContext
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
     return this.cambiarEstado10$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 

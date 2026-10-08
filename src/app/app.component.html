@@ -11,50 +11,12 @@
         </section>
       </aside>
       <main class="agrihusaApp-content_main">
-        <app-mantenimiento-roles *ngIf="mostrarRoles"></app-mantenimiento-roles>
-        <app-mantenimiento-usuarios *ngIf="mostrarUsuarios"></app-mantenimiento-usuarios>
-        <app-mantenimiento-destinos *ngIf="mostrarDestinos"></app-mantenimiento-destinos>
-        <app-mantenimiento-vias *ngIf="mostrarVias"></app-mantenimiento-vias>
-        <app-mantenimiento-variedades *ngIf="mostrarVariedades"></app-mantenimiento-variedades>
-        <app-mantenimiento-navieras *ngIf="mostrarNavieras"></app-mantenimiento-navieras>
-        <app-mantenimiento-puertos-llegada *ngIf="mostrarPuertosLlegada"></app-mantenimiento-puertos-llegada>
-        <app-auditoria *ngIf="mostrarAuditoria"></app-auditoria>
-        <app-perfil-usuario *ngIf="mostrarPerfilUsuario"></app-perfil-usuario>
-        <app-mantenimiento-clientes *ngIf="mostrarClientes"></app-mantenimiento-clientes>
-        <app-mantenimiento-operadores-logisticos *ngIf="mostrarOperadoresLogisticos"></app-mantenimiento-operadores-logisticos>
-        <app-mantenimiento-productos *ngIf="mostrarProductos"></app-mantenimiento-productos>
-        <app-mantenimiento-situaciones *ngIf="mostrarSituaciones"></app-mantenimiento-situaciones>
-        <app-registro-despacho *ngIf="mostrarRegistroDespacho"></app-registro-despacho>
-        <app-reporte-despacho *ngIf="mostrarReporteDespacho"></app-reporte-despacho>
-
-        <section class="agrihusaApp-content_placeholder" *ngIf="
-            !mostrarRoles &&
-            !mostrarUsuarios &&
-            !mostrarDestinos &&
-            !mostrarVias &&
-            !mostrarVariedades &&
-            !mostrarNavieras &&
-            !mostrarPuertosLlegada &&
-            !mostrarPerfilUsuario &&
-            !mostrarClientes &&
-            !mostrarProductos &&
-            !mostrarSituaciones &&
-            !mostrarOperadoresLogisticos &&
-            !mostrarRegistroDespacho &&
-            !mostrarReporteDespacho &&
-            !mostrarAuditoria
-          ">
-          <p class="eyebrow">Layout base</p>
-          <h1>{{ selectedMenuLabel }}</h1>
-          <p>
-            Este espacio queda libre para integrar microfrontends o vistas futuras.
-          </p>
-        </section>
+        <router-outlet></router-outlet>
       </main>
     </div>
   </div>
 
   <div *ngIf="!isAuthenticated">
-    <app-login (loginSuccess)="onLoginSuccess()"></app-login>
+    <router-outlet></router-outlet>
   </div>
 </div>
