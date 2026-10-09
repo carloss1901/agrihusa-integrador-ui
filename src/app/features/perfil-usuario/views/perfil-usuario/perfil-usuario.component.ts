@@ -13,6 +13,7 @@ import {
     EMPTY,
     finalize,
     forkJoin,
+    of,
     switchMap
 } from 'rxjs';
 
@@ -20,7 +21,7 @@ import {
     AccionPermiso,
     ModuloSistema
 } from '../../../../core/models/permiso.model';
-import { AuthService } from '../../../../core/services/auth.service';
+import { TokenService } from '../../../../core/services/token.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
 import {
@@ -28,7 +29,6 @@ import {
     ResultadoBitacora
 } from '../../../../core/models/bitacora.model';
 import { BitacoraService } from '../../../../core/services/bitacora.service';
-import { RolService } from '../../../../core/services/rol.service';
 import { Usuario } from '../../../../core/models/usuario.model';
 import { UsuarioService } from '../../../../core/services/usuario.service';
 import {
@@ -140,9 +140,8 @@ export class PerfilUsuarioComponent
     });
 
     constructor(
-        private authService: AuthService,
+        private tokenService: TokenService,
         private usuarioService: UsuarioService,
-        private rolService: RolService,
         private bitacoraService: BitacoraService
     ) { }
 
@@ -209,11 +208,6 @@ export class PerfilUsuarioComponent
                 }
 
                 this.usuarioActual = usuarioActualizado;
-                this.authService
-                    .actualizarSesionDesdeUsuario(
-                        usuarioActualizado
-                    );
-
                 this.registrarActualizacionPerfil(
                     usuarioActualizado
                 );
@@ -329,11 +323,6 @@ export class PerfilUsuarioComponent
 
                 this.usuarioActual = usuarioActualizado;
 
-                this.authService
-                    .actualizarSesionDesdeUsuario(
-                        usuarioActualizado
-                    );
-
                 this.registrarCambioPassword(
                     ResultadoBitacora.EXITO
                 );
@@ -388,10 +377,10 @@ export class PerfilUsuarioComponent
     }
 
     private cargarPerfil(): void {
-        const sesion =
-            this.authService.obtenerSesionActual();
+        const payload =
+            this.tokenService.obtenerPayload();
 
-        if (!sesion) {
+        if (!payload?.usuarioId) {
             this.mensajeError =
                 'No existe una sesión activa.';
             this.cargando = false;
@@ -401,17 +390,13 @@ export class PerfilUsuarioComponent
         forkJoin({
             usuario:
                 this.usuarioService.obtenerPorId(
-                    sesion.usuarioId
-                ),
-            rol:
-                this.rolService.obtenerPorId(
-                    sesion.rolId
+                    payload.usuarioId
                 ),
             puedeEditar:
-                this.authService.tienePermiso(
+                of(this.tokenService.tienePermiso(
                     ModuloSistema.PERFIL_USUARIO,
                     AccionPermiso.EDITAR
-                )
+                ))
         })
             .pipe(
                 finalize(() => {
@@ -427,8 +412,7 @@ export class PerfilUsuarioComponent
 
                 this.usuarioActual = resultado.usuario;
                 this.nombreRol =
-                    resultado.rol?.nombre ??
-                    'Sin rol asignado';
+                    this.tokenService.obtenerRolPrincipal();
                 this.puedeEditar =
                     resultado.puedeEditar;
 
@@ -449,17 +433,17 @@ export class PerfilUsuarioComponent
     private registrarActualizacionPerfil(
         usuario: Usuario
     ): void {
-        const sesion =
-            this.authService.obtenerSesionActual();
+        const payload =
+            this.tokenService.obtenerPayload();
 
-        if (!sesion) {
+        if (!payload?.usuarioId) {
             return;
         }
 
         this.bitacoraService
             .registrar({
-                usuarioId: sesion.usuarioId,
-                nombreUsuario: sesion.nombreUsuario,
+                usuarioId: payload.usuarioId,
+                nombreUsuario: payload.sub ?? '',
                 modulo:
                     ModuloSistema.PERFIL_USUARIO,
                 accion: AccionBitacora.EDITAR,
@@ -475,17 +459,17 @@ export class PerfilUsuarioComponent
     private registrarCambioPassword(
         resultado: ResultadoBitacora
     ): void {
-        const sesion =
-            this.authService.obtenerSesionActual();
+        const payload =
+            this.tokenService.obtenerPayload();
 
-        if (!sesion || !this.usuarioActual) {
+        if (!payload?.usuarioId || !this.usuarioActual) {
             return;
         }
 
         this.bitacoraService
             .registrar({
-                usuarioId: sesion.usuarioId,
-                nombreUsuario: sesion.nombreUsuario,
+                usuarioId: payload.usuarioId,
+                nombreUsuario: payload.sub ?? '',
                 modulo:
                     ModuloSistema.PERFIL_USUARIO,
                 accion: AccionBitacora.EDITAR,

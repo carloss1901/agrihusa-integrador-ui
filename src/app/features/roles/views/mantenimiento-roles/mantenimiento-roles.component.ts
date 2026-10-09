@@ -28,12 +28,13 @@ import {
 import { RolService } from '../../../../core/services/rol.service';
 import { AlertService } from '../../../../core/services/alert.service';
 import { ModuloSistema } from '../../../../core/models/permiso.model';
-import { AuthService } from '../../../../core/services/auth.service';
+import { TokenService } from '../../../../core/services/token.service';
 import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
 } from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { BitacoraService } from '../../../../core/services/bitacora.service';
 
 @Component({
@@ -64,7 +65,9 @@ export class MantenimientoRolesComponent
   constructor(
     private rolService: RolService,
     private modalService: NgbModal,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private tokenService: TokenService,
+    private bitacoraService: BitacoraService
   ) { }
 
   ngOnInit(): void {
@@ -254,16 +257,16 @@ export class MantenimientoRolesComponent
     rol: Rol,
     detalle: string
   ): void {
-    const sesion =
-      this.authService.obtenerSesionActual();
+    const payload =
+      this.tokenService.obtenerPayload();
 
-    if (!sesion) {
+    if (!payload?.usuarioId) {
       return;
     }
 
     const evento: RegistroBitacoraCrearData = {
-      usuarioId: sesion.usuarioId,
-      nombreUsuario: sesion.nombreUsuario,
+      usuarioId: payload.usuarioId,
+      nombreUsuario: payload.sub ?? '',
       modulo: ModuloSistema.ROLES,
       accion,
       entidad: 'Rol',
