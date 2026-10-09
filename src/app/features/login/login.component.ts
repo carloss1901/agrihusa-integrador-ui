@@ -38,6 +38,8 @@ export class LoginComponent {
   loading = false;
   submitted = false;
   errorMessage = '';
+  mostrarPassword = false;
+  readonly currentYear = new Date().getFullYear();
 
   constructor(
     private loginControllerService: LoginControllerService,
@@ -100,5 +102,9 @@ export class LoginComponent {
   ): boolean {
     const control = this.formulario.controls[controlName];
     return control.invalid && (control.touched || this.submitted);
+  }
+
+  alternarVisibilidadPassword(): void {
+    this.mostrarPassword = !this.mostrarPassword;
   }
 }
