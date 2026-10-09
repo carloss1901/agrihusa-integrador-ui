@@ -12,10 +12,31 @@
   </div>
 
   <div class="menu-group" *ngFor="let menuItem of menuArrAgrihusa">
-    <div class="accordion-button">
+    <div
+      class="accordion-button"
+      role="button"
+      tabindex="0"
+      [attr.aria-expanded]="estaGrupoAbierto(menuItem.codigo)"
+      (click)="alternarGrupo(menuItem.codigo)"
+      (keydown.enter)="alternarGrupo(menuItem.codigo)"
+      (keydown.space)="$event.preventDefault(); alternarGrupo(menuItem.codigo)"
+    >
       <span>{{ menuItem.nombreModulo | uppercase }}</span>
+      <svg
+        class="accordion-chevron"
+        [class.expanded]="estaGrupoAbierto(menuItem.codigo)"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
     </div>
-    <div class="accordion-body">
+    <div class="accordion-body" *ngIf="estaGrupoAbierto(menuItem.codigo)">
       <ul>
         <li
           *ngFor="let subItem of menuItem.subMenu"

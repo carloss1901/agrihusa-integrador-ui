@@ -123,16 +123,25 @@ export class MantenimientoUsuariosComponent
     }
 
     mostrarModalEditar(): void {
+        const usuarioSeleccionado =
+            this.filaSeleccionada;
+
         if (
             !this.puedeEditar ||
-            !this.filaSeleccionada ||
-            !this.filaSeleccionada.activo
+            !usuarioSeleccionado ||
+            !usuarioSeleccionado.activo
         ) {
             return;
         }
 
-        this.abrirModal(this.filaSeleccionada);
-    }
+        this.usuarioService
+            .obtenerPorId(usuarioSeleccionado.id)
+            .subscribe((usuario) => {
+            if (usuario) {
+                this.abrirModal(usuario);
+            }
+            });
+        }
 
     cambiarEstado(): void {
         const usuario = this.filaSeleccionada;

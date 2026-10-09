@@ -153,7 +153,7 @@ export class MantenimientoDestinosComponent
     }
 
     this.destinoService
-      .cambiarEstado(destino.id)
+      .cambiarEstado(destino)
       .subscribe((resultado) => {
         if (!resultado) {
           return;

@@ -1,3 +1,5 @@
+@use "variables" as *;
+
 .labels {
     border: none;
     border-radius: $border-radius-badge;

@@ -1,167 +1,267 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
+import {
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
 import { PaginatedResult } from '../../../core/models/pagination.model';
 import {
   Rol,
   RolFormData,
   RolQuery
 } from '../models/rol.model';
-
+import { RolControllerService } from '../../../api/api/services/rol-controller.service';
+import { CustomPageRolResponse } from '../../../api/api/models/custom-page-rol-response';
+import { RolResponse } from '../../../api/api/models/rol-response';
+import { RolDetalleResponse } from '../../../api/api/models/rol-detalle-response';
+import {
+  AccionPermiso,
+  ModuloSistema
+} from '../../../core/models/permiso.model';
+import { RolRegistroRequest } from '../../../api/api/models/rol-registro-request';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RolService {
-  constructor(private localStorageService: LocalStorageService) {}
+  constructor(
+    private rolControllerService: RolControllerService
+  ) {}
 
   listar(
     query: RolQuery
   ): Observable<PaginatedResult<Rol>> {
     const page = Math.max(1, query.page);
     const pageSize = Math.max(1, query.pageSize);
-    const nombre = query.nombre?.trim().toUpperCase();
 
-    const rolesFiltrados = this.obtenerRoles().filter((rol) => {
-      if (
-        nombre &&
-        !rol.nombre.toUpperCase().includes(nombre)
-      ) {
-        return false;
-      }
-
-      if (
-        query.estado !== undefined &&
-        rol.activo !== query.estado
-      ) {
-        return false;
-      }
-
-      return true;
-    });
-
-    const inicio = (page - 1) * pageSize;
-    const items = rolesFiltrados.slice(
-      inicio,
-      inicio + pageSize
+    return this.consultarRoles({
+      nombre: query.nombre?.trim() || undefined,
+      activo: query.estado,
+      pagina: page,
+      tamPagina: pageSize
+    }).pipe(
+      map((response) => ({
+        items: (response.datos ?? []).map(
+          (item) => this.mapearRol(item)
+        ),
+        totalItems: Number(
+          response.paginacion?.totalElementos ?? 0
+        ),
+        page: Number(
+          response.paginacion?.numeroPagina ?? page
+        ),
+        pageSize: Number(
+          response.paginacion?.tamanioPagina ?? pageSize
+        )
+      }))
     );
-
-    return of({
-      items,
-      totalItems: rolesFiltrados.length,
-      page,
-      pageSize
-    });
   }
 
   obtenerPorId(id: number): Observable<Rol | null> {
-    const rol = this.obtenerRoles().find((item) => item.id === id) ?? null;
+    return this.rolControllerService
+      .obtenerPorId1({ rolId: id })
+      .pipe(
+        switchMap((response) => {
+          const contenido: unknown = response;
 
-    return of(rol);
+          if (!(contenido instanceof Blob)) {
+            return of(response);
+          }
+
+          return from(contenido.text()).pipe(
+            map(
+              (texto) =>
+                JSON.parse(texto) as RolDetalleResponse
+            )
+          );
+        }),
+        map((response) => ({
+          id: response.rolId ?? 0,
+          nombre: response.nombre ?? '',
+          descripcion: response.descripcion ?? '',
+          esSistema: response.esSistema ?? false,
+          permisos: (response.permisos ?? []).map(
+            (permiso) => ({
+              modulo:
+                (permiso.modulo ?? '') as ModuloSistema,
+              acciones:
+                (permiso.acciones ?? []) as AccionPermiso[]
+            })
+          ),
+          activo: response.activo ?? false,
+          fechaCreacion: '',
+          fechaActualizacion: null
+        }))
+      );
   }
 
-  crear(data: RolFormData): Observable<Rol> {
-    const roles = this.obtenerRoles();
-    const fechaActual = new Date().toISOString();
+  crear(
+    data: RolFormData
+  ): Observable<Rol> {
+    const nombre = data.nombre.trim();
+    const descripcion = data.descripcion.trim();
 
-    const nuevoRol: Rol = {
-      id: this.generarId(roles),
-      nombre: data.nombre.trim(),
-      descripcion: data.descripcion.trim(),
-      esSistema: false,
-      permisos: this.copiarPermisos(data.permisos),
-      activo: true,  
-      fechaCreacion: fechaActual,
-      fechaActualizacion: null
+    const body: RolRegistroRequest = {
+      rolId: 0,
+      nombre,
+      descripcion,
+      permisos: data.permisos.map((permiso) => ({
+        modulo: permiso.modulo,
+        acciones: [...permiso.acciones]
+      }))
     };
 
-    roles.push(nuevoRol);
-    this.guardarRoles(roles);
+    return this.rolControllerService
+      .registrar4({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarRoles({
+            nombre,
+            pagina: 1,
+            tamPagina: 100
+          })
+        ),
+        map((response) => {
+          const rolCreado = (response.datos ?? [])
+            .map((item) => this.mapearRol(item))
+            .find(
+              (rol) =>
+                rol.nombre.trim().toUpperCase() ===
+                nombre.toUpperCase()
+            );
 
-    return of(nuevoRol);
+          if (!rolCreado) {
+            throw new Error(
+              'El rol fue registrado, pero no pudo recuperarse.'
+            );
+          }
+
+          return {
+            ...rolCreado,
+            permisos: this.copiarPermisos(data.permisos)
+          };
+        })
+      );
   }
 
   actualizar(
     id: number,
     data: RolFormData
   ): Observable<Rol | null> {
-    const roles = this.obtenerRoles();
-    const posicion = roles.findIndex((item) => item.id === id);
-
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    if (roles[posicion].esSistema) {
-      return of(null);
-    }
-
-    const rolActualizado: Rol = {
-      ...roles[posicion],
+    const body: RolRegistroRequest = {
+      rolId: id,
       nombre: data.nombre.trim(),
       descripcion: data.descripcion.trim(),
-      permisos: this.copiarPermisos(data.permisos),
-      fechaActualizacion: new Date().toISOString()
+      permisos: data.permisos.map((permiso) => ({
+        modulo: permiso.modulo,
+        acciones: [...permiso.acciones]
+      }))
     };
 
-    roles[posicion] = rolActualizado;
-    this.guardarRoles(roles);
-
-    return of(rolActualizado);
+    return this.rolControllerService
+      .actualizar4({ body })
+      .pipe(
+        switchMap(() =>
+          this.obtenerPorId(id)
+        )
+      );
   }
 
-  cambiarEstado(id: number): Observable<Rol | null> {
-    const roles = this.obtenerRoles();
-    const posicion = roles.findIndex((item) => item.id === id);
+  cambiarEstado(
+    id: number
+  ): Observable<Rol | null> {
+    return this.obtenerPorId(id).pipe(
+      switchMap((rol) => {
+        if (!rol || rol.esSistema) {
+          return of(null);
+        }
 
-    if (posicion === -1) {
-      return of(null);
-    }
-    
-    if (roles[posicion].esSistema) {
-    return of(null);
-    }
+        const nuevoEstado = !rol.activo;
 
-    roles[posicion] = {
-      ...roles[posicion],
-      activo: !roles[posicion].activo,
-      fechaActualizacion: new Date().toISOString()
-    };
-
-    this.guardarRoles(roles);
-
-    return of(roles[posicion]);
+        return this.rolControllerService
+          .cambiarEstado4({
+            rolId: id,
+            activo: nuevoEstado
+          })
+          .pipe(
+            map(() => ({
+              ...rol,
+              activo: nuevoEstado,
+              fechaActualizacion:
+                new Date().toISOString()
+            }))
+          );
+      })
+    );
   }
 
   existeNombre(
     nombre: string,
     idExcluir?: number
   ): Observable<boolean> {
-    const nombreNormalizado = nombre.trim().toUpperCase();
+    const nombreNormalizado =
+      nombre.trim().toUpperCase();
 
-    const existe = this.obtenerRoles().some(
-      (item) =>
-        item.nombre.trim().toUpperCase() === nombreNormalizado &&
-        item.id !== idExcluir
+    return this.consultarRoles({
+      nombre: nombre.trim(),
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (item) =>
+            (item.nombre ?? '')
+              .trim()
+              .toUpperCase() === nombreNormalizado &&
+            item.rolId !== idExcluir
+        )
+      )
     );
-
-    return of(existe);
   }
 
-  private obtenerRoles(): Rol[] {
-    return this.localStorageService.obtener<Rol[]>(STORAGE_KEYS.ROLES) ?? [];
+  private consultarRoles(
+    params: {
+      nombre?: string;
+      activo?: boolean;
+      pagina?: number;
+      tamPagina?: number;
+    }
+  ): Observable<CustomPageRolResponse> {
+    return this.rolControllerService
+      .listarRoles(params)
+      .pipe(
+        switchMap((response) => {
+          const contenido: unknown = response;
+
+          if (!(contenido instanceof Blob)) {
+            return of(response);
+          }
+
+          return from(contenido.text()).pipe(
+            map(
+              (texto) =>
+                JSON.parse(texto) as CustomPageRolResponse
+            )
+          );
+        })
+      );
   }
 
-  private guardarRoles(roles: Rol[]): void {
-    this.localStorageService.guardar(STORAGE_KEYS.ROLES, roles);
-  }
-
-  private generarId(roles: Rol[]): number {
-    return roles.reduce(
-      (mayorId, rol) => Math.max(mayorId, rol.id),
-      0
-    ) + 1;
+  private mapearRol(
+    response: RolResponse
+  ): Rol {
+    return {
+      id: response.rolId ?? 0,
+      nombre: response.nombre ?? '',
+      descripcion: response.descripcion ?? '',
+      esSistema: response.esSistema ?? false,
+      permisos: [],
+      activo: response.activo ?? false,
+      fechaCreacion: '',
+      fechaActualizacion: null
+    };
   }
 
   private copiarPermisos(

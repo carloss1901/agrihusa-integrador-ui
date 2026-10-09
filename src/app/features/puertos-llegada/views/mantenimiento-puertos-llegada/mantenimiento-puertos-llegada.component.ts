@@ -156,7 +156,7 @@ export class MantenimientoPuertosLlegadaComponent
     }
 
     this.puertoService
-      .cambiarEstado(puerto.id)
+      .cambiarEstado(puerto)
       .subscribe((resultado) => {
         if (!resultado) {
           return;

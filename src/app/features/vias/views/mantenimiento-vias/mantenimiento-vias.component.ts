@@ -155,7 +155,7 @@ export class MantenimientoViasComponent
     }
 
     this.viaService
-      .cambiarEstado(via.id)
+      .cambiarEstado(via)
       .subscribe((resultado) => {
         if (!resultado) {
           return;

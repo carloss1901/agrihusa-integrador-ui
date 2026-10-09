@@ -1,3 +1,6 @@
+@use "variables" as *;
+@use "mixin" as *;
+
 .agrihusa {
 	.nav-tabs {
 		border:none;

@@ -177,7 +177,7 @@ export class MantenimientoVariedadesComponent
     }
 
     this.variedadService
-      .cambiarEstado(variedad.id)
+      .cambiarEstado(variedad)
       .subscribe((resultado) => {
         if (!resultado) {
           return;

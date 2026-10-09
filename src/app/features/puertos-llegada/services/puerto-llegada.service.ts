@@ -1,175 +1,202 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
+import {
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
 import { PaginatedResult } from '../../../core/models/pagination.model';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
 import {
   PuertoLlegada,
   PuertoLlegadaFormData,
   PuertoLlegadaQuery
 } from '../models/puerto-llegada.model';
+import { CustomPagePuertoLlegadaResponse } from '../../../api/api/models/custom-page-puerto-llegada-response';
+import { PuertoLlegadaResponse } from '../../../api/api/models/puerto-llegada-response';
+import { PuertoLlegadaControllerService } from '../../../api/api/services/puerto-llegada-controller.service';
+import { PuertoLlegadaRegistroRequest } from '../../../api/api/models/puerto-llegada-registro-request';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PuertoLlegadaService {
   constructor(
-    private localStorageService: LocalStorageService
+    private puertoControllerService:
+      PuertoLlegadaControllerService
   ) {}
 
   listar(
-    query: PuertoLlegadaQuery
-  ): Observable<PaginatedResult<PuertoLlegada>> {
-    const page = Math.max(1, query.page);
-    const pageSize = Math.max(1, query.pageSize);
-    const texto = query.texto?.trim().toUpperCase();
-    const pais = query.pais?.trim().toUpperCase();
+      query: PuertoLlegadaQuery
+    ): Observable<PaginatedResult<PuertoLlegada>> {
+      const page = Math.max(1, query.page);
+      const pageSize = Math.max(1, query.pageSize);
 
-    const puertosFiltrados = this.obtenerPuertos()
-      .filter((puerto) => {
-        const contenido = [
-          puerto.codigo,
-          puerto.puerto,
-          puerto.pais
-        ]
-          .join(' ')
-          .toUpperCase();
-
-        if (
-          texto &&
-          !contenido.includes(texto)
-        ) {
-          return false;
-        }
-
-        if (
-          pais &&
-          puerto.pais.toUpperCase() !== pais
-        ) {
-          return false;
-        }
-
-        if (
-          query.estado !== undefined &&
-          puerto.activo !== query.estado
-        ) {
-          return false;
-        }
-
-        return true;
-      })
-      .sort((a, b) => {
-        const comparacionPais =
-          a.pais.localeCompare(b.pais);
-
-        return comparacionPais !== 0
-          ? comparacionPais
-          : a.puerto.localeCompare(b.puerto);
-      });
-
-    const inicio = (page - 1) * pageSize;
-    const items = puertosFiltrados.slice(
-      inicio,
-      inicio + pageSize
-    );
-
-    return of({
-      items,
-      totalItems: puertosFiltrados.length,
-      page,
-      pageSize
-    });
-  }
+      return this.consultarPuertos({
+        texto: query.texto?.trim() || undefined,
+        pais: query.pais?.trim() || undefined,
+        activo: query.estado,
+        pagina: page,
+        tamPagina: pageSize
+      }).pipe(
+        map((response) => ({
+          items: (response.datos ?? []).map(
+            (item) => this.mapearPuerto(item)
+          ),
+          totalItems: Number(
+            response.paginacion?.totalElementos ?? 0
+          ),
+          page: Number(
+            response.paginacion?.numeroPagina ?? page
+          ),
+          pageSize: Number(
+            response.paginacion?.tamanioPagina ??
+              pageSize
+          )
+        }))
+      );
+    }
 
   obtenerPorId(
     id: number
   ): Observable<PuertoLlegada | null> {
-    const puerto =
-      this.obtenerPuertos().find(
-        (item) => item.id === id
-      ) ?? null;
+    return this.consultarPuertos({
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) => {
+        const puerto = (response.datos ?? [])
+          .map((item) =>
+            this.mapearPuerto(item)
+          )
+          .find((item) => item.id === id);
 
-    return of(puerto);
+        return puerto ?? null;
+      })
+    );
   }
 
   listarActivos(): Observable<PuertoLlegada[]> {
-    const puertos = this.obtenerPuertos()
-      .filter((puerto) => puerto.activo)
-      .sort((a, b) =>
-        `${a.pais} ${a.puerto}`.localeCompare(
-          `${b.pais} ${b.puerto}`
-        )
-      );
-
-    return of(puertos);
+    return this.consultarPuertos({
+      activo: true,
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) =>
+        (response.datos ?? [])
+          .map((item) =>
+            this.mapearPuerto(item)
+          )
+          .sort((a, b) =>
+            `${a.pais} ${a.puerto}`.localeCompare(
+              `${b.pais} ${b.puerto}`
+            )
+          )
+      )
+    );
   }
 
   crear(
     data: PuertoLlegadaFormData
   ): Observable<PuertoLlegada> {
-    const puertos = this.obtenerPuertos();
+    const datos = this.normalizarDatos(data);
 
-    const nuevoPuerto: PuertoLlegada = {
-      id: this.generarId(puertos),
-      ...this.normalizarDatos(data),
-      activo: true,
-      fechaCreacion: new Date().toISOString(),
-      fechaActualizacion: null
+    const body: PuertoLlegadaRegistroRequest = {
+      puertoLlegadaId: 0,
+      codigo: datos.codigo,
+      puerto: datos.puerto,
+      pais: datos.pais
     };
 
-    puertos.push(nuevoPuerto);
-    this.guardarPuertos(puertos);
+    return this.puertoControllerService
+      .registrar5({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarPuertos({
+            texto: datos.codigo,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const puertoCreado =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearPuerto(item)
+              )
+              .find(
+                (puerto) =>
+                  puerto.codigo === datos.codigo
+              );
 
-    return of(nuevoPuerto);
+          if (!puertoCreado) {
+            throw new Error(
+              'El puerto fue registrado, pero no pudo recuperarse.'
+            );
+          }
+
+          return puertoCreado;
+        })
+      );
   }
 
   actualizar(
     id: number,
     data: PuertoLlegadaFormData
   ): Observable<PuertoLlegada | null> {
-    const puertos = this.obtenerPuertos();
-    const posicion = puertos.findIndex(
-      (item) => item.id === id
-    );
+    const datos = this.normalizarDatos(data);
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    const puertoActualizado: PuertoLlegada = {
-      ...puertos[posicion],
-      ...this.normalizarDatos(data),
-      fechaActualizacion: new Date().toISOString()
+    const body: PuertoLlegadaRegistroRequest = {
+      puertoLlegadaId: id,
+      codigo: datos.codigo,
+      puerto: datos.puerto,
+      pais: datos.pais
     };
 
-    puertos[posicion] = puertoActualizado;
-    this.guardarPuertos(puertos);
+    return this.puertoControllerService
+      .actualizar5({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarPuertos({
+            texto: datos.codigo,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const puertoActualizado =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearPuerto(item)
+              )
+              .find(
+                (puerto) =>
+                  puerto.id === id
+              );
 
-    return of(puertoActualizado);
+          return puertoActualizado ?? null;
+        })
+      );
   }
 
   cambiarEstado(
-    id: number
+    puerto: PuertoLlegada
   ): Observable<PuertoLlegada | null> {
-    const puertos = this.obtenerPuertos();
-    const posicion = puertos.findIndex(
-      (item) => item.id === id
-    );
+    const nuevoEstado = !puerto.activo;
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    puertos[posicion] = {
-      ...puertos[posicion],
-      activo: !puertos[posicion].activo,
-      fechaActualizacion: new Date().toISOString()
-    };
-
-    this.guardarPuertos(puertos);
-
-    return of(puertos[posicion]);
+    return this.puertoControllerService
+      .cambiarEstado5({
+        puertoLlegadaId: puerto.id,
+        activo: nuevoEstado
+      })
+      .pipe(
+        map(() => ({
+          ...puerto,
+          activo: nuevoEstado,
+          fechaActualizacion:
+            new Date().toISOString()
+        }))
+      );
   }
 
   existeCodigo(
@@ -179,14 +206,21 @@ export class PuertoLlegadaService {
     const codigoNormalizado =
       this.normalizarCodigo(codigo);
 
-    const existe = this.obtenerPuertos().some(
-      (puerto) =>
-        this.normalizarCodigo(puerto.codigo) ===
-          codigoNormalizado &&
-        puerto.id !== idExcluir
+    return this.consultarPuertos({
+      texto: codigoNormalizado,
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (item) =>
+            this.normalizarCodigo(
+              item.codigo ?? ''
+            ) === codigoNormalizado &&
+            item.puertoLlegadaId !== idExcluir
+        )
+      )
     );
-
-    return of(existe);
   }
 
   existePuerto(
@@ -200,46 +234,56 @@ export class PuertoLlegadaService {
       puerto: nombrePuerto
     });
 
-    const existe = this.obtenerPuertos().some(
-      (puerto) =>
-        puerto.pais.toUpperCase() === datos.pais &&
-        puerto.puerto.toUpperCase() ===
-          datos.puerto &&
-        puerto.id !== idExcluir
-    );
-
-    return of(existe);
-  }
-
-  private obtenerPuertos(): PuertoLlegada[] {
-    return (
-      this.localStorageService.obtener<
-        PuertoLlegada[]
-      >(
-        STORAGE_KEYS.PUERTOS_LLEGADA
-      ) ?? []
-    );
-  }
-
-  private guardarPuertos(
-    puertos: PuertoLlegada[]
-  ): void {
-    this.localStorageService.guardar(
-      STORAGE_KEYS.PUERTOS_LLEGADA,
-      puertos
+    return this.consultarPuertos({
+      texto: datos.puerto,
+      pais: datos.pais,
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (item) =>
+            (item.pais ?? '')
+              .trim()
+              .toUpperCase() === datos.pais &&
+            (item.puerto ?? '')
+              .trim()
+              .toUpperCase() === datos.puerto &&
+            item.puertoLlegadaId !== idExcluir
+        )
+      )
     );
   }
 
-  private generarId(
-    puertos: PuertoLlegada[]
-  ): number {
-    return (
-      puertos.reduce(
-        (mayorId, puerto) =>
-          Math.max(mayorId, puerto.id),
-        0
-      ) + 1
-    );
+  private consultarPuertos(
+    params: {
+      texto?: string;
+      pais?: string;
+      activo?: boolean;
+      pagina?: number;
+      tamPagina?: number;
+    }
+  ): Observable<CustomPagePuertoLlegadaResponse> {
+    return this.puertoControllerService
+      .listarPuertos(params)
+      .pipe(
+        switchMap((response) => {
+          const contenido: unknown = response;
+
+          if (!(contenido instanceof Blob)) {
+            return of(response);
+          }
+
+          return from(contenido.text()).pipe(
+            map(
+              (texto) =>
+                JSON.parse(
+                  texto
+                ) as CustomPagePuertoLlegadaResponse
+            )
+          );
+        })
+      );
   }
 
   private normalizarDatos(
@@ -259,5 +303,19 @@ export class PuertoLlegadaService {
       .trim()
       .toUpperCase()
       .replace(/\s+/g, '');
+  }
+
+  private mapearPuerto(
+    response: PuertoLlegadaResponse
+  ): PuertoLlegada {
+    return {
+      id: response.puertoLlegadaId ?? 0,
+      codigo: response.codigo ?? '',
+      puerto: response.puerto ?? '',
+      pais: response.pais ?? '',
+      activo: response.activo ?? false,
+      fechaCreacion: '',
+      fechaActualizacion: null
+    };
   }
 }

@@ -1,21 +1,29 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
+import {
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
 import { PaginatedResult } from '../../../core/models/pagination.model';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
 import {
   Situacion,
   SituacionFormData,
   SituacionQuery
 } from '../models/situacion.model';
+import { CustomPageSituacionResponse } from '../../../api/api/models/custom-page-situacion-response';
+import { SituacionResponse } from '../../../api/api/models/situacion-response';
+import { SituacionControllerService } from '../../../api/api/services/situacion-controller.service';
+import { SituacionRegistroRequest } from '../../../api/api/models/situacion-registro-request';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SituacionService {
   constructor(
-    private localStorageService: LocalStorageService
+    private situacionControllerService:
+      SituacionControllerService
   ) {}
 
   listar(
@@ -23,133 +31,168 @@ export class SituacionService {
   ): Observable<PaginatedResult<Situacion>> {
     const page = Math.max(1, query.page);
     const pageSize = Math.max(1, query.pageSize);
-    const texto = query.texto?.trim().toUpperCase();
 
-    const situacionesFiltradas =
-      this.obtenerSituaciones()
-        .filter((situacion) => {
-          if (
-            texto &&
-            !situacion.descripcion
-              .toUpperCase()
-              .includes(texto)
-          ) {
-            return false;
-          }
-
-          if (
-            query.estado !== undefined &&
-            situacion.activo !== query.estado
-          ) {
-            return false;
-          }
-
-          return true;
-        })
-        .sort((a, b) =>
-          a.descripcion.localeCompare(b.descripcion)
-        );
-
-    const inicio = (page - 1) * pageSize;
-    const items = situacionesFiltradas.slice(
-      inicio,
-      inicio + pageSize
+    return this.consultarSituaciones({
+      texto: query.texto?.trim() || undefined,
+      activo: query.estado,
+      pagina: page,
+      tamPagina: pageSize
+    }).pipe(
+      map((response) => ({
+        items: (response.datos ?? []).map(
+          (item) => this.mapearSituacion(item)
+        ),
+        totalItems: Number(
+          response.paginacion?.totalElementos ?? 0
+        ),
+        page: Number(
+          response.paginacion?.numeroPagina ?? page
+        ),
+        pageSize: Number(
+          response.paginacion?.tamanioPagina ??
+            pageSize
+        )
+      }))
     );
-
-    return of({
-      items,
-      totalItems: situacionesFiltradas.length,
-      page,
-      pageSize
-    });
   }
 
   obtenerPorId(
     id: number
   ): Observable<Situacion | null> {
-    const situacion =
-      this.obtenerSituaciones().find(
-        (item) => item.id === id
-      ) ?? null;
+    return this.consultarSituaciones({
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) => {
+        const situacion = (response.datos ?? [])
+          .map((item) =>
+            this.mapearSituacion(item)
+          )
+          .find((item) => item.id === id);
 
-    return of(situacion);
+        return situacion ?? null;
+      })
+    );
   }
 
   listarActivas(): Observable<Situacion[]> {
-    const situaciones = this.obtenerSituaciones()
-      .filter((situacion) => situacion.activo)
-      .sort((a, b) =>
-        a.descripcion.localeCompare(b.descripcion)
-      );
-
-    return of(situaciones);
+    return this.consultarSituaciones({
+      activo: true,
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) =>
+        (response.datos ?? [])
+          .map((item) =>
+            this.mapearSituacion(item)
+          )
+          .sort((a, b) =>
+            a.descripcion.localeCompare(
+              b.descripcion
+            )
+          )
+      )
+    );
   }
 
   crear(
     data: SituacionFormData
   ): Observable<Situacion> {
-    const situaciones = this.obtenerSituaciones();
+    const datos = this.normalizarDatos(data);
 
-    const nuevaSituacion: Situacion = {
-      id: this.generarId(situaciones),
-      ...this.normalizarDatos(data),
-      activo: true,
-      fechaCreacion: new Date().toISOString(),
-      fechaActualizacion: null
+    const body: SituacionRegistroRequest = {
+      situacionId: 0,
+      descripcion: datos.descripcion
     };
 
-    situaciones.push(nuevaSituacion);
-    this.guardarSituaciones(situaciones);
+    return this.situacionControllerService
+      .registrar3({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarSituaciones({
+            texto: datos.descripcion,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const situacionCreada =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearSituacion(item)
+              )
+              .find(
+                (situacion) =>
+                  situacion.descripcion ===
+                    datos.descripcion
+              );
 
-    return of(nuevaSituacion);
+          if (!situacionCreada) {
+            throw new Error(
+              'La situación fue registrada, pero no pudo recuperarse.'
+            );
+          }
+
+          return situacionCreada;
+        })
+      );
   }
 
   actualizar(
     id: number,
     data: SituacionFormData
   ): Observable<Situacion | null> {
-    const situaciones = this.obtenerSituaciones();
-    const posicion = situaciones.findIndex(
-      (item) => item.id === id
-    );
+    const datos = this.normalizarDatos(data);
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    const situacionActualizada: Situacion = {
-      ...situaciones[posicion],
-      ...this.normalizarDatos(data),
-      fechaActualizacion: new Date().toISOString()
+    const body: SituacionRegistroRequest = {
+      situacionId: id,
+      descripcion: datos.descripcion
     };
 
-    situaciones[posicion] = situacionActualizada;
-    this.guardarSituaciones(situaciones);
+    return this.situacionControllerService
+      .actualizar3({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarSituaciones({
+            texto: datos.descripcion,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const situacionActualizada =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearSituacion(item)
+              )
+              .find(
+                (situacion) =>
+                  situacion.id === id
+              );
 
-    return of(situacionActualizada);
+          return situacionActualizada ?? null;
+        })
+      );
   }
 
   cambiarEstado(
-    id: number
+    situacion: Situacion
   ): Observable<Situacion | null> {
-    const situaciones = this.obtenerSituaciones();
-    const posicion = situaciones.findIndex(
-      (item) => item.id === id
-    );
+    const nuevoEstado = !situacion.activo;
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    situaciones[posicion] = {
-      ...situaciones[posicion],
-      activo: !situaciones[posicion].activo,
-      fechaActualizacion: new Date().toISOString()
-    };
-
-    this.guardarSituaciones(situaciones);
-
-    return of(situaciones[posicion]);
+    return this.situacionControllerService
+      .cambiarEstado3({
+        situacionId: situacion.id,
+        activo: nuevoEstado
+      })
+      .pipe(
+        map(() => ({
+          ...situacion,
+          activo: nuevoEstado,
+          fechaActualizacion:
+            new Date().toISOString()
+        }))
+      );
   }
 
   existeDescripcion(
@@ -159,43 +202,53 @@ export class SituacionService {
     const descripcionNormalizada =
       descripcion.trim().toUpperCase();
 
-    const existe = this.obtenerSituaciones().some(
-      (situacion) =>
-        situacion.descripcion.toUpperCase() ===
-          descripcionNormalizada &&
-        situacion.id !== idExcluir
-    );
-
-    return of(existe);
-  }
-
-  private obtenerSituaciones(): Situacion[] {
-    return (
-      this.localStorageService.obtener<Situacion[]>(
-        STORAGE_KEYS.SITUACIONES
-      ) ?? []
-    );
-  }
-
-  private guardarSituaciones(
-    situaciones: Situacion[]
-  ): void {
-    this.localStorageService.guardar(
-      STORAGE_KEYS.SITUACIONES,
-      situaciones
+    return this.consultarSituaciones({
+      texto: descripcion.trim(),
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (item) =>
+            (item.descripcion ?? '')
+              .trim()
+              .toUpperCase() ===
+                descripcionNormalizada &&
+            item.situacionId !== idExcluir
+        )
+      )
     );
   }
 
-  private generarId(
-    situaciones: Situacion[]
-  ): number {
-    return (
-      situaciones.reduce(
-        (mayorId, situacion) =>
-          Math.max(mayorId, situacion.id),
-        0
-      ) + 1
-    );
+
+  private consultarSituaciones(
+    params: {
+      texto?: string;
+      activo?: boolean;
+      pagina?: number;
+      tamPagina?: number;
+    }
+  ): Observable<CustomPageSituacionResponse> {
+    return this.situacionControllerService
+      .listarSituaciones(params)
+      .pipe(
+        switchMap((response) => {
+          const contenido: unknown = response;
+
+          if (!(contenido instanceof Blob)) {
+            return of(response);
+          }
+
+          return from(contenido.text()).pipe(
+            map(
+              (texto) =>
+                JSON.parse(
+                  texto
+                ) as CustomPageSituacionResponse
+            )
+          );
+        })
+      );
   }
 
   private normalizarDatos(
@@ -204,6 +257,18 @@ export class SituacionService {
     return {
       descripcion:
         data.descripcion.trim().toUpperCase()
+    };
+  }
+
+  private mapearSituacion(
+    response: SituacionResponse
+  ): Situacion {
+    return {
+      id: response.situacionId ?? 0,
+      descripcion: response.descripcion ?? '',
+      activo: response.activo ?? false,
+      fechaCreacion: '',
+      fechaActualizacion: null
     };
   }
 }

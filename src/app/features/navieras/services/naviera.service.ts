@@ -1,234 +1,306 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
+import {
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
 import { PaginatedResult } from '../../../core/models/pagination.model';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
 import {
     Naviera,
     NavieraFormData,
     NavieraQuery
 } from '../models/naviera.model';
+import { CustomPageNavieraResponse } from '../../../api/api/models/custom-page-naviera-response';
+import { NavieraResponse } from '../../../api/api/models/naviera-response';
+import { NavieraControllerService } from '../../../api/api/services/naviera-controller.service';
+import { NavieraRegistroRequest } from '../../../api/api/models/naviera-registro-request';
 
 @Injectable({
     providedIn: 'root'
 })
 export class NavieraService {
     constructor(
-        private localStorageService: LocalStorageService
-    ) { }
+        private navieraControllerService:
+            NavieraControllerService
+        ) { }
 
     listar(
         query: NavieraQuery
-    ): Observable<PaginatedResult<Naviera>> {
+        ): Observable<PaginatedResult<Naviera>> {
         const page = Math.max(1, query.page);
         const pageSize = Math.max(1, query.pageSize);
-        const texto = query.texto?.trim().toUpperCase();
-        const pais = query.pais?.trim().toUpperCase();
 
-        const navierasFiltradas = this.obtenerNavieras()
-            .filter((naviera) => {
-                const contenido = [
-                    naviera.codigo,
-                    naviera.nombre,
-                    naviera.pais,
-                    naviera.contacto,
-                    naviera.correo
-                ]
-                    .join(' ')
-                    .toUpperCase();
-
-                if (
-                    texto &&
-                    !contenido.includes(texto)
-                ) {
-                    return false;
-                }
-
-                if (
-                    pais &&
-                    naviera.pais.toUpperCase() !== pais
-                ) {
-                    return false;
-                }
-
-                if (
-                    query.estado !== undefined &&
-                    naviera.activo !== query.estado
-                ) {
-                    return false;
-                }
-
-                return true;
-            })
-            .sort((a, b) =>
-                a.nombre.localeCompare(b.nombre)
-            );
-
-        const inicio = (page - 1) * pageSize;
-        const items = navierasFiltradas.slice(
-            inicio,
-            inicio + pageSize
+        return this.consultarNavieras({
+            texto: query.texto?.trim() || undefined,
+            pais: query.pais?.trim() || undefined,
+            activo: query.estado,
+            pagina: page,
+            tamPagina: pageSize
+        }).pipe(
+            map((response) => ({
+            items: (response.datos ?? []).map(
+                (item) => this.mapearNaviera(item)
+            ),
+            totalItems: Number(
+                response.paginacion?.totalElementos ?? 0
+            ),
+            page: Number(
+                response.paginacion?.numeroPagina ?? page
+            ),
+            pageSize: Number(
+                response.paginacion?.tamanioPagina ??
+                pageSize
+            )
+            }))
         );
-
-        return of({
-            items,
-            totalItems: navierasFiltradas.length,
-            page,
-            pageSize
-        });
-    }
+        }
 
     obtenerPorId(
         id: number
-    ): Observable<Naviera | null> {
-        const naviera =
-            this.obtenerNavieras().find(
-                (item) => item.id === id
-            ) ?? null;
+        ): Observable<Naviera | null> {
+        return this.consultarNavieras({
+            pagina: 1,
+            tamPagina: 1000
+        }).pipe(
+            map((response) => {
+            const naviera = (response.datos ?? [])
+                .map((item) =>
+                this.mapearNaviera(item)
+                )
+                .find((item) => item.id === id);
 
-        return of(naviera);
-    }
+            return naviera ?? null;
+            })
+        );
+        }
 
     listarActivas(): Observable<Naviera[]> {
-        const navieras = this.obtenerNavieras()
-            .filter((naviera) => naviera.activo)
-            .sort((a, b) =>
+        return this.consultarNavieras({
+            activo: true,
+            pagina: 1,
+            tamPagina: 1000
+        }).pipe(
+            map((response) =>
+            (response.datos ?? [])
+                .map((item) =>
+                this.mapearNaviera(item)
+                )
+                .sort((a, b) =>
                 a.nombre.localeCompare(b.nombre)
-            );
-
-        return of(navieras);
-    }
+                )
+            )
+        );
+        }
 
     crear(
         data: NavieraFormData
-    ): Observable<Naviera> {
-        const navieras = this.obtenerNavieras();
+        ): Observable<Naviera> {
+        const datos = this.normalizarDatos(data);
 
-        const nuevaNaviera: Naviera = {
-            id: this.generarId(navieras),
-            ...this.normalizarDatos(data),
-            activo: true,
-            fechaCreacion: new Date().toISOString(),
-            fechaActualizacion: null
+        const body: NavieraRegistroRequest = {
+            navieraId: 0,
+            codigo: datos.codigo,
+            nombre: datos.nombre,
+            pais: datos.pais,
+            contacto: datos.contacto || undefined,
+            correo: datos.correo || undefined,
+            telefono: datos.telefono || undefined,
+            sitioWeb: datos.sitioWeb || undefined
         };
 
-        navieras.push(nuevaNaviera);
-        this.guardarNavieras(navieras);
+        return this.navieraControllerService
+            .registrar8({ body })
+            .pipe(
+            switchMap(() =>
+                this.consultarNavieras({
+                texto: datos.codigo,
+                pagina: 1,
+                tamPagina: 10
+                })
+            ),
+            map((response) => {
+                const navieraCreada =
+                (response.datos ?? [])
+                    .map((item) =>
+                    this.mapearNaviera(item)
+                    )
+                    .find(
+                    (naviera) =>
+                        naviera.codigo === datos.codigo
+                    );
 
-        return of(nuevaNaviera);
-    }
+                if (!navieraCreada) {
+                throw new Error(
+                    'La naviera fue registrada, pero no pudo recuperarse.'
+                );
+                }
+
+                return navieraCreada;
+            })
+            );
+        }
 
     actualizar(
         id: number,
         data: NavieraFormData
-    ): Observable<Naviera | null> {
-        const navieras = this.obtenerNavieras();
-        const posicion = navieras.findIndex(
-            (item) => item.id === id
-        );
+        ): Observable<Naviera | null> {
+        const datos = this.normalizarDatos(data);
 
-        if (posicion === -1) {
-            return of(null);
-        }
-
-        const navieraActualizada: Naviera = {
-            ...navieras[posicion],
-            ...this.normalizarDatos(data),
-            fechaActualizacion: new Date().toISOString()
+        const body: NavieraRegistroRequest = {
+            navieraId: id,
+            codigo: datos.codigo,
+            nombre: datos.nombre,
+            pais: datos.pais,
+            contacto: datos.contacto || undefined,
+            correo: datos.correo || undefined,
+            telefono: datos.telefono || undefined,
+            sitioWeb: datos.sitioWeb || undefined
         };
 
-        navieras[posicion] = navieraActualizada;
-        this.guardarNavieras(navieras);
+        return this.navieraControllerService
+            .actualizar8({ body })
+            .pipe(
+            switchMap(() =>
+                this.consultarNavieras({
+                texto: datos.codigo,
+                pagina: 1,
+                tamPagina: 10
+                })
+            ),
+            map((response) => {
+                const navieraActualizada =
+                (response.datos ?? [])
+                    .map((item) =>
+                    this.mapearNaviera(item)
+                    )
+                    .find(
+                    (naviera) =>
+                        naviera.id === id
+                    );
 
-        return of(navieraActualizada);
-    }
+                return navieraActualizada ?? null;
+            })
+            );
+        }
 
     cambiarEstado(
-        id: number
-    ): Observable<Naviera | null> {
-        const navieras = this.obtenerNavieras();
-        const posicion = navieras.findIndex(
-            (item) => item.id === id
-        );
+        naviera: Naviera
+        ): Observable<Naviera | null> {
+        const nuevoEstado = !naviera.activo;
 
-        if (posicion === -1) {
-            return of(null);
+        return this.navieraControllerService
+            .cambiarEstado8({
+            navieraId: naviera.id,
+            activo: nuevoEstado
+            })
+            .pipe(
+            map(() => ({
+                ...naviera,
+                activo: nuevoEstado,
+                fechaActualizacion:
+                new Date().toISOString()
+            }))
+            );
         }
-
-        navieras[posicion] = {
-            ...navieras[posicion],
-            activo: !navieras[posicion].activo,
-            fechaActualizacion: new Date().toISOString()
-        };
-
-        this.guardarNavieras(navieras);
-
-        return of(navieras[posicion]);
-    }
 
     existeCodigo(
         codigo: string,
         idExcluir?: number
-    ): Observable<boolean> {
+        ): Observable<boolean> {
         const codigoNormalizado =
             codigo.trim().toUpperCase();
 
-        const existe = this.obtenerNavieras().some(
-            (naviera) =>
-                naviera.codigo.trim().toUpperCase() ===
-                codigoNormalizado &&
-                naviera.id !== idExcluir
+        return this.consultarNavieras({
+            texto: codigoNormalizado,
+            pagina: 1,
+            tamPagina: 100
+        }).pipe(
+            map((response) =>
+            (response.datos ?? []).some(
+                (item) =>
+                (item.codigo ?? '')
+                    .trim()
+                    .toUpperCase() === codigoNormalizado &&
+                item.navieraId !== idExcluir
+            )
+            )
         );
-
-        return of(existe);
-    }
+        }
 
     existeNombre(
         nombre: string,
         idExcluir?: number
-    ): Observable<boolean> {
+        ): Observable<boolean> {
         const nombreNormalizado =
             nombre.trim().toUpperCase();
 
-        const existe = this.obtenerNavieras().some(
-            (naviera) =>
-                naviera.nombre.trim().toUpperCase() ===
-                nombreNormalizado &&
-                naviera.id !== idExcluir
+        return this.consultarNavieras({
+            texto: nombre.trim(),
+            pagina: 1,
+            tamPagina: 100
+        }).pipe(
+            map((response) =>
+            (response.datos ?? []).some(
+                (item) =>
+                (item.nombre ?? '')
+                    .trim()
+                    .toUpperCase() === nombreNormalizado &&
+                item.navieraId !== idExcluir
+            )
+            )
         );
+        }
 
-        return of(existe);
-    }
+    private consultarNavieras(
+        params: {
+            texto?: string;
+            pais?: string;
+            activo?: boolean;
+            pagina?: number;
+            tamPagina?: number;
+        }
+        ): Observable<CustomPageNavieraResponse> {
+        return this.navieraControllerService
+            .listar(params)
+            .pipe(
+            switchMap((response) => {
+                const contenido: unknown = response;
 
-    private obtenerNavieras(): Naviera[] {
-        return (
-            this.localStorageService.obtener<Naviera[]>(
-                STORAGE_KEYS.NAVIERAS
-            ) ?? []
-        );
-    }
+                if (!(contenido instanceof Blob)) {
+                return of(response);
+                }
 
-    private guardarNavieras(
-        navieras: Naviera[]
-    ): void {
-        this.localStorageService.guardar(
-            STORAGE_KEYS.NAVIERAS,
-            navieras
-        );
-    }
-
-    private generarId(
-        navieras: Naviera[]
-    ): number {
-        return (
-            navieras.reduce(
-                (mayorId, naviera) =>
-                    Math.max(mayorId, naviera.id),
-                0
-            ) + 1
-        );
-    }
+                return from(contenido.text()).pipe(
+                map(
+                    (texto) =>
+                    JSON.parse(
+                        texto
+                    ) as CustomPageNavieraResponse
+                )
+                );
+            })
+            );
+        }
+    
+    private mapearNaviera(
+        response: NavieraResponse
+        ): Naviera {
+        return {
+            id: response.navieraId ?? 0,
+            codigo: response.codigo ?? '',
+            nombre: response.nombre ?? '',
+            pais: response.pais ?? '',
+            contacto: response.contacto ?? '',
+            correo: response.correo ?? '',
+            telefono: response.telefono ?? '',
+            sitioWeb: response.sitioWeb ?? '',
+            activo: response.activo ?? false,
+            fechaCreacion: '',
+            fechaActualizacion: null
+        };
+        }
 
     private normalizarDatos(
         data: NavieraFormData

@@ -153,7 +153,7 @@ export class MantenimientoNavierasComponent
     }
 
     this.navieraService
-      .cambiarEstado(naviera.id)
+      .cambiarEstado(naviera)
       .subscribe((resultado) => {
         if (!resultado) {
           return;

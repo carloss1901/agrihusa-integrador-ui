@@ -158,7 +158,7 @@ export class MantenimientoOperadoresLogisticosComponent
     }
 
     this.operadorService
-      .cambiarEstado(operador.id)
+      .cambiarEstado(operador)
       .subscribe((resultado) => {
         if (!resultado) {
           return;

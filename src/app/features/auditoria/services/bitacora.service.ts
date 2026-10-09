@@ -1,200 +1,176 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
-import { PaginatedResult } from '../../../core/models/pagination.model';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
 import {
-    BitacoraQuery,
-    RegistroBitacora,
-    RegistroBitacoraCrearData
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
+import { BitacoraControllerService } from '../../../api/api/services/bitacora-controller.service';
+import { BitacoraRegistroRequest } from '../../../api/api/models/bitacora-registro-request';
+import { BitacoraResponse } from '../../../api/api/models/bitacora-response';
+import { CustomPageBitacoraResponse } from '../../../api/api/models/custom-page-bitacora-response';
+import { PaginatedResult } from '../../../core/models/pagination.model';
+import {
+  AccionBitacora,
+  BitacoraQuery,
+  ModuloBitacora,
+  RegistroBitacora,
+  RegistroBitacoraCrearData,
+  ResultadoBitacora
 } from '../models/bitacora.model';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class BitacoraService {
-    constructor(
-        private localStorageService: LocalStorageService
-    ) { }
+  constructor(
+    private bitacoraControllerService:
+      BitacoraControllerService
+  ) {}
 
-    listar(
-        query: BitacoraQuery
-    ): Observable<PaginatedResult<RegistroBitacora>> {
-        const page = Math.max(1, query.page);
-        const pageSize = Math.max(1, query.pageSize);
-        const usuario =
-            query.usuario?.trim().toUpperCase();
+  listar(
+    query: BitacoraQuery
+  ): Observable<PaginatedResult<RegistroBitacora>> {
+    const page = Math.max(1, query.page);
+    const pageSize = Math.max(1, query.pageSize);
 
-        const fechaDesde = this.obtenerInicioDia(
-            query.fechaDesde
-        );
-
-        const fechaHasta = this.obtenerFinDia(
-            query.fechaHasta
-        );
-
-        const registrosFiltrados = [
-            ...this.obtenerRegistros()
-        ]
-            .filter((registro) => {
-                if (
-                    usuario &&
-                    !registro.nombreUsuario
-                        .toUpperCase()
-                        .includes(usuario)
-                ) {
-                    return false;
-                }
-
-                if (
-                    query.accion !== undefined &&
-                    registro.accion !== query.accion
-                ) {
-                    return false;
-                }
-
-                if (
-                    query.modulo !== undefined &&
-                    registro.modulo !== query.modulo
-                ) {
-                    return false;
-                }
-
-                if (
-                    query.resultado !== undefined &&
-                    registro.resultado !== query.resultado
-                ) {
-                    return false;
-                }
-
-                const fechaRegistro =
-                    new Date(registro.fecha).getTime();
-
-                if (
-                    fechaDesde !== null &&
-                    fechaRegistro < fechaDesde
-                ) {
-                    return false;
-                }
-
-                if (
-                    fechaHasta !== null &&
-                    fechaRegistro > fechaHasta
-                ) {
-                    return false;
-                }
-
-                return true;
-            })
-            .sort((a, b) =>
-                b.fecha.localeCompare(a.fecha)
-            );
-
-        const inicio = (page - 1) * pageSize;
-        const items = registrosFiltrados.slice(
-            inicio,
-            inicio + pageSize
-        );
-
-        return of({
-            items,
-            totalItems: registrosFiltrados.length,
-            page,
+    return this.consultarBitacoras({
+      usuario: query.usuario?.trim() || undefined,
+      modulo: query.modulo,
+      accion: query.accion,
+      resultado: query.resultado,
+      fechaDesde: query.fechaDesde,
+      fechaHasta: query.fechaHasta,
+      pagina: page,
+      tamPagina: pageSize
+    }).pipe(
+      map((response) => ({
+        items: (response.datos ?? []).map(
+          (item) => this.mapearBitacora(item)
+        ),
+        totalItems: Number(
+          response.paginacion?.totalElementos ?? 0
+        ),
+        page: Number(
+          response.paginacion?.numeroPagina ?? page
+        ),
+        pageSize: Number(
+          response.paginacion?.tamanioPagina ??
             pageSize
-        });
+        )
+      }))
+    );
+  }
+
+  obtenerPorId(
+    id: number
+  ): Observable<RegistroBitacora | null> {
+    return this.consultarBitacoras({
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) => {
+        const registro = (response.datos ?? [])
+          .map((item) =>
+            this.mapearBitacora(item)
+          )
+          .find((item) => item.id === id);
+
+        return registro ?? null;
+      })
+    );
+  }
+
+  registrar(
+    data: RegistroBitacoraCrearData
+  ): Observable<RegistroBitacora> {
+    const body: BitacoraRegistroRequest = {
+      usuarioId: data.usuarioId ?? undefined,
+      modulo: data.modulo,
+      accion: data.accion,
+      entidad: data.entidad.trim(),
+      registroId: data.registroId ?? undefined,
+      detalle: data.detalle.trim().slice(0, 500),
+      resultado: data.resultado
+    };
+
+    return this.bitacoraControllerService
+      .registrar12({ body })
+      .pipe(
+        map(() => ({
+          id: 0,
+          fecha: new Date().toISOString(),
+          usuarioId: data.usuarioId,
+          nombreUsuario:
+            data.nombreUsuario.trim() || 'SISTEMA',
+          modulo: data.modulo,
+          accion: data.accion,
+          entidad: data.entidad.trim(),
+          registroId: data.registroId,
+          detalle: data.detalle.trim().slice(0, 500),
+          resultado: data.resultado
+        }))
+      );
+  }
+
+  private consultarBitacoras(
+    params: {
+      usuario?: string;
+      modulo?: string;
+      accion?: string;
+      entidad?: string;
+      resultado?: string;
+      activo?: boolean;
+      fechaDesde?: string;
+      fechaHasta?: string;
+      pagina?: number;
+      tamPagina?: number;
     }
+  ): Observable<CustomPageBitacoraResponse> {
+    return this.bitacoraControllerService
+      .listar3(params)
+      .pipe(
+        switchMap((response) => {
+          const contenido: unknown = response;
 
-    obtenerPorId(
-        id: number
-    ): Observable<RegistroBitacora | null> {
-        const registro =
-            this.obtenerRegistros().find(
-                (item) => item.id === id
-            ) ?? null;
+          if (!(contenido instanceof Blob)) {
+            return of(response);
+          }
 
-        return of(registro);
-    }
+          return from(contenido.text()).pipe(
+            map(
+              (texto) =>
+                JSON.parse(
+                  texto
+                ) as CustomPageBitacoraResponse
+            )
+          );
+        })
+      );
+  }
 
-    registrar(
-        data: RegistroBitacoraCrearData
-    ): Observable<RegistroBitacora> {
-        const registros = this.obtenerRegistros();
-
-        const nuevoRegistro: RegistroBitacora = {
-            id: this.generarId(registros),
-            fecha: new Date().toISOString(),
-            usuarioId: data.usuarioId,
-            nombreUsuario:
-                data.nombreUsuario.trim().toUpperCase() ||
-                'SISTEMA',
-            modulo: data.modulo,
-            accion: data.accion,
-            entidad: data.entidad.trim(),
-            registroId: data.registroId,
-            detalle: data.detalle.trim().slice(0, 500),
-            resultado: data.resultado
-        };
-
-        registros.push(nuevoRegistro);
-
-        this.localStorageService.guardar(
-            STORAGE_KEYS.BITACORA,
-            registros
-        );
-
-        return of(nuevoRegistro);
-    }
-
-    private obtenerRegistros(): RegistroBitacora[] {
-        return (
-            this.localStorageService.obtener<
-                RegistroBitacora[]
-            >(STORAGE_KEYS.BITACORA) ?? []
-        );
-    }
-
-    private generarId(
-        registros: RegistroBitacora[]
-    ): number {
-        return (
-            registros.reduce(
-                (mayorId, registro) =>
-                    Math.max(mayorId, registro.id),
-                0
-            ) + 1
-        );
-    }
-
-    private obtenerInicioDia(
-        fecha?: string
-    ): number | null {
-        if (!fecha) {
-            return null;
-        }
-
-        const resultado = new Date(
-            `${fecha}T00:00:00`
-        ).getTime();
-
-        return Number.isNaN(resultado)
-            ? null
-            : resultado;
-    }
-
-    private obtenerFinDia(
-        fecha?: string
-    ): number | null {
-        if (!fecha) {
-            return null;
-        }
-
-        const resultado = new Date(
-            `${fecha}T23:59:59.999`
-        ).getTime();
-
-        return Number.isNaN(resultado)
-            ? null
-            : resultado;
-    }
+  private mapearBitacora(
+    response: BitacoraResponse
+  ): RegistroBitacora {
+    return {
+      id: response.bitacoraId ?? 0,
+      fecha:
+        response.fecha ??
+        response.fechaCreacion ??
+        '',
+      usuarioId: response.usuarioId ?? null,
+      nombreUsuario:
+        response.nombreUsuario ?? 'SISTEMA',
+      modulo:
+        (response.modulo ?? '') as ModuloBitacora,
+      accion:
+        (response.accion ?? '') as AccionBitacora,
+      entidad: response.entidad ?? '',
+      registroId: response.registroId ?? null,
+      detalle: response.detalle ?? '',
+      resultado:
+        (response.resultado ?? '') as ResultadoBitacora
+    };
+  }
 }

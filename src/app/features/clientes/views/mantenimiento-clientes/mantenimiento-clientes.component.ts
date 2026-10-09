@@ -153,7 +153,7 @@ export class MantenimientoClientesComponent
     }
 
     this.clienteService
-      .cambiarEstado(cliente.id)
+      .cambiarEstado(cliente)
       .subscribe((resultado) => {
         if (!resultado) {
           return;
@@ -192,9 +192,17 @@ export class MantenimientoClientesComponent
           this.loading = false;
         })
       )
-      .subscribe((resultado) => {
-        this.clientes = resultado.items;
-        this.totalItems = resultado.totalItems;
+      .subscribe({
+        next: (resultado) => {
+          this.clientes = resultado.items;
+          this.totalItems = resultado.totalItems;
+        },
+        error: (error) => {
+          console.error(
+            'ERROR AL CARGAR CLIENTES:',
+            error
+          );
+        }
       });
   }
 

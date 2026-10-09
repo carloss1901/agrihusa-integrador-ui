@@ -1,225 +1,266 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
+import {
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
 import { PaginatedResult } from '../../../core/models/pagination.model';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
 import {
     Destino,
     DestinoFormData,
     DestinoQuery
 } from '../models/destino.model';
+import { CustomPageDestinoResponse } from '../../../api/api/models/custom-page-destino-response';
+import { DestinoResponse } from '../../../api/api/models/destino-response';
+import { DestinoControllerService } from '../../../api/api/services/destino-controller.service';
+import { DestinoRegistroRequest } from '../../../api/api/models/destino-registro-request';
 
 @Injectable({
     providedIn: 'root'
 })
 export class DestinoService {
     constructor(
-        private localStorageService: LocalStorageService
-    ) { }
+        private destinoControllerService:
+            DestinoControllerService
+        ) { }
 
     listar(
         query: DestinoQuery
-    ): Observable<PaginatedResult<Destino>> {
+        ): Observable<PaginatedResult<Destino>> {
         const page = Math.max(1, query.page);
         const pageSize = Math.max(1, query.pageSize);
-        const texto = query.texto?.trim().toUpperCase();
-        const pais = query.pais?.trim().toUpperCase();
 
-        const destinosFiltrados = this.obtenerDestinos()
-            .filter((destino) => {
-                const contenido = [
-                    destino.pais,
-                    destino.ciudad
-                ]
-                    .join(' ')
-                    .toUpperCase();
-
-                if (
-                    texto &&
-                    !contenido.includes(texto)
-                ) {
-                    return false;
-                }
-
-                if (
-                    pais &&
-                    destino.pais.toUpperCase() !== pais
-                ) {
-                    return false;
-                }
-
-                if (
-                    query.estado !== undefined &&
-                    destino.activo !== query.estado
-                ) {
-                    return false;
-                }
-
-                return true;
-            })
-            .sort((a, b) => {
-                const comparacionPais =
-                    a.pais.localeCompare(b.pais);
-
-                return comparacionPais !== 0
-                    ? comparacionPais
-                    : a.ciudad.localeCompare(b.ciudad);
-            });
-
-        const inicio = (page - 1) * pageSize;
-        const items = destinosFiltrados.slice(
-            inicio,
-            inicio + pageSize
+        return this.consultarDestinos({
+            ciudad: query.texto?.trim() || undefined,
+            pais: query.pais?.trim() || undefined,
+            activo: query.estado,
+            pagina: page,
+            tamPagina: pageSize
+        }).pipe(
+            map((response) => ({
+            items: (response.datos ?? []).map(
+                (item) => this.mapearDestino(item)
+            ),
+            totalItems: Number(
+                response.paginacion?.totalElementos ?? 0
+            ),
+            page: Number(
+                response.paginacion?.numeroPagina ?? page
+            ),
+            pageSize: Number(
+                response.paginacion?.tamanioPagina ??
+                pageSize
+            )
+            }))
         );
-
-        return of({
-            items,
-            totalItems: destinosFiltrados.length,
-            page,
-            pageSize
-        });
-    }
+        }
 
     obtenerPorId(
         id: number
-    ): Observable<Destino | null> {
-        const destino =
-            this.obtenerDestinos().find(
-                (item) => item.id === id
-            ) ?? null;
+        ): Observable<Destino | null> {
+        return this.consultarDestinos({
+            pagina: 1,
+            tamPagina: 1000
+        }).pipe(
+            map((response) => {
+            const destino = (response.datos ?? [])
+                .map((item) =>
+                this.mapearDestino(item)
+                )
+                .find((item) => item.id === id);
 
-        return of(destino);
-    }
+            return destino ?? null;
+            })
+        );
+        }
 
     listarActivos(): Observable<Destino[]> {
-        const destinos = this.obtenerDestinos()
-            .filter((destino) => destino.activo)
-            .sort((a, b) =>
+        return this.consultarDestinos({
+            activo: true,
+            pagina: 1,
+            tamPagina: 1000
+        }).pipe(
+            map((response) =>
+            (response.datos ?? [])
+                .map((item) =>
+                this.mapearDestino(item)
+                )
+                .sort((a, b) =>
                 `${a.pais} ${a.ciudad}`.localeCompare(
                     `${b.pais} ${b.ciudad}`
                 )
-            );
-
-        return of(destinos);
-    }
+                )
+            )
+        );
+        }
 
     crear(
         data: DestinoFormData
-    ): Observable<Destino> {
-        const destinos = this.obtenerDestinos();
+        ): Observable<Destino> {
+        const datos = this.normalizarDatos(data);
 
-        const nuevoDestino: Destino = {
-            id: this.generarId(destinos),
-            ...this.normalizarDatos(data),
-            activo: true,
-            fechaCreacion: new Date().toISOString(),
-            fechaActualizacion: null
+        const body: DestinoRegistroRequest = {
+            destinoId: 0,
+            pais: datos.pais,
+            ciudad: datos.ciudad
         };
 
-        destinos.push(nuevoDestino);
-        this.guardarDestinos(destinos);
+        return this.destinoControllerService
+            .registrar9({ body })
+            .pipe(
+            switchMap(() =>
+                this.consultarDestinos({
+                pais: datos.pais,
+                ciudad: datos.ciudad,
+                pagina: 1,
+                tamPagina: 10
+                })
+            ),
+            map((response) => {
+                const destinoCreado =
+                (response.datos ?? [])
+                    .map((item) =>
+                    this.mapearDestino(item)
+                    )
+                    .find(
+                    (destino) =>
+                        destino.pais === datos.pais &&
+                        destino.ciudad === datos.ciudad
+                    );
 
-        return of(nuevoDestino);
-    }
+                if (!destinoCreado) {
+                throw new Error(
+                    'El destino fue registrado, pero no pudo recuperarse.'
+                );
+                }
+
+                return destinoCreado;
+            })
+            );
+        }
 
     actualizar(
         id: number,
         data: DestinoFormData
-    ): Observable<Destino | null> {
-        const destinos = this.obtenerDestinos();
-        const posicion = destinos.findIndex(
-            (item) => item.id === id
-        );
+        ): Observable<Destino | null> {
+        const datos = this.normalizarDatos(data);
 
-        if (posicion === -1) {
-            return of(null);
-        }
-
-        const destinoActualizado: Destino = {
-            ...destinos[posicion],
-            ...this.normalizarDatos(data),
-            fechaActualizacion: new Date().toISOString()
+        const body: DestinoRegistroRequest = {
+            destinoId: id,
+            pais: datos.pais,
+            ciudad: datos.ciudad
         };
 
-        destinos[posicion] = destinoActualizado;
-        this.guardarDestinos(destinos);
+        return this.destinoControllerService
+            .actualizar9({ body })
+            .pipe(
+            switchMap(() =>
+                this.consultarDestinos({
+                pais: datos.pais,
+                ciudad: datos.ciudad,
+                pagina: 1,
+                tamPagina: 10
+                })
+            ),
+            map((response) => {
+                const destinoActualizado =
+                (response.datos ?? [])
+                    .map((item) =>
+                    this.mapearDestino(item)
+                    )
+                    .find(
+                    (destino) =>
+                        destino.id === id
+                    );
 
-        return of(destinoActualizado);
-    }
+                return destinoActualizado ?? null;
+            })
+            );
+        }
 
     cambiarEstado(
-        id: number
-    ): Observable<Destino | null> {
-        const destinos = this.obtenerDestinos();
-        const posicion = destinos.findIndex(
-            (item) => item.id === id
-        );
+        destino: Destino
+        ): Observable<Destino | null> {
+        const nuevoEstado = !destino.activo;
 
-        if (posicion === -1) {
-            return of(null);
+        return this.destinoControllerService
+            .cambiarEstado9({
+            destinoId: destino.id,
+            activo: nuevoEstado
+            })
+            .pipe(
+            map(() => ({
+                ...destino,
+                activo: nuevoEstado,
+                fechaActualizacion:
+                new Date().toISOString()
+            }))
+            );
         }
-
-        destinos[posicion] = {
-            ...destinos[posicion],
-            activo: !destinos[posicion].activo,
-            fechaActualizacion: new Date().toISOString()
-        };
-
-        this.guardarDestinos(destinos);
-
-        return of(destinos[posicion]);
-    }
 
     existeUbicacion(
         pais: string,
         ciudad: string,
         idExcluir?: number
-    ): Observable<boolean> {
+        ): Observable<boolean> {
         const datos = this.normalizarDatos({
             pais,
             ciudad
         });
 
-        const existe = this.obtenerDestinos().some(
-            (destino) =>
-                destino.pais.toUpperCase() === datos.pais &&
-                destino.ciudad.toUpperCase() ===
-                datos.ciudad &&
-                destino.id !== idExcluir
+        return this.consultarDestinos({
+            pais: datos.pais,
+            ciudad: datos.ciudad,
+            pagina: 1,
+            tamPagina: 100
+        }).pipe(
+            map((response) =>
+            (response.datos ?? []).some(
+                (item) =>
+                (item.pais ?? '')
+                    .trim()
+                    .toUpperCase() === datos.pais &&
+                (item.ciudad ?? '')
+                    .trim()
+                    .toUpperCase() === datos.ciudad &&
+                item.destinoId !== idExcluir
+            )
+            )
         );
+        }
+    
+        private consultarDestinos(
+        params: {
+            pais?: string;
+            ciudad?: string;
+            activo?: boolean;
+            pagina?: number;
+            tamPagina?: number;
+        }
+        ): Observable<CustomPageDestinoResponse> {
+        return this.destinoControllerService
+            .listarDestinos(params)
+            .pipe(
+            switchMap((response) => {
+                const contenido: unknown = response;
 
-        return of(existe);
-    }
+                if (!(contenido instanceof Blob)) {
+                return of(response);
+                }
 
-    private obtenerDestinos(): Destino[] {
-        return (
-            this.localStorageService.obtener<Destino[]>(
-                STORAGE_KEYS.DESTINOS
-            ) ?? []
-        );
-    }
-
-    private guardarDestinos(
-        destinos: Destino[]
-    ): void {
-        this.localStorageService.guardar(
-            STORAGE_KEYS.DESTINOS,
-            destinos
-        );
-    }
-
-    private generarId(
-        destinos: Destino[]
-    ): number {
-        return (
-            destinos.reduce(
-                (mayorId, destino) =>
-                    Math.max(mayorId, destino.id),
-                0
-            ) + 1
-        );
-    }
+                return from(contenido.text()).pipe(
+                map(
+                    (texto) =>
+                    JSON.parse(
+                        texto
+                    ) as CustomPageDestinoResponse
+                )
+                );
+            })
+            );
+        }
 
     private normalizarDatos(
         data: DestinoFormData
@@ -229,4 +270,17 @@ export class DestinoService {
             ciudad: data.ciudad.trim().toUpperCase()
         };
     }
+
+    private mapearDestino(
+        response: DestinoResponse
+        ): Destino {
+        return {
+            id: response.destinoId ?? 0,
+            pais: response.pais ?? '',
+            ciudad: response.ciudad ?? '',
+            activo: response.activo ?? false,
+            fechaCreacion: '',
+            fechaActualizacion: null
+        };
+        }
 }

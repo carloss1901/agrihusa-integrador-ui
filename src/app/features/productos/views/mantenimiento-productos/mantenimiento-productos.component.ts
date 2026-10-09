@@ -153,7 +153,7 @@ export class MantenimientoProductosComponent implements OnInit {
     }
 
     this.productoService
-      .cambiarEstado(producto.id)
+      .cambiarEstado(producto)
       .subscribe((resultado) => {
         if (!resultado) {
           return;

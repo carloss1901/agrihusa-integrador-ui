@@ -94,8 +94,8 @@ export class ModalUsuarioComponent implements OnInit {
             nonNullable: true,
             validators: [
                 Validators.required,
-                Validators.maxLength(30),
-                Validators.pattern(/^[A-Za-z0-9._-]+$/)
+                Validators.maxLength(8),
+                Validators.pattern(/^\d{8}$/)
             ]
         }),
         nombres: new FormControl('', {

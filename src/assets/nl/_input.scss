@@ -1,3 +1,6 @@
+@use "variables" as *;
+@use "sass:color";
+
 .agrihusa {
 	.form-group {
 		margin-bottom: 0.5rem;
@@ -32,7 +35,7 @@
 			height: $input-height-lg;
 		}
 		&:focus {
-			border-color: lighten($nl-blue, 25%) !important;
+			border-color: color.adjust($nl-blue, $lightness: 25%) !important;
 			box-shadow: 0 0 0 0.2rem rgba($nl-blue, 0.25);
 		}
 		&:disabled,

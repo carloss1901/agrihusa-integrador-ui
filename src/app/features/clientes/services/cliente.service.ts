@@ -1,240 +1,307 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
+import {
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
+import { ClienteResponse } from '../../../api/api/models/cliente-response';
+import { ClienteControllerService } from '../../../api/api/services/cliente-controller.service';
 import { PaginatedResult } from '../../../core/models/pagination.model';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
 import {
     Cliente,
     ClienteFormData,
     ClienteQuery,
     TipoDocumentoCliente
 } from '../models/cliente.model';
+import { ClienteRegistroRequest } from '../../../api/api/models/cliente-registro-request';
+import { CustomPageClienteResponse } from '../../../api/api/models/custom-page-cliente-response';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ClienteService {
     constructor(
-        private localStorageService: LocalStorageService
+        private clienteControllerService: ClienteControllerService
     ) { }
 
     listar(
         query: ClienteQuery
-    ): Observable<PaginatedResult<Cliente>> {
+        ): Observable<PaginatedResult<Cliente>> {
         const page = Math.max(1, query.page);
         const pageSize = Math.max(1, query.pageSize);
-        const texto = query.texto?.trim().toUpperCase();
 
-        const clientesFiltrados = this.obtenerClientes()
-            .filter((cliente) => {
-                const contenido = [
-                    cliente.numeroDocumento,
-                    cliente.razonSocial,
-                    cliente.nombreComercial,
-                    cliente.contacto,
-                    cliente.correo,
-                    cliente.pais
-                ]
-                    .join(' ')
-                    .toUpperCase();
-
-                if (
-                    texto &&
-                    !contenido.includes(texto)
-                ) {
-                    return false;
-                }
-
-                if (
-                    query.tipoDocumento !== undefined &&
-                    cliente.tipoDocumento !== query.tipoDocumento
-                ) {
-                    return false;
-                }
-
-                if (
-                    query.estado !== undefined &&
-                    cliente.activo !== query.estado
-                ) {
-                    return false;
-                }
-
-                return true;
-            })
-            .sort((a, b) =>
-                a.razonSocial.localeCompare(b.razonSocial)
+        return this.consultarClientes({
+            texto: query.texto?.trim() || undefined,
+            tipoDocumento: query.tipoDocumento,
+            activo: query.estado,
+            pagina: page,
+            tamPagina: pageSize
+        }).pipe(
+            map((response) => {
+        
+            const items = (response.datos ?? []).map(
+                (item) => this.mapearCliente(item)
             );
 
-        const inicio = (page - 1) * pageSize;
-        const items = clientesFiltrados.slice(
-            inicio,
-            inicio + pageSize
-        );
+            const resultado = {
+                items,
+                totalItems: Number(
+                response.paginacion?.totalElementos ?? 0
+                ),
+                page: Number(
+                response.paginacion?.numeroPagina ?? page
+                ),
+                pageSize: Number(
+                response.paginacion?.tamanioPagina ?? pageSize
+                )
+            };
 
-        return of({
-            items,
-            totalItems: clientesFiltrados.length,
-            page,
-            pageSize
-        });
-    }
+            return resultado;
+            })
+        );
+        }
 
     obtenerPorId(
         id: number
-    ): Observable<Cliente | null> {
-        const cliente =
-            this.obtenerClientes().find(
-                (item) => item.id === id
-            ) ?? null;
+        ): Observable<Cliente | null> {
+        return this.consultarClientes({
+            pagina: 1,
+            tamPagina: 1000
+        }).pipe(
+            map((response) => {
+            const cliente = (response.datos ?? [])
+                .map((item) => this.mapearCliente(item))
+                .find((item) => item.id === id);
 
-        return of(cliente);
-    }
+            return cliente ?? null;
+            })
+        );
+        }
 
     listarActivos(): Observable<Cliente[]> {
-        const clientes = this.obtenerClientes()
-            .filter((cliente) => cliente.activo)
-            .sort((a, b) =>
-                a.razonSocial.localeCompare(b.razonSocial)
-            );
-
-        return of(clientes);
-    }
+        return this.consultarClientes({
+            activo: true,
+            pagina: 1,
+            tamPagina: 1000
+        }).pipe(
+            map((response) =>
+            (response.datos ?? [])
+                .map((item) =>
+                this.mapearCliente(item)
+                )
+                .sort((a, b) =>
+                a.razonSocial.localeCompare(
+                    b.razonSocial
+                )
+                )
+            )
+        );
+        }
 
     crear(
         data: ClienteFormData
-    ): Observable<Cliente> {
-        const clientes = this.obtenerClientes();
-        const datosNormalizados =
-            this.normalizarDatos(data);
+        ): Observable<Cliente> {
+        const datos = this.normalizarDatos(data);
 
-        const nuevoCliente: Cliente = {
-            id: this.generarId(clientes),
-            ...datosNormalizados,
-            activo: true,
-            fechaCreacion: new Date().toISOString(),
-            fechaActualizacion: null
+        const body: ClienteRegistroRequest = {
+            clienteId: 0,
+            tipoDocumento: datos.tipoDocumento,
+            numeroDocumento: datos.numeroDocumento,
+            razonSocial: datos.razonSocial,
+            nombreComercial: datos.nombreComercial || undefined,
+            contacto: datos.contacto || undefined,
+            correo: datos.correo || undefined,
+            telefono: datos.telefono || undefined,
+            direccion: datos.direccion || undefined,
+            pais: datos.pais
         };
 
-        clientes.push(nuevoCliente);
-        this.guardarClientes(clientes);
+        return this.clienteControllerService
+            .registrar11({ body })
+            .pipe(
+            switchMap(() =>
+                this.consultarClientes({
+                texto: datos.numeroDocumento,
+                tipoDocumento: datos.tipoDocumento,
+                pagina: 1,
+                tamPagina: 10
+                })
+            ),
+            map((response) => {
+                const clienteCreado = (response.datos ?? [])
+                .map((item) => this.mapearCliente(item))
+                .find(
+                    (cliente) =>
+                    this.normalizarDocumento(
+                        cliente.numeroDocumento
+                    ) === datos.numeroDocumento
+                );
 
-        return of(nuevoCliente);
-    }
+                if (!clienteCreado) {
+                throw new Error(
+                    'El cliente fue registrado, pero no pudo recuperarse.'
+                );
+                }
+
+                return clienteCreado;
+            })
+            );
+        }
 
     actualizar(
         id: number,
         data: ClienteFormData
-    ): Observable<Cliente | null> {
-        const clientes = this.obtenerClientes();
-        const posicion = clientes.findIndex(
-            (item) => item.id === id
-        );
+        ): Observable<Cliente | null> {
+        const datos = this.normalizarDatos(data);
 
-        if (posicion === -1) {
-            return of(null);
-        }
-
-        const clienteActualizado: Cliente = {
-            ...clientes[posicion],
-            ...this.normalizarDatos(data),
-            fechaActualizacion: new Date().toISOString()
+        const body: ClienteRegistroRequest = {
+            clienteId: id,
+            tipoDocumento: datos.tipoDocumento,
+            numeroDocumento: datos.numeroDocumento,
+            razonSocial: datos.razonSocial,
+            nombreComercial:
+            datos.nombreComercial || undefined,
+            contacto: datos.contacto || undefined,
+            correo: datos.correo || undefined,
+            telefono: datos.telefono || undefined,
+            direccion: datos.direccion || undefined,
+            pais: datos.pais
         };
 
-        clientes[posicion] = clienteActualizado;
-        this.guardarClientes(clientes);
+        return this.clienteControllerService
+            .actualizar11({ body })
+            .pipe(
+            switchMap(() =>
+                this.consultarClientes({
+                texto: datos.numeroDocumento,
+                tipoDocumento: datos.tipoDocumento,
+                pagina: 1,
+                tamPagina: 10
+                })
+            ),
+            map((response) => {
+                const clienteActualizado =
+                (response.datos ?? [])
+                    .map((item) =>
+                    this.mapearCliente(item)
+                    )
+                    .find(
+                    (cliente) =>
+                        cliente.id === id
+                    );
 
-        return of(clienteActualizado);
-    }
+                if (!clienteActualizado) {
+                return null;
+                }
+
+                return clienteActualizado;
+            })
+            );
+        }
 
     cambiarEstado(
-        id: number
-    ): Observable<Cliente | null> {
-        const clientes = this.obtenerClientes();
-        const posicion = clientes.findIndex(
-            (item) => item.id === id
-        );
+        cliente: Cliente
+        ): Observable<Cliente | null> {
+        const nuevoEstado = !cliente.activo;
 
-        if (posicion === -1) {
-            return of(null);
+        return this.clienteControllerService
+            .cambiarEstado11({
+            clienteId: cliente.id,
+            activo: nuevoEstado
+            })
+            .pipe(
+            map(() => ({
+                ...cliente,
+                activo: nuevoEstado,
+                fechaActualizacion:
+                new Date().toISOString()
+            }))
+            );
         }
-
-        clientes[posicion] = {
-            ...clientes[posicion],
-            activo: !clientes[posicion].activo,
-            fechaActualizacion: new Date().toISOString()
-        };
-
-        this.guardarClientes(clientes);
-
-        return of(clientes[posicion]);
-    }
 
     existeDocumento(
         tipoDocumento: TipoDocumentoCliente,
         numeroDocumento: string,
         idExcluir?: number
-    ): Observable<boolean> {
-        const documentoNormalizado =
+        ): Observable<boolean> {
+        const documento =
             this.normalizarDocumento(numeroDocumento);
 
-        const existe = this.obtenerClientes().some(
-            (cliente) =>
-                cliente.tipoDocumento === tipoDocumento &&
+        return this.consultarClientes({
+            texto: documento,
+            tipoDocumento,
+            pagina: 1,
+            tamPagina: 100
+        }).pipe(
+            map((response) =>
+            (response.datos ?? []).some(
+                (item) =>
                 this.normalizarDocumento(
-                    cliente.numeroDocumento
-                ) === documentoNormalizado &&
-                cliente.id !== idExcluir
+                    item.numeroDocumento ?? ''
+                ) === documento &&
+                item.clienteId !== idExcluir
+            )
+            )
         );
-
-        return of(existe);
-    }
+        }
 
     existeRazonSocial(
         razonSocial: string,
         idExcluir?: number
-    ): Observable<boolean> {
+        ): Observable<boolean> {
         const razonNormalizada =
             razonSocial.trim().toUpperCase();
 
-        const existe = this.obtenerClientes().some(
-            (cliente) =>
-                cliente.razonSocial.trim().toUpperCase() ===
-                razonNormalizada &&
-                cliente.id !== idExcluir
+        return this.consultarClientes({
+            texto: razonSocial.trim(),
+            pagina: 1,
+            tamPagina: 100
+        }).pipe(
+            map((response) =>
+            (response.datos ?? []).some(
+                (item) =>
+                (item.razonSocial ?? '')
+                    .trim()
+                    .toUpperCase() === razonNormalizada &&
+                item.clienteId !== idExcluir
+            )
+            )
         );
+        }
+    
 
-        return of(existe);
-    }
+    private consultarClientes(
+        params: {
+            texto?: string;
+            tipoDocumento?: string;
+            activo?: boolean;
+            pagina?: number;
+            tamPagina?: number;
+        }
+        ): Observable<CustomPageClienteResponse> {
+        return this.clienteControllerService
+            .listar2(params)
+            .pipe(
+            switchMap((response) => {
+                const contenido: unknown = response;
 
-    private obtenerClientes(): Cliente[] {
-        return (
-            this.localStorageService.obtener<Cliente[]>(
-                STORAGE_KEYS.CLIENTES
-            ) ?? []
-        );
-    }
+                if (!(contenido instanceof Blob)) {
+                return of(response);
+                }
 
-    private guardarClientes(
-        clientes: Cliente[]
-    ): void {
-        this.localStorageService.guardar(
-            STORAGE_KEYS.CLIENTES,
-            clientes
-        );
-    }
-
-    private generarId(
-        clientes: Cliente[]
-    ): number {
-        return (
-            clientes.reduce(
-                (mayorId, cliente) =>
-                    Math.max(mayorId, cliente.id),
-                0
-            ) + 1
-        );
-    }
+                return from(contenido.text()).pipe(
+                map(
+                    (texto) =>
+                    JSON.parse(
+                        texto
+                    ) as CustomPageClienteResponse
+                )
+                );
+            })
+            );
+        }
 
     private normalizarDatos(
         data: ClienteFormData
@@ -265,4 +332,27 @@ export class ClienteService {
             .toUpperCase()
             .replace(/\s+/g, '');
     }
+
+    private mapearCliente(
+        response: ClienteResponse
+        ): Cliente {
+        return {
+            id: response.clienteId ?? 0,
+            tipoDocumento: (
+            response.tipoDocumento ??
+            TipoDocumentoCliente.OTRO
+            ) as TipoDocumentoCliente,
+            numeroDocumento: response.numeroDocumento ?? '',
+            razonSocial: response.razonSocial ?? '',
+            nombreComercial: response.nombreComercial ?? '',
+            contacto: response.contacto ?? '',
+            correo: response.correo ?? '',
+            telefono: response.telefono ?? '',
+            direccion: response.direccion ?? '',
+            pais: response.pais ?? '',
+            activo: response.activo ?? false,
+            fechaCreacion: '',
+            fechaActualizacion: null
+        };
+        }
 }

@@ -127,7 +127,7 @@ export class ModalUpsertVariedadComponent
     this.productoService
       .listar({
         page: 1,
-        pageSize: Number.MAX_SAFE_INTEGER
+        pageSize: 1000
       })
       .subscribe((resultado) => {
         this.productos = this.data

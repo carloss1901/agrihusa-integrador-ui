@@ -1,164 +1,211 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
+import {
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
 import { PaginatedResult } from '../../../core/models/pagination.model';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
 import {
   OperadorLogistico,
   OperadorLogisticoFormData,
   OperadorLogisticoQuery
 } from '../models/operador-logistico.model';
+import { CustomPageOperadorLogisticoResponse } from '../../../api/api/models/custom-page-operador-logistico-response';
+import { OperadorLogisticoResponse } from '../../../api/api/models/operador-logistico-response';
+import { OperadorLogisticoControllerService } from '../../../api/api/services/operador-logistico-controller.service';
+import { OperadorLogisticoRegistroRequest } from '../../../api/api/models/operador-logistico-registro-request';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OperadorLogisticoService {
   constructor(
-    private localStorageService: LocalStorageService
+    private operadorControllerService:
+      OperadorLogisticoControllerService
   ) {}
 
   listar(
-    query: OperadorLogisticoQuery
-  ): Observable<PaginatedResult<OperadorLogistico>> {
-    const page = Math.max(1, query.page);
-    const pageSize = Math.max(1, query.pageSize);
-    const texto = query.texto?.trim().toUpperCase();
+      query: OperadorLogisticoQuery
+    ): Observable<PaginatedResult<OperadorLogistico>> {
+      const page = Math.max(1, query.page);
+      const pageSize = Math.max(1, query.pageSize);
 
-    const operadoresFiltrados =
-      this.obtenerOperadores()
-        .filter((operador) => {
-          const contenido = [
-            operador.ruc,
-            operador.razonSocial,
-            operador.nombreComercial,
-            operador.contacto,
-            operador.correo,
-            operador.telefono
-          ]
-            .join(' ')
-            .toUpperCase();
-
-          if (
-            texto &&
-            !contenido.includes(texto)
-          ) {
-            return false;
-          }
-
-          if (
-            query.estado !== undefined &&
-            operador.activo !== query.estado
-          ) {
-            return false;
-          }
-
-          return true;
-        })
-        .sort((a, b) =>
-          a.razonSocial.localeCompare(b.razonSocial)
-        );
-
-    const inicio = (page - 1) * pageSize;
-    const items = operadoresFiltrados.slice(
-      inicio,
-      inicio + pageSize
-    );
-
-    return of({
-      items,
-      totalItems: operadoresFiltrados.length,
-      page,
-      pageSize
-    });
-  }
+      return this.consultarOperadores({
+        texto: query.texto?.trim() || undefined,
+        activo: query.estado,
+        pagina: page,
+        tamPagina: pageSize
+      }).pipe(
+        map((response) => ({
+          items: (response.datos ?? []).map(
+            (item) => this.mapearOperador(item)
+          ),
+          totalItems: Number(
+            response.paginacion?.totalElementos ?? 0
+          ),
+          page: Number(
+            response.paginacion?.numeroPagina ?? page
+          ),
+          pageSize: Number(
+            response.paginacion?.tamanioPagina ??
+              pageSize
+          )
+        }))
+      );
+    }
 
   obtenerPorId(
     id: number
   ): Observable<OperadorLogistico | null> {
-    const operador =
-      this.obtenerOperadores().find(
-        (item) => item.id === id
-      ) ?? null;
+    return this.consultarOperadores({
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) => {
+        const operador = (response.datos ?? [])
+          .map((item) =>
+            this.mapearOperador(item)
+          )
+          .find((item) => item.id === id);
 
-    return of(operador);
+        return operador ?? null;
+      })
+    );
   }
 
   listarActivos(): Observable<OperadorLogistico[]> {
-    const operadores = this.obtenerOperadores()
-      .filter((operador) => operador.activo)
-      .sort((a, b) =>
-        a.razonSocial.localeCompare(b.razonSocial)
-      );
-
-    return of(operadores);
+    return this.consultarOperadores({
+      activo: true,
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) =>
+        (response.datos ?? [])
+          .map((item) =>
+            this.mapearOperador(item)
+          )
+          .sort((a, b) =>
+            a.razonSocial.localeCompare(
+              b.razonSocial
+            )
+          )
+      )
+    );
   }
 
   crear(
     data: OperadorLogisticoFormData
   ): Observable<OperadorLogistico> {
-    const operadores = this.obtenerOperadores();
+    const datos = this.normalizarDatos(data);
 
-    const nuevoOperador: OperadorLogistico = {
-      id: this.generarId(operadores),
-      ...this.normalizarDatos(data),
-      activo: true,
-      fechaCreacion: new Date().toISOString(),
-      fechaActualizacion: null
+    const body: OperadorLogisticoRegistroRequest = {
+      operadorLogisticoId: 0,
+      ruc: datos.ruc,
+      razonSocial: datos.razonSocial,
+      nombreComercial:
+        datos.nombreComercial || undefined,
+      contacto: datos.contacto || undefined,
+      correo: datos.correo || undefined,
+      telefono: datos.telefono || undefined,
+      direccion: datos.direccion || undefined
     };
 
-    operadores.push(nuevoOperador);
-    this.guardarOperadores(operadores);
+    return this.operadorControllerService
+      .registrar7({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarOperadores({
+            texto: datos.ruc,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const operadorCreado =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearOperador(item)
+              )
+              .find(
+                (operador) =>
+                  operador.ruc === datos.ruc
+              );
 
-    return of(nuevoOperador);
+          if (!operadorCreado) {
+            throw new Error(
+              'El operador fue registrado, pero no pudo recuperarse.'
+            );
+          }
+
+          return operadorCreado;
+        })
+      );
   }
 
   actualizar(
     id: number,
     data: OperadorLogisticoFormData
   ): Observable<OperadorLogistico | null> {
-    const operadores = this.obtenerOperadores();
-    const posicion = operadores.findIndex(
-      (item) => item.id === id
-    );
+    const datos = this.normalizarDatos(data);
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    const operadorActualizado: OperadorLogistico = {
-      ...operadores[posicion],
-      ...this.normalizarDatos(data),
-      fechaActualizacion: new Date().toISOString()
+    const body: OperadorLogisticoRegistroRequest = {
+      operadorLogisticoId: id,
+      ruc: datos.ruc,
+      razonSocial: datos.razonSocial,
+      nombreComercial:
+        datos.nombreComercial || undefined,
+      contacto: datos.contacto || undefined,
+      correo: datos.correo || undefined,
+      telefono: datos.telefono || undefined,
+      direccion: datos.direccion || undefined
     };
 
-    operadores[posicion] = operadorActualizado;
-    this.guardarOperadores(operadores);
+    return this.operadorControllerService
+      .actualizar7({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarOperadores({
+            texto: datos.ruc,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const operadorActualizado =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearOperador(item)
+              )
+              .find(
+                (operador) =>
+                  operador.id === id
+              );
 
-    return of(operadorActualizado);
+          return operadorActualizado ?? null;
+        })
+      );
   }
 
   cambiarEstado(
-    id: number
+    operador: OperadorLogistico
   ): Observable<OperadorLogistico | null> {
-    const operadores = this.obtenerOperadores();
-    const posicion = operadores.findIndex(
-      (item) => item.id === id
-    );
+    const nuevoEstado = !operador.activo;
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    operadores[posicion] = {
-      ...operadores[posicion],
-      activo: !operadores[posicion].activo,
-      fechaActualizacion: new Date().toISOString()
-    };
-
-    this.guardarOperadores(operadores);
-
-    return of(operadores[posicion]);
+    return this.operadorControllerService
+      .cambiarEstado7({
+        operadorLogisticoId: operador.id,
+        activo: nuevoEstado
+      })
+      .pipe(
+        map(() => ({
+          ...operador,
+          activo: nuevoEstado,
+          fechaActualizacion:
+            new Date().toISOString()
+        }))
+      );
   }
 
   existeRuc(
@@ -168,14 +215,21 @@ export class OperadorLogisticoService {
     const rucNormalizado =
       this.normalizarRuc(ruc);
 
-    const existe = this.obtenerOperadores().some(
-      (operador) =>
-        this.normalizarRuc(operador.ruc) ===
-          rucNormalizado &&
-        operador.id !== idExcluir
+    return this.consultarOperadores({
+      texto: rucNormalizado,
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (item) =>
+            this.normalizarRuc(
+              item.ruc ?? ''
+            ) === rucNormalizado &&
+            item.operadorLogisticoId !== idExcluir
+        )
+      )
     );
-
-    return of(existe);
   }
 
   existeRazonSocial(
@@ -185,46 +239,51 @@ export class OperadorLogisticoService {
     const razonNormalizada =
       razonSocial.trim().toUpperCase();
 
-    const existe = this.obtenerOperadores().some(
-      (operador) =>
-        operador.razonSocial.trim().toUpperCase() ===
-          razonNormalizada &&
-        operador.id !== idExcluir
-    );
-
-    return of(existe);
-  }
-
-  private obtenerOperadores():
-    OperadorLogistico[] {
-    return (
-      this.localStorageService.obtener<
-        OperadorLogistico[]
-      >(
-        STORAGE_KEYS.OPERADORES_LOGISTICOS
-      ) ?? []
+    return this.consultarOperadores({
+      texto: razonSocial.trim(),
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (item) =>
+            (item.razonSocial ?? '')
+              .trim()
+              .toUpperCase() === razonNormalizada &&
+            item.operadorLogisticoId !== idExcluir
+        )
+      )
     );
   }
 
-  private guardarOperadores(
-    operadores: OperadorLogistico[]
-  ): void {
-    this.localStorageService.guardar(
-      STORAGE_KEYS.OPERADORES_LOGISTICOS,
-      operadores
-    );
-  }
+  private consultarOperadores(
+    params: {
+      texto?: string;
+      activo?: boolean;
+      pagina?: number;
+      tamPagina?: number;
+    }
+  ): Observable<CustomPageOperadorLogisticoResponse> {
+    return this.operadorControllerService
+      .listarOperadores(params)
+      .pipe(
+        switchMap((response) => {
+          const contenido: unknown = response;
 
-  private generarId(
-    operadores: OperadorLogistico[]
-  ): number {
-    return (
-      operadores.reduce(
-        (mayorId, operador) =>
-          Math.max(mayorId, operador.id),
-        0
-      ) + 1
-    );
+          if (!(contenido instanceof Blob)) {
+            return of(response);
+          }
+
+          return from(contenido.text()).pipe(
+            map(
+              (texto) =>
+                JSON.parse(
+                  texto
+                ) as CustomPageOperadorLogisticoResponse
+            )
+          );
+        })
+      );
   }
 
   private normalizarDatos(
@@ -245,5 +304,24 @@ export class OperadorLogisticoService {
 
   private normalizarRuc(ruc: string): string {
     return ruc.replace(/\D/g, '');
+  }
+
+  private mapearOperador(
+    response: OperadorLogisticoResponse
+  ): OperadorLogistico {
+    return {
+      id: response.operadorLogisticoId ?? 0,
+      ruc: response.ruc ?? '',
+      razonSocial: response.razonSocial ?? '',
+      nombreComercial:
+        response.nombreComercial ?? '',
+      contacto: response.contacto ?? '',
+      correo: response.correo ?? '',
+      telefono: response.telefono ?? '',
+      direccion: response.direccion ?? '',
+      activo: response.activo ?? false,
+      fechaCreacion: '',
+      fechaActualizacion: null
+    };
   }
 }

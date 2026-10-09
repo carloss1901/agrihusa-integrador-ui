@@ -156,7 +156,7 @@ export class MantenimientoSituacionesComponent
     }
 
     this.situacionService
-      .cambiarEstado(situacion.id)
+      .cambiarEstado(situacion)
       .subscribe((resultado) => {
         if (!resultado) {
           return;

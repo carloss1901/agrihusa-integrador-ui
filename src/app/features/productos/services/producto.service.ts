@@ -1,21 +1,29 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
+import {
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
 import { PaginatedResult } from '../../../core/models/pagination.model';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
 import {
   Producto,
   ProductoFormData,
   ProductoQuery
 } from '../models/producto.model';
+import { CustomPageProductoResponse } from '../../../api/api/models/custom-page-producto-response';
+import { ProductoResponse } from '../../../api/api/models/producto-response';
+import { ProductoControllerService } from '../../../api/api/services/producto-controller.service';
+import { ProductoRegistroRequest } from '../../../api/api/models/producto-registro-request';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductoService {
   constructor(
-    private localStorageService: LocalStorageService
+    private productoControllerService:
+      ProductoControllerService
   ) {}
 
   listar(
@@ -23,138 +31,169 @@ export class ProductoService {
   ): Observable<PaginatedResult<Producto>> {
     const page = Math.max(1, query.page);
     const pageSize = Math.max(1, query.pageSize);
-    const texto = query.texto?.trim().toUpperCase();
 
-    const productosFiltrados = this.obtenerProductos()
-      .filter((producto) => {
-        const contenido = [
-          producto.codigo,
-          producto.nombre,
-          producto.descripcion
-        ]
-          .join(' ')
-          .toUpperCase();
-
-        if (
-          texto &&
-          !contenido.includes(texto)
-        ) {
-          return false;
-        }
-
-        if (
-          query.estado !== undefined &&
-          producto.activo !== query.estado
-        ) {
-          return false;
-        }
-
-        return true;
-      })
-      .sort((a, b) =>
-        a.nombre.localeCompare(b.nombre)
-      );
-
-    const inicio = (page - 1) * pageSize;
-    const items = productosFiltrados.slice(
-      inicio,
-      inicio + pageSize
+    return this.consultarProductos({
+      texto: query.texto?.trim() || undefined,
+      activo: query.estado,
+      pagina: page,
+      tamPagina: pageSize
+    }).pipe(
+      map((response) => ({
+        items: (response.datos ?? []).map(
+          (item) => this.mapearProducto(item)
+        ),
+        totalItems: Number(
+          response.paginacion?.totalElementos ?? 0
+        ),
+        page: Number(
+          response.paginacion?.numeroPagina ?? page
+        ),
+        pageSize: Number(
+          response.paginacion?.tamanioPagina ??
+            pageSize
+        )
+      }))
     );
-
-    return of({
-      items,
-      totalItems: productosFiltrados.length,
-      page,
-      pageSize
-    });
   }
 
   obtenerPorId(
     id: number
   ): Observable<Producto | null> {
-    const producto =
-      this.obtenerProductos().find(
-        (item) => item.id === id
-      ) ?? null;
+    return this.consultarProductos({
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) => {
+        const producto = (response.datos ?? [])
+          .map((item) =>
+            this.mapearProducto(item)
+          )
+          .find((item) => item.id === id);
 
-    return of(producto);
+        return producto ?? null;
+      })
+    );
   }
 
   listarActivos(): Observable<Producto[]> {
-    const productos = this.obtenerProductos()
-      .filter((producto) => producto.activo)
-      .sort((a, b) =>
-        a.nombre.localeCompare(b.nombre)
-      );
-
-    return of(productos);
+    return this.consultarProductos({
+      activo: true,
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) =>
+        (response.datos ?? [])
+          .map((item) =>
+            this.mapearProducto(item)
+          )
+          .sort((a, b) =>
+            a.nombre.localeCompare(b.nombre)
+          )
+      )
+    );
   }
 
   crear(
     data: ProductoFormData
   ): Observable<Producto> {
-    const productos = this.obtenerProductos();
+    const datos = this.normalizarDatos(data);
 
-    const nuevoProducto: Producto = {
-      id: this.generarId(productos),
-      ...this.normalizarDatos(data),
-      activo: true,
-      fechaCreacion: new Date().toISOString(),
-      fechaActualizacion: null
+    const body: ProductoRegistroRequest = {
+      productoId: 0,
+      codigo: datos.codigo,
+      nombre: datos.nombre,
+      descripcion: datos.descripcion
     };
 
-    productos.push(nuevoProducto);
-    this.guardarProductos(productos);
+    return this.productoControllerService
+      .registrar6({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarProductos({
+            texto: datos.codigo,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const productoCreado =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearProducto(item)
+              )
+              .find(
+                (producto) =>
+                  producto.codigo === datos.codigo
+              );
 
-    return of(nuevoProducto);
+          if (!productoCreado) {
+            throw new Error(
+              'El producto fue registrado, pero no pudo recuperarse.'
+            );
+          }
+
+          return productoCreado;
+        })
+      );
   }
 
   actualizar(
     id: number,
     data: ProductoFormData
   ): Observable<Producto | null> {
-    const productos = this.obtenerProductos();
-    const posicion = productos.findIndex(
-      (item) => item.id === id
-    );
+    const datos = this.normalizarDatos(data);
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    const productoActualizado: Producto = {
-      ...productos[posicion],
-      ...this.normalizarDatos(data),
-      fechaActualizacion: new Date().toISOString()
+    const body: ProductoRegistroRequest = {
+      productoId: id,
+      codigo: datos.codigo,
+      nombre: datos.nombre,
+      descripcion: datos.descripcion
     };
 
-    productos[posicion] = productoActualizado;
-    this.guardarProductos(productos);
+    return this.productoControllerService
+      .actualizar6({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarProductos({
+            texto: datos.codigo,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const productoActualizado =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearProducto(item)
+              )
+              .find(
+                (producto) =>
+                  producto.id === id
+              );
 
-    return of(productoActualizado);
+          return productoActualizado ?? null;
+        })
+      );
   }
 
   cambiarEstado(
-    id: number
+    producto: Producto
   ): Observable<Producto | null> {
-    const productos = this.obtenerProductos();
-    const posicion = productos.findIndex(
-      (item) => item.id === id
-    );
+    const nuevoEstado = !producto.activo;
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    productos[posicion] = {
-      ...productos[posicion],
-      activo: !productos[posicion].activo,
-      fechaActualizacion: new Date().toISOString()
-    };
-
-    this.guardarProductos(productos);
-
-    return of(productos[posicion]);
+    return this.productoControllerService
+      .cambiarEstado6({
+        productoId: producto.id,
+        activo: nuevoEstado
+      })
+      .pipe(
+        map(() => ({
+          ...producto,
+          activo: nuevoEstado,
+          fechaActualizacion:
+            new Date().toISOString()
+        }))
+      );
   }
 
   existeCodigo(
@@ -164,14 +203,21 @@ export class ProductoService {
     const codigoNormalizado =
       this.normalizarCodigo(codigo);
 
-    const existe = this.obtenerProductos().some(
-      (producto) =>
-        this.normalizarCodigo(producto.codigo) ===
-          codigoNormalizado &&
-        producto.id !== idExcluir
+    return this.consultarProductos({
+      texto: codigoNormalizado,
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (item) =>
+            this.normalizarCodigo(
+              item.codigo ?? ''
+            ) === codigoNormalizado &&
+            item.productoId !== idExcluir
+        )
+      )
     );
-
-    return of(existe);
   }
 
   existeNombre(
@@ -181,43 +227,51 @@ export class ProductoService {
     const nombreNormalizado =
       nombre.trim().toUpperCase();
 
-    const existe = this.obtenerProductos().some(
-      (producto) =>
-        producto.nombre.toUpperCase() ===
-          nombreNormalizado &&
-        producto.id !== idExcluir
-    );
-
-    return of(existe);
-  }
-
-  private obtenerProductos(): Producto[] {
-    return (
-      this.localStorageService.obtener<Producto[]>(
-        STORAGE_KEYS.PRODUCTOS
-      ) ?? []
-    );
-  }
-
-  private guardarProductos(
-    productos: Producto[]
-  ): void {
-    this.localStorageService.guardar(
-      STORAGE_KEYS.PRODUCTOS,
-      productos
+    return this.consultarProductos({
+      texto: nombre.trim(),
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (item) =>
+            (item.nombre ?? '')
+              .trim()
+              .toUpperCase() === nombreNormalizado &&
+            item.productoId !== idExcluir
+        )
+      )
     );
   }
 
-  private generarId(
-    productos: Producto[]
-  ): number {
-    return (
-      productos.reduce(
-        (mayorId, producto) =>
-          Math.max(mayorId, producto.id),
-        0
-      ) + 1
-    );
+  private consultarProductos(
+    params: {
+      texto?: string;
+      activo?: boolean;
+      pagina?: number;
+      tamPagina?: number;
+    }
+  ): Observable<CustomPageProductoResponse> {
+    return this.productoControllerService
+      .listarProductos(params)
+      .pipe(
+        switchMap((response) => {
+          const contenido: unknown = response;
+
+          if (!(contenido instanceof Blob)) {
+            return of(response);
+          }
+
+          return from(contenido.text()).pipe(
+            map(
+              (texto) =>
+                JSON.parse(
+                  texto
+                ) as CustomPageProductoResponse
+            )
+          );
+        })
+      );
   }
 
   private normalizarDatos(
@@ -238,5 +292,19 @@ export class ProductoService {
       .trim()
       .toUpperCase()
       .replace(/\s+/g, '');
+  }
+
+  private mapearProducto(
+    response: ProductoResponse
+  ): Producto {
+    return {
+      id: response.productoId ?? 0,
+      codigo: response.codigo ?? '',
+      nombre: response.nombre ?? '',
+      descripcion: response.descripcion ?? '',
+      activo: response.activo ?? false,
+      fechaCreacion: '',
+      fechaActualizacion: null
+    };
   }
 }

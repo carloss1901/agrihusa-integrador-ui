@@ -1,22 +1,32 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
+import {
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
 import { PaginatedResult } from '../../../core/models/pagination.model';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
-import { Variedad } from '../../variedades/models/variedad.model';
+import { VariedadService } from '../../variedades/services/variedad.service';
 import {
   Despacho,
   DespachoFormData,
-  DespachoQuery
+  DespachoQuery,
+  UnidadMedidaDespacho
 } from '../models/despacho.model';
+import { DespachoControllerService } from '../../../api/api/services/despacho-controller.service';
+import { CustomPageDespachoResponse } from '../../../api/api/models/custom-page-despacho-response';
+import { DespachoResponse } from '../../../api/api/models/despacho-response';
+import { DespachoRegistroRequest } from '../../../api/api/models/despacho-registro-request';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DespachoService {
   constructor(
-    private localStorageService: LocalStorageService
+    private despachoControllerService:
+      DespachoControllerService,
+    private variedadService: VariedadService
   ) {}
 
   listar(
@@ -24,229 +34,306 @@ export class DespachoService {
   ): Observable<PaginatedResult<Despacho>> {
     const page = Math.max(1, query.page);
     const pageSize = Math.max(1, query.pageSize);
-    const texto = query.texto?.trim().toUpperCase();
 
-    const despachosFiltrados = this.obtenerDespachos()
-      .filter((despacho) => {
-        const contenido = [
-          despacho.codigo,
-          despacho.numeroContenedor,
-          despacho.observaciones
-        ]
-          .join(' ')
-          .toUpperCase();
-
-        if (
-          texto &&
-          !contenido.includes(texto)
-        ) {
-          return false;
-        }
-
-        if (
-          query.fechaDesde &&
-          despacho.fechaDespacho < query.fechaDesde
-        ) {
-          return false;
-        }
-
-        if (
-          query.fechaHasta &&
-          despacho.fechaDespacho > query.fechaHasta
-        ) {
-          return false;
-        }
-
-        if (
-          query.clienteId !== undefined &&
-          despacho.clienteId !== query.clienteId
-        ) {
-          return false;
-        }
-
-        if (
-          query.productoId !== undefined &&
-          despacho.productoId !== query.productoId
-        ) {
-          return false;
-        }
-
-        if (
-          query.situacionId !== undefined &&
-          despacho.situacionId !== query.situacionId
-        ) {
-          return false;
-        }
-
-        if (
-          query.estado !== undefined &&
-          despacho.activo !== query.estado
-        ) {
-          return false;
-        }
-
-        return true;
-      })
-      .sort((a, b) => {
-        const comparacionFecha =
-          b.fechaDespacho.localeCompare(
-            a.fechaDespacho
-          );
-
-        return comparacionFecha !== 0
-          ? comparacionFecha
-          : b.id - a.id;
-      });
-
-    const inicio = (page - 1) * pageSize;
-    const items = despachosFiltrados.slice(
-      inicio,
-      inicio + pageSize
+    return this.consultarDespachos({
+      texto: query.texto?.trim() || undefined,
+      clienteId: query.clienteId,
+      productoId: query.productoId,
+      situacionId: query.situacionId,
+      activo: query.estado,
+      fechaDesde: query.fechaDesde,
+      fechaHasta: query.fechaHasta,
+      pagina: page,
+      tamPagina: pageSize
+    }).pipe(
+      map((response) => ({
+        items: (response.datos ?? []).map(
+          (item) => this.mapearDespacho(item)
+        ),
+        totalItems: Number(
+          response.paginacion?.totalElementos ?? 0
+        ),
+        page: Number(
+          response.paginacion?.numeroPagina ?? page
+        ),
+        pageSize: Number(
+          response.paginacion?.tamanioPagina ??
+            pageSize
+        )
+      }))
     );
-
-    return of({
-      items,
-      totalItems: despachosFiltrados.length,
-      page,
-      pageSize
-    });
   }
 
   listarTodos(): Observable<Despacho[]> {
-    const despachos = this.obtenerDespachos()
-      .sort((a, b) =>
-        b.fechaDespacho.localeCompare(
-          a.fechaDespacho
-        )
-      );
-
-    return of(despachos);
+    return this.consultarDespachos({
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) =>
+        (response.datos ?? [])
+          .map((item) =>
+            this.mapearDespacho(item)
+          )
+          .sort((a, b) =>
+            b.fechaDespacho.localeCompare(
+              a.fechaDespacho
+            )
+          )
+      )
+    );
   }
 
   obtenerPorId(
     id: number
   ): Observable<Despacho | null> {
-    const despacho =
-      this.obtenerDespachos().find(
-        (item) => item.id === id
-      ) ?? null;
+    return this.consultarDespachos({
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) => {
+        const despacho = (response.datos ?? [])
+          .map((item) =>
+            this.mapearDespacho(item)
+          )
+          .find((item) => item.id === id);
 
-    return of(despacho);
+        return despacho ?? null;
+      })
+    );
   }
 
   crear(
     data: DespachoFormData
   ): Observable<Despacho> {
-    const despachos = this.obtenerDespachos();
+    const datos = this.normalizarDatos(data);
 
-    const nuevoDespacho: Despacho = {
-      id: this.generarId(despachos),
-      codigo: this.generarCodigo(despachos),
-      ...this.normalizarDatos(data),
-      activo: true,
-      fechaCreacion: new Date().toISOString(),
-      fechaActualizacion: null
-    };
+    return this.listarTodos().pipe(
+      switchMap((despachos) => {
+        const codigo =
+          this.generarCodigo(despachos);
 
-    despachos.push(nuevoDespacho);
-    this.guardarDespachos(despachos);
+        const body: DespachoRegistroRequest = {
+          despachoId: 0,
+          codigo,
+          fechaDespacho: datos.fechaDespacho,
+          fechaEstimadaLlegada:
+            datos.fechaEstimadaLlegada,
+          clienteId: datos.clienteId,
+          navieraId: datos.navieraId,
+          destinoId: datos.destinoId,
+          operadorLogisticoId:
+            datos.operadorLogisticoId,
+          puertoLlegadaId:
+            datos.puertoLlegadaId,
+          productoId: datos.productoId,
+          variedadId: datos.variedadId,
+          viaId: datos.viaId,
+          situacionId: datos.situacionId,
+          cantidad: datos.cantidad,
+          unidadMedida: datos.unidadMedida,
+          numeroContenedor:
+            datos.numeroContenedor,
+          observaciones:
+            datos.observaciones || undefined
+        };
 
-    return of(nuevoDespacho);
+        return this.despachoControllerService
+          .registrar10({ body })
+          .pipe(
+            switchMap(() =>
+              this.consultarDespachos({
+                texto: codigo,
+                pagina: 1,
+                tamPagina: 10
+              })
+            ),
+            map((response) => {
+              const despachoCreado =
+                (response.datos ?? [])
+                  .map((item) =>
+                    this.mapearDespacho(item)
+                  )
+                  .find(
+                    (despacho) =>
+                      despacho.codigo === codigo
+                  );
+
+              if (!despachoCreado) {
+                throw new Error(
+                  'El despacho fue registrado, pero no pudo recuperarse.'
+                );
+              }
+
+              return despachoCreado;
+            })
+          );
+      })
+    );
   }
 
   actualizar(
     id: number,
     data: DespachoFormData
   ): Observable<Despacho | null> {
-    const despachos = this.obtenerDespachos();
-    const posicion = despachos.findIndex(
-      (item) => item.id === id
+    const datos = this.normalizarDatos(data);
+
+    return this.obtenerPorId(id).pipe(
+      switchMap((despachoActual) => {
+        if (!despachoActual) {
+          return of(null);
+        }
+
+        const body: DespachoRegistroRequest = {
+          despachoId: id,
+          codigo: despachoActual.codigo,
+          fechaDespacho: datos.fechaDespacho,
+          fechaEstimadaLlegada:
+            datos.fechaEstimadaLlegada,
+          clienteId: datos.clienteId,
+          navieraId: datos.navieraId,
+          destinoId: datos.destinoId,
+          operadorLogisticoId:
+            datos.operadorLogisticoId,
+          puertoLlegadaId:
+            datos.puertoLlegadaId,
+          productoId: datos.productoId,
+          variedadId: datos.variedadId,
+          viaId: datos.viaId,
+          situacionId: datos.situacionId,
+          cantidad: datos.cantidad,
+          unidadMedida: datos.unidadMedida,
+          numeroContenedor:
+            datos.numeroContenedor,
+          observaciones:
+            datos.observaciones || undefined
+        };
+
+        return this.despachoControllerService
+          .actualizar10({ body })
+          .pipe(
+            switchMap(() =>
+              this.obtenerPorId(id)
+            )
+          );
+      })
     );
-
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    const despachoActualizado: Despacho = {
-      ...despachos[posicion],
-      ...this.normalizarDatos(data),
-      fechaActualizacion: new Date().toISOString()
-    };
-
-    despachos[posicion] = despachoActualizado;
-    this.guardarDespachos(despachos);
-
-    return of(despachoActualizado);
   }
 
   cambiarEstado(
     id: number
   ): Observable<Despacho | null> {
-    const despachos = this.obtenerDespachos();
-    const posicion = despachos.findIndex(
-      (item) => item.id === id
+    return this.obtenerPorId(id).pipe(
+      switchMap((despacho) => {
+        if (!despacho) {
+          return of(null);
+        }
+
+        const nuevoEstado = !despacho.activo;
+
+        return this.despachoControllerService
+          .cambiarEstado10({
+            despachoId: id,
+            activo: nuevoEstado
+          })
+          .pipe(
+            map(() => ({
+              ...despacho,
+              activo: nuevoEstado,
+              fechaActualizacion:
+                new Date().toISOString()
+            }))
+          );
+      })
     );
-
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    despachos[posicion] = {
-      ...despachos[posicion],
-      activo: !despachos[posicion].activo,
-      fechaActualizacion: new Date().toISOString()
-    };
-
-    this.guardarDespachos(despachos);
-
-    return of(despachos[posicion]);
   }
 
   relacionProductoVariedadValida(
     productoId: number,
     variedadId: number
   ): Observable<boolean> {
-    const variedades =
-      this.localStorageService.obtener<Variedad[]>(
-        STORAGE_KEYS.VARIEDADES
-      ) ?? [];
+    const productoIdNumero = Number(productoId);
+    const variedadIdNumero = Number(variedadId);
 
-    const relacionValida = variedades.some(
-      (variedad) =>
-        variedad.id === variedadId &&
-        variedad.productoId === productoId
-    );
-
-    return of(relacionValida);
+    return this.variedadService
+      .listarPorProducto(productoIdNumero, true)
+      .pipe(
+        map((variedades) =>
+          variedades.some(
+            (variedad) =>
+              Number(variedad.id) === variedadIdNumero &&
+              Number(variedad.productoId) === productoIdNumero
+          )
+        )
+      );
   }
 
-  private obtenerDespachos(): Despacho[] {
-    return (
-      this.localStorageService.obtener<Despacho[]>(
-        STORAGE_KEYS.DESPACHOS
-      ) ?? []
-    );
+  private consultarDespachos(
+    params: {
+      texto?: string;
+      clienteId?: number;
+      productoId?: number;
+      situacionId?: number;
+      activo?: boolean;
+      fechaDesde?: string;
+      fechaHasta?: string;
+      pagina?: number;
+      tamPagina?: number;
+    }
+  ): Observable<CustomPageDespachoResponse> {
+    return this.despachoControllerService
+      .listar1(params)
+      .pipe(
+        switchMap((response) => {
+          const contenido: unknown = response;
+
+          if (!(contenido instanceof Blob)) {
+            return of(response);
+          }
+
+          return from(contenido.text()).pipe(
+            map(
+              (texto) =>
+                JSON.parse(
+                  texto
+                ) as CustomPageDespachoResponse
+            )
+          );
+        })
+      );
   }
 
-  private guardarDespachos(
-    despachos: Despacho[]
-  ): void {
-    this.localStorageService.guardar(
-      STORAGE_KEYS.DESPACHOS,
-      despachos
-    );
-  }
-
-  private generarId(
-    despachos: Despacho[]
-  ): number {
-    return (
-      despachos.reduce(
-        (mayorId, despacho) =>
-          Math.max(mayorId, despacho.id),
-        0
-      ) + 1
-    );
+private mapearDespacho(
+    response: DespachoResponse
+  ): Despacho {
+    return {
+      id: response.despachoId ?? 0,
+      codigo: response.codigo ?? '',
+      fechaDespacho: response.fechaDespacho ?? '',
+      fechaEstimadaLlegada:
+        response.fechaEstimadaLlegada ?? '',
+      clienteId: response.clienteId ?? 0,
+      navieraId: response.navieraId ?? 0,
+      destinoId: response.destinoId ?? 0,
+      operadorLogisticoId:
+        response.operadorLogisticoId ?? 0,
+      puertoLlegadaId:
+        response.puertoLlegadaId ?? 0,
+      productoId: response.productoId ?? 0,
+      variedadId: response.variedadId ?? 0,
+      viaId: response.viaId ?? 0,
+      situacionId: response.situacionId ?? 0,
+      cantidad: Number(response.cantidad ?? 0),
+      unidadMedida: (
+        response.unidadMedida ??
+        UnidadMedidaDespacho.CAJAS
+      ) as UnidadMedidaDespacho,
+      numeroContenedor:
+        response.numeroContenedor ?? '',
+      observaciones: response.observaciones ?? '',
+      activo: response.activo ?? false,
+      fechaCreacion: '',
+      fechaActualizacion: null
+    };
   }
 
   private generarCodigo(

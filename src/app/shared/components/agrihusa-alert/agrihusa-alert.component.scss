@@ -1,0 +1,85 @@
+.btn-close-toast {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+}
+
+:host ::ng-deep {
+  .ngb-toasts {
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    position: fixed;
+    z-index: 1200;
+    background-color: transparent;
+
+    .toast__animation {
+      .toast {
+        margin: 0 auto 0;
+        animation: slideTop 0.5s ease;
+        backdrop-filter: blur(0);
+        background-color: transparent;
+        box-shadow: none;
+        border: none;
+
+        .toast-body {
+          padding-top: 0;
+          padding-bottom: 1.5rem;
+          box-shadow: none;
+        }
+      }
+    }
+
+    @keyframes slideTop {
+      0% {
+        transform: translateY(-100%);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+  }
+}
+
+:host ::ng-deep .bg-alert-success {
+  color: #fff;
+  background-color: #198754;
+  border: 0;
+}
+
+:host ::ng-deep .bg-alert-error {
+  color: #fff;
+  background-color: #dc3545;
+  border: 0;
+}
+
+:host ::ng-deep .bg-alert-warning {
+  color: #212529;
+  background-color: #ffc107;
+  border: 0;
+}
+
+:host ::ng-deep .bg-alert-info {
+  color: #fff;
+  background-color: #0d6efd;
+  border: 0;
+}
+
+:host ::ng-deep .alert-flotante {
+  color: inherit;
+}
+
+:host ::ng-deep .label-large {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+:host ::ng-deep .siaf-grey-30 {
+  color: inherit;
+}

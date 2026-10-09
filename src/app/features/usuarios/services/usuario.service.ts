@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import {
-  Observable,
+  catchError,
   from,
-  of
+  map,
+  Observable,
+  of,
+  switchMap
 } from 'rxjs';
-
 import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
 import { PaginatedResult } from '../../../core/models/pagination.model';
 import { LocalStorageService } from '../../../core/services/local-storage.service';
@@ -20,6 +22,13 @@ import {
   CambioPasswordServiceData,
   PerfilUsuarioActualizarData
 } from '../../perfil-usuario/models/perfil-usuario.model';
+import { UsuarioControllerService } from '../../../api/api/services/usuario-controller.service';
+import { CustomPageUsuarioResponse } from '../../../api/api/models/custom-page-usuario-response';
+import { UsuarioResponse } from '../../../api/api/models/usuario-response';
+import { UsuarioRegistroRequest } from '../../../api/api/models/usuario-registro-request';
+import { UsuarioActualizarRequest } from '../../../api/api/models/usuario-actualizar-request';
+import { CambiarContraseniaRequest } from '../../../api/api/models/cambiar-contrasenia-request';
+import { PerfilUsuarioActualizarRequest } from '../../../api/api/models/perfil-usuario-actualizar-request';
 
 @Injectable({
   providedIn: 'root'
@@ -27,74 +36,68 @@ import {
 export class UsuarioService {
   constructor(
     private localStorageService: LocalStorageService,
-    private passwordHashService: PasswordHashService
-  ) { }
+    private passwordHashService: PasswordHashService,
+    private usuarioControllerService:
+      UsuarioControllerService
+  ) {}
 
   listar(
     query: UsuarioQuery
   ): Observable<PaginatedResult<Usuario>> {
     const page = Math.max(1, query.page);
     const pageSize = Math.max(1, query.pageSize);
-    const texto = query.texto?.trim().toUpperCase();
 
-    const usuariosFiltrados =
-      this.obtenerUsuarios().filter((usuario) => {
-        const contenido = [
-          usuario.nombreUsuario,
-          usuario.nombres,
-          usuario.apellidos,
-          usuario.correo
-        ]
-          .join(' ')
-          .toUpperCase();
-
-        if (
-          texto &&
-          !contenido.includes(texto)
-        ) {
-          return false;
-        }
-
-        if (
-          query.rolId !== undefined &&
-          usuario.rolId !== query.rolId
-        ) {
-          return false;
-        }
-
-        if (
-          query.estado !== undefined &&
-          usuario.activo !== query.estado
-        ) {
-          return false;
-        }
-
-        return true;
-      });
-
-    const inicio = (page - 1) * pageSize;
-    const items = usuariosFiltrados.slice(
-      inicio,
-      inicio + pageSize
+    return this.consultarUsuarios({
+      texto: query.texto?.trim() || undefined,
+      rolId: query.rolId,
+      activo: query.estado,
+      pagina: page,
+      tamPagina: pageSize
+    }).pipe(
+      map((response) => ({
+        items: (response.datos ?? []).map(
+          (item) => this.mapearUsuario(item)
+        ),
+        totalItems: Number(
+          response.paginacion?.totalElementos ?? 0
+        ),
+        page: Number(
+          response.paginacion?.numeroPagina ?? page
+        ),
+        pageSize: Number(
+          response.paginacion?.tamanioPagina ??
+            pageSize
+        )
+      }))
     );
-
-    return of({
-      items,
-      totalItems: usuariosFiltrados.length,
-      page,
-      pageSize
-    });
   }
 
   obtenerPorId(
     id: number
   ): Observable<Usuario | null> {
-    const usuario =
-      this.obtenerUsuarios().find(
-        (item) => item.id === id
-      ) ?? null;
+    return this.usuarioControllerService
+      .obtenerPorId({
+        usuarioId: id
+      })
+      .pipe(
+        switchMap((response) => {
+          const contenido: unknown = response;
 
-    return of(usuario);
+          if (!(contenido instanceof Blob)) {
+            return of(response);
+          }
+
+          return from(contenido.text()).pipe(
+            map(
+              (texto) =>
+                JSON.parse(texto) as UsuarioResponse
+            )
+          );
+        }),
+        map((response) =>
+          this.mapearUsuario(response)
+        )
+      );
   }
 
   obtenerPorNombreUsuario(
@@ -116,112 +119,182 @@ export class UsuarioService {
   crear(
     data: UsuarioCrearData
   ): Observable<Usuario> {
-    return from(this.crearUsuario(data));
+    const apellidos = data.apellidos
+      .trim()
+      .split(/\s+/);
+
+    const apellidoPaterno =
+      apellidos.shift() ?? '';
+
+    const apellidoMaterno =
+      apellidos.join(' ') || '-';
+
+    const dni = data.nombreUsuario.trim();
+
+    const body: UsuarioRegistroRequest = {
+      dni,
+      nombres: data.nombres.trim(),
+      apellidoPaterno,
+      apellidoMaterno,
+      correo: data.correo.trim().toLowerCase(),
+      telefono: data.telefono.trim() || undefined,
+      rolId: data.rolId,
+      contrasenia: data.password,
+      activo: data.activo
+    };
+
+    return this.usuarioControllerService
+      .registrar2({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarUsuarios({
+            texto: dni,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const usuarioCreado =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearUsuario(item)
+              )
+              .find(
+                (usuario) =>
+                  usuario.nombreUsuario === dni
+              );
+
+          if (!usuarioCreado) {
+            throw new Error(
+              'El usuario fue registrado, pero no pudo recuperarse.'
+            );
+          }
+
+          return usuarioCreado;
+        })
+      );
   }
 
   actualizar(
     id: number,
     data: UsuarioActualizarData
   ): Observable<Usuario | null> {
-    const usuarios = this.obtenerUsuarios();
-    const posicion = usuarios.findIndex(
-      (item) => item.id === id
-    );
+    const apellidos = data.apellidos
+      .trim()
+      .split(/\s+/);
 
-    if (posicion === -1) {
-      return of(null);
-    }
+    const apellidoPaterno =
+      apellidos.shift() ?? '';
 
-    const usuarioActual = usuarios[posicion];
+    const apellidoMaterno =
+      apellidos.join(' ') || '-';
 
-    const usuarioActualizado: Usuario = {
-      ...usuarioActual,
-      nombreUsuario: usuarioActual.esSistema
-        ? usuarioActual.nombreUsuario
-        : data.nombreUsuario.trim().toUpperCase(),
+    const body: UsuarioActualizarRequest = {
+      usuarioId: id,
+      dni: data.nombreUsuario.trim(),
       nombres: data.nombres.trim(),
-      apellidos: data.apellidos.trim(),
+      apellidoPaterno,
+      apellidoMaterno,
       correo: data.correo.trim().toLowerCase(),
-      telefono: data.telefono.trim(),
-      rolId: usuarioActual.esSistema
-        ? usuarioActual.rolId
-        : data.rolId,
-      activo: usuarioActual.esSistema
-        ? usuarioActual.activo
-        : data.activo,
-      fechaActualizacion: new Date().toISOString()
+      telefono: data.telefono.trim() || undefined,
+      rolId: data.rolId,
+      activo: data.activo
     };
 
-    usuarios[posicion] = usuarioActualizado;
-    this.guardarUsuarios(usuarios);
-
-    return of(usuarioActualizado);
+    return this.usuarioControllerService
+      .actualizar2({ body })
+      .pipe(
+        switchMap(() =>
+          this.obtenerPorId(id)
+        )
+      );
   }
 
   actualizarPerfil(
     id: number,
     data: PerfilUsuarioActualizarData
   ): Observable<Usuario | null> {
-    const usuarios = this.obtenerUsuarios();
-    const posicion = usuarios.findIndex(
-      (usuario) => usuario.id === id
-    );
+    const apellidos = data.apellidos
+      .trim()
+      .split(/\s+/);
 
-    if (
-      posicion === -1 ||
-      !usuarios[posicion].activo
-    ) {
-      return of(null);
-    }
+    const apellidoPaterno =
+      apellidos.shift() ?? '';
 
-    const usuarioActualizado: Usuario = {
-      ...usuarios[posicion],
+    const apellidoMaterno =
+      apellidos.join(' ') || '-';
+
+    const body: PerfilUsuarioActualizarRequest = {
       nombres: data.nombres.trim(),
-      apellidos: data.apellidos.trim(),
+      apellidoPaterno,
+      apellidoMaterno,
       correo: data.correo.trim().toLowerCase(),
-      telefono: data.telefono.trim(),
-      fechaActualizacion: new Date().toISOString()
+      telefono: data.telefono.trim() || undefined
     };
 
-    usuarios[posicion] = usuarioActualizado;
-    this.guardarUsuarios(usuarios);
-
-    return of(usuarioActualizado);
+    return this.usuarioControllerService
+      .actualizarPerfil({ body })
+      .pipe(
+        switchMap(() =>
+          this.obtenerPorId(id)
+        )
+      );
   }
 
   cambiarPassword(
-    id: number,
+    _id: number,
     data: CambioPasswordServiceData
   ): Observable<CambioPasswordResult> {
-    return from(
-      this.cambiarPasswordUsuario(id, data)
-    );
+    const body: CambiarContraseniaRequest = {
+      contraseniaActual: data.passwordActual,
+      nuevaContrasenia: data.nuevaPassword,
+      confirmarContrasenia: data.nuevaPassword
+    };
+
+    return this.usuarioControllerService
+      .cambiarContrasenia({ body })
+      .pipe(
+        map(() => ({
+          success: true,
+          message:
+            'La contraseña se actualizó correctamente.'
+        })),
+        catchError(() =>
+          of({
+            success: false,
+            message:
+              'No fue posible cambiar la contraseña. Verifica la contraseña actual.'
+          })
+        )
+      );
   }
 
   cambiarEstado(
     id: number
   ): Observable<Usuario | null> {
-    const usuarios = this.obtenerUsuarios();
-    const posicion = usuarios.findIndex(
-      (item) => item.id === id
+    return this.obtenerPorId(id).pipe(
+      switchMap((usuario) => {
+        if (!usuario || usuario.esSistema) {
+          return of(null);
+        }
+
+        const nuevoEstado = !usuario.activo;
+
+        return this.usuarioControllerService
+          .cambiarEstado2({
+            usuarioId: id,
+            activo: nuevoEstado
+          })
+          .pipe(
+            map(() => ({
+              ...usuario,
+              activo: nuevoEstado,
+              fechaActualizacion:
+                new Date().toISOString()
+            }))
+          );
+      })
     );
-
-    if (
-      posicion === -1 ||
-      usuarios[posicion].esSistema
-    ) {
-      return of(null);
-    }
-
-    usuarios[posicion] = {
-      ...usuarios[posicion],
-      activo: !usuarios[posicion].activo,
-      fechaActualizacion: new Date().toISOString()
-    };
-
-    this.guardarUsuarios(usuarios);
-
-    return of(usuarios[posicion]);
   }
 
   existeNombreUsuario(
@@ -231,14 +304,21 @@ export class UsuarioService {
     const nombreNormalizado =
       nombreUsuario.trim().toUpperCase();
 
-    const existe = this.obtenerUsuarios().some(
-      (usuario) =>
-        usuario.nombreUsuario.toUpperCase() ===
-        nombreNormalizado &&
-        usuario.id !== idExcluir
+    return this.consultarUsuarios({
+      texto: nombreUsuario.trim(),
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (usuario) =>
+            (usuario.usuario ?? usuario.dni ?? '')
+              .trim()
+              .toUpperCase() === nombreNormalizado &&
+            usuario.usuarioId !== idExcluir
+        )
+      )
     );
-
-    return of(existe);
   }
 
   existeCorreo(
@@ -248,14 +328,21 @@ export class UsuarioService {
     const correoNormalizado =
       correo.trim().toLowerCase();
 
-    const existe = this.obtenerUsuarios().some(
-      (usuario) =>
-        usuario.correo.toLowerCase() ===
-        correoNormalizado &&
-        usuario.id !== idExcluir
+    return this.consultarUsuarios({
+      texto: correo.trim(),
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (usuario) =>
+            (usuario.correo ?? '')
+              .trim()
+              .toLowerCase() === correoNormalizado &&
+            usuario.usuarioId !== idExcluir
+        )
+      )
     );
-
-    return of(existe);
   }
 
   registrarUltimoAcceso(
@@ -278,6 +365,69 @@ export class UsuarioService {
     this.guardarUsuarios(usuarios);
 
     return of(usuarios[posicion]);
+  }
+
+  private consultarUsuarios(
+  params: {
+    texto?: string;
+    rolId?: number;
+    activo?: boolean;
+    pagina?: number;
+    tamPagina?: number;
+  }
+): Observable<CustomPageUsuarioResponse> {
+  return this.usuarioControllerService
+    .listarUsuarios(params)
+    .pipe(
+      switchMap((response) => {
+        const contenido: unknown = response;
+
+        if (!(contenido instanceof Blob)) {
+          return of(response);
+        }
+
+        return from(contenido.text()).pipe(
+          map(
+            (texto) =>
+              JSON.parse(
+                texto
+              ) as CustomPageUsuarioResponse
+          )
+        );
+      })
+    );
+}
+
+private mapearUsuario(
+    response: UsuarioResponse
+  ): Usuario {
+    const apellidos = [
+      response.apellidoPaterno,
+      response.apellidoMaterno
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+
+    return {
+      id: response.usuarioId ?? 0,
+      nombreUsuario:
+        response.usuario ?? response.dni ?? '',
+      nombres: response.nombres ?? '',
+      apellidos,
+      correo: response.correo ?? '',
+      telefono: response.telefono ?? '',
+      rolId: response.rolId ?? 0,
+      passwordHash: '',
+      esSistema: response.esSistema ?? false,
+      debeCambiarPassword:
+        response.resetContrasenia ?? false,
+      ultimoAcceso: response.ultimoAcceso ?? null,
+      activo: response.activo ?? false,
+      fechaCreacion: response.fechaCreacion ?? '',
+      fechaActualizacion:
+        response.fechaModificacion ?? null
+    };
   }
 
   private async crearUsuario(

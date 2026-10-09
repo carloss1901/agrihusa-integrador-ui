@@ -1,4 +1,5 @@
 <div id="agrihusaApp" class="agrihusa">
+  <agrihusa-alert aria-live="polite" aria-atomic="true"></agrihusa-alert>
   <div class="agrihusa-header" *ngIf="isAuthenticated">
     <header>
       <app-header (onToggleSideNav)="toggleMenu($event)" (onLogout)="logout()"></app-header>
@@ -54,6 +55,6 @@
   </div>
 
   <div *ngIf="!isAuthenticated">
-    <app-login></app-login>
+    <app-login (loginSuccess)="onLoginSuccess()"></app-login>
   </div>
 </div>

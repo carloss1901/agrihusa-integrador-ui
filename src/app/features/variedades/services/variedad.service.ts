@@ -1,21 +1,29 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
+import {
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
 import { PaginatedResult } from '../../../core/models/pagination.model';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
 import {
   Variedad,
   VariedadFormData,
   VariedadQuery
 } from '../models/variedad.model';
+import { CustomPageVariedadResponse } from '../../../api/api/models/custom-page-variedad-response';
+import { VariedadResponse } from '../../../api/api/models/variedad-response';
+import { VariedadControllerService } from '../../../api/api/services/variedad-controller.service';
+import { VariedadRegistroRequest } from '../../../api/api/models/variedad-registro-request';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VariedadService {
   constructor(
-    private localStorageService: LocalStorageService
+    private variedadControllerService:
+      VariedadControllerService
   ) {}
 
   listar(
@@ -23,152 +31,176 @@ export class VariedadService {
   ): Observable<PaginatedResult<Variedad>> {
     const page = Math.max(1, query.page);
     const pageSize = Math.max(1, query.pageSize);
-    const texto = query.texto?.trim().toUpperCase();
 
-    const variedadesFiltradas =
-      this.obtenerVariedades()
-        .filter((variedad) => {
-          if (
-            texto &&
-            !variedad.nombre
-              .toUpperCase()
-              .includes(texto)
-          ) {
-            return false;
-          }
-
-          if (
-            query.productoId !== undefined &&
-            variedad.productoId !== query.productoId
-          ) {
-            return false;
-          }
-
-          if (
-            query.estado !== undefined &&
-            variedad.activo !== query.estado
-          ) {
-            return false;
-          }
-
-          return true;
-        })
-        .sort((a, b) => {
-          const comparacionProducto =
-            a.productoId - b.productoId;
-
-          return comparacionProducto !== 0
-            ? comparacionProducto
-            : a.nombre.localeCompare(b.nombre);
-        });
-
-    const inicio = (page - 1) * pageSize;
-    const items = variedadesFiltradas.slice(
-      inicio,
-      inicio + pageSize
+    return this.consultarVariedades({
+      texto: query.texto?.trim() || undefined,
+      productoId: query.productoId,
+      activo: query.estado,
+      pagina: page,
+      tamPagina: pageSize
+    }).pipe(
+      map((response) => ({
+        items: (response.datos ?? []).map(
+          (item) => this.mapearVariedad(item)
+        ),
+        totalItems: Number(
+          response.paginacion?.totalElementos ?? 0
+        ),
+        page: Number(
+          response.paginacion?.numeroPagina ?? page
+        ),
+        pageSize: Number(
+          response.paginacion?.tamanioPagina ??
+            pageSize
+        )
+      }))
     );
-
-    return of({
-      items,
-      totalItems: variedadesFiltradas.length,
-      page,
-      pageSize
-    });
   }
 
   obtenerPorId(
     id: number
   ): Observable<Variedad | null> {
-    const variedad =
-      this.obtenerVariedades().find(
-        (item) => item.id === id
-      ) ?? null;
+    return this.consultarVariedades({
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) => {
+        const variedad = (response.datos ?? [])
+          .map((item) =>
+            this.mapearVariedad(item)
+          )
+          .find((item) => item.id === id);
 
-    return of(variedad);
+        return variedad ?? null;
+      })
+    );
   }
 
   listarPorProducto(
     productoId: number,
     soloActivas = true
   ): Observable<Variedad[]> {
-    const variedades = this.obtenerVariedades()
-      .filter(
-        (variedad) =>
-          variedad.productoId === productoId &&
-          (!soloActivas || variedad.activo)
+    return this.consultarVariedades({
+      productoId,
+      activo: soloActivas ? true : undefined,
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) =>
+        (response.datos ?? [])
+          .map((item) =>
+            this.mapearVariedad(item)
+          )
+          .sort((a, b) =>
+            a.nombre.localeCompare(b.nombre)
+          )
       )
-      .sort((a, b) =>
-        a.nombre.localeCompare(b.nombre)
-      );
-
-    return of(variedades);
+    );
   }
 
   crear(
     data: VariedadFormData
   ): Observable<Variedad> {
-    const variedades = this.obtenerVariedades();
+    const datos = this.normalizarDatos(data);
 
-    const nuevaVariedad: Variedad = {
-      id: this.generarId(variedades),
-      ...this.normalizarDatos(data),
-      activo: true,
-      fechaCreacion: new Date().toISOString(),
-      fechaActualizacion: null
+    const body: VariedadRegistroRequest = {
+      variedadId: 0,
+      productoId: datos.productoId,
+      nombre: datos.nombre
     };
 
-    variedades.push(nuevaVariedad);
-    this.guardarVariedades(variedades);
+    return this.variedadControllerService
+      .registrar1({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarVariedades({
+            texto: datos.nombre,
+            productoId: datos.productoId,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const variedadCreada =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearVariedad(item)
+              )
+              .find(
+                (variedad) =>
+                  variedad.productoId ===
+                    datos.productoId &&
+                  variedad.nombre === datos.nombre
+              );
 
-    return of(nuevaVariedad);
+          if (!variedadCreada) {
+            throw new Error(
+              'La variedad fue registrada, pero no pudo recuperarse.'
+            );
+          }
+
+          return variedadCreada;
+        })
+      );
   }
 
   actualizar(
     id: number,
     data: VariedadFormData
   ): Observable<Variedad | null> {
-    const variedades = this.obtenerVariedades();
-    const posicion = variedades.findIndex(
-      (item) => item.id === id
-    );
+    const datos = this.normalizarDatos(data);
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    const variedadActualizada: Variedad = {
-      ...variedades[posicion],
-      ...this.normalizarDatos(data),
-      fechaActualizacion: new Date().toISOString()
+    const body: VariedadRegistroRequest = {
+      variedadId: id,
+      productoId: datos.productoId,
+      nombre: datos.nombre
     };
 
-    variedades[posicion] = variedadActualizada;
-    this.guardarVariedades(variedades);
+    return this.variedadControllerService
+      .actualizar1({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarVariedades({
+            texto: datos.nombre,
+            productoId: datos.productoId,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const variedadActualizada =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearVariedad(item)
+              )
+              .find(
+                (variedad) =>
+                  variedad.id === id
+              );
 
-    return of(variedadActualizada);
+          return variedadActualizada ?? null;
+        })
+      );
   }
 
   cambiarEstado(
-    id: number
+    variedad: Variedad
   ): Observable<Variedad | null> {
-    const variedades = this.obtenerVariedades();
-    const posicion = variedades.findIndex(
-      (item) => item.id === id
-    );
+    const nuevoEstado = !variedad.activo;
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    variedades[posicion] = {
-      ...variedades[posicion],
-      activo: !variedades[posicion].activo,
-      fechaActualizacion: new Date().toISOString()
-    };
-
-    this.guardarVariedades(variedades);
-
-    return of(variedades[posicion]);
+    return this.variedadControllerService
+      .cambiarEstado1({
+        variedadId: variedad.id,
+        activo: nuevoEstado
+      })
+      .pipe(
+        map(() => ({
+          ...variedad,
+          activo: nuevoEstado,
+          fechaActualizacion:
+            new Date().toISOString()
+        }))
+      );
   }
 
   existeNombre(
@@ -179,44 +211,54 @@ export class VariedadService {
     const nombreNormalizado =
       nombre.trim().toUpperCase();
 
-    const existe = this.obtenerVariedades().some(
-      (variedad) =>
-        variedad.productoId === productoId &&
-        variedad.nombre.toUpperCase() ===
-          nombreNormalizado &&
-        variedad.id !== idExcluir
-    );
-
-    return of(existe);
-  }
-
-  private obtenerVariedades(): Variedad[] {
-    return (
-      this.localStorageService.obtener<Variedad[]>(
-        STORAGE_KEYS.VARIEDADES
-      ) ?? []
-    );
-  }
-
-  private guardarVariedades(
-    variedades: Variedad[]
-  ): void {
-    this.localStorageService.guardar(
-      STORAGE_KEYS.VARIEDADES,
-      variedades
+    return this.consultarVariedades({
+      texto: nombre.trim(),
+      productoId,
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (item) =>
+            item.productoId === productoId &&
+            (item.nombre ?? '')
+              .trim()
+              .toUpperCase() === nombreNormalizado &&
+            item.variedadId !== idExcluir
+        )
+      )
     );
   }
 
-  private generarId(
-    variedades: Variedad[]
-  ): number {
-    return (
-      variedades.reduce(
-        (mayorId, variedad) =>
-          Math.max(mayorId, variedad.id),
-        0
-      ) + 1
-    );
+  private consultarVariedades(
+    params: {
+      texto?: string;
+      productoId?: number;
+      activo?: boolean;
+      pagina?: number;
+      tamPagina?: number;
+    }
+  ): Observable<CustomPageVariedadResponse> {
+    return this.variedadControllerService
+      .listarVariedades(params)
+      .pipe(
+        switchMap((response) => {
+          const contenido: unknown = response;
+
+          if (!(contenido instanceof Blob)) {
+            return of(response);
+          }
+
+          return from(contenido.text()).pipe(
+            map(
+              (texto) =>
+                JSON.parse(
+                  texto
+                ) as CustomPageVariedadResponse
+            )
+          );
+        })
+      );
   }
 
   private normalizarDatos(
@@ -225,6 +267,19 @@ export class VariedadService {
     return {
       productoId: data.productoId,
       nombre: data.nombre.trim().toUpperCase()
+    };
+  }
+
+  private mapearVariedad(
+    response: VariedadResponse
+  ): Variedad {
+    return {
+      id: response.variedadId ?? 0,
+      productoId: response.productoId ?? 0,
+      nombre: response.nombre ?? '',
+      activo: response.activo ?? false,
+      fechaCreacion: '',
+      fechaActualizacion: null
     };
   }
 }

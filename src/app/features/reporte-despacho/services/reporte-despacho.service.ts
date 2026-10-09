@@ -1,251 +1,215 @@
 import { Injectable } from '@angular/core';
 import type { Borders } from 'exceljs';
-import { Observable, of } from 'rxjs';
-
 import {
-  STORAGE_KEYS,
-  StorageKey
-} from '../../../core/constants/storage-keys.constant';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
-import { Cliente } from '../../clientes/models/cliente.model';
-import { Destino } from '../../destinos/models/destino.model';
-import { Naviera } from '../../navieras/models/naviera.model';
-import { OperadorLogistico } from '../../operadores-logisticos/models/operador-logistico.model';
-import { Producto } from '../../productos/models/producto.model';
-import { PuertoLlegada } from '../../puertos-llegada/models/puerto-llegada.model';
-import { Despacho } from '../../registro-despacho/models/despacho.model';
-import { Situacion } from '../../situaciones/models/situacion.model';
-import { Variedad } from '../../variedades/models/variedad.model';
-import { Via } from '../../vias/models/via.model';
+  forkJoin,
+  map,
+  Observable
+} from 'rxjs';
 import {
   ReporteDespachoFilter,
   ReporteDespachoItem,
   ResumenReporteDespacho
 } from '../models/reporte-despacho.model';
+import { ClienteService } from '../../clientes/services/cliente.service';
+import { DestinoService } from '../../destinos/services/destino.service';
+import { NavieraService } from '../../navieras/services/naviera.service';
+import { OperadorLogisticoService } from '../../operadores-logisticos/services/operador-logistico.service';
+import { ProductoService } from '../../productos/services/producto.service';
+import { PuertoLlegadaService } from '../../puertos-llegada/services/puerto-llegada.service';
+import { DespachoService } from '../../registro-despacho/services/despacho.service';
+import { SituacionService } from '../../situaciones/services/situacion.service';
+import { VariedadService } from '../../variedades/services/variedad.service';
+import { ViaService } from '../../vias/services/via.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReporteDespachoService {
   constructor(
-    private localStorageService: LocalStorageService
+    private despachoService: DespachoService,
+    private clienteService: ClienteService,
+    private navieraService: NavieraService,
+    private destinoService: DestinoService,
+    private operadorService: OperadorLogisticoService,
+    private puertoService: PuertoLlegadaService,
+    private productoService: ProductoService,
+    private variedadService: VariedadService,
+    private viaService: ViaService,
+    private situacionService: SituacionService
   ) {}
 
   consultar(
     filtro: ReporteDespachoFilter
   ): Observable<ReporteDespachoItem[]> {
-    const despachos =
-      this.obtenerCatalogo<Despacho>(
-        STORAGE_KEYS.DESPACHOS
-      );
+    const consultaCatalogo = {
+      page: 1,
+      pageSize: 1000
+    };
 
-    const clientes = this.crearMapa(
-      this.obtenerCatalogo<Cliente>(
-        STORAGE_KEYS.CLIENTES
-      )
-    );
+    return forkJoin({
+      despachos: this.despachoService.listar({
+        page: 1,
+        pageSize: 1000,
+        fechaDesde: filtro.fechaDesde,
+        fechaHasta: filtro.fechaHasta,
+        clienteId: filtro.clienteId,
+        productoId: filtro.productoId,
+        situacionId: filtro.situacionId,
+        estado: filtro.estado
+      }),
+      clientes:
+        this.clienteService.listar(consultaCatalogo),
+      navieras:
+        this.navieraService.listar(consultaCatalogo),
+      destinos:
+        this.destinoService.listar(consultaCatalogo),
+      operadores:
+        this.operadorService.listar(consultaCatalogo),
+      puertos:
+        this.puertoService.listar(consultaCatalogo),
+      productos:
+        this.productoService.listar(consultaCatalogo),
+      variedades:
+        this.variedadService.listar(consultaCatalogo),
+      vias:
+        this.viaService.listar(consultaCatalogo),
+      situaciones:
+        this.situacionService.listar(consultaCatalogo)
+    }).pipe(
+      map((respuesta) => {
+        const clientes = this.crearMapa(
+          respuesta.clientes.items
+        );
+        const navieras = this.crearMapa(
+          respuesta.navieras.items
+        );
+        const destinos = this.crearMapa(
+          respuesta.destinos.items
+        );
+        const operadores = this.crearMapa(
+          respuesta.operadores.items
+        );
+        const puertos = this.crearMapa(
+          respuesta.puertos.items
+        );
+        const productos = this.crearMapa(
+          respuesta.productos.items
+        );
+        const variedades = this.crearMapa(
+          respuesta.variedades.items
+        );
+        const vias = this.crearMapa(
+          respuesta.vias.items
+        );
+        const situaciones = this.crearMapa(
+          respuesta.situaciones.items
+        );
 
-    const navieras = this.crearMapa(
-      this.obtenerCatalogo<Naviera>(
-        STORAGE_KEYS.NAVIERAS
-      )
-    );
+        return respuesta.despachos.items
+          .filter((despacho) => {
+            if (
+              filtro.variedadId !== undefined &&
+              despacho.variedadId !==
+                filtro.variedadId
+            ) {
+              return false;
+            }
 
-    const destinos = this.crearMapa(
-      this.obtenerCatalogo<Destino>(
-        STORAGE_KEYS.DESTINOS
-      )
-    );
+            if (
+              filtro.viaId !== undefined &&
+              despacho.viaId !== filtro.viaId
+            ) {
+              return false;
+            }
 
-    const operadores = this.crearMapa(
-      this.obtenerCatalogo<OperadorLogistico>(
-        STORAGE_KEYS.OPERADORES_LOGISTICOS
-      )
-    );
+            return true;
+          })
+          .sort((a, b) =>
+            b.fechaDespacho.localeCompare(
+              a.fechaDespacho
+            )
+          )
+          .map(
+            (
+              despacho
+            ): ReporteDespachoItem => {
+              const cliente = clientes.get(
+                despacho.clienteId
+              );
+              const naviera = navieras.get(
+                despacho.navieraId
+              );
+              const destino = destinos.get(
+                despacho.destinoId
+              );
+              const operador = operadores.get(
+                despacho.operadorLogisticoId
+              );
+              const puerto = puertos.get(
+                despacho.puertoLlegadaId
+              );
+              const producto = productos.get(
+                despacho.productoId
+              );
+              const variedad = variedades.get(
+                despacho.variedadId
+              );
+              const via = vias.get(
+                despacho.viaId
+              );
+              const situacion = situaciones.get(
+                despacho.situacionId
+              );
 
-    const puertos = this.crearMapa(
-      this.obtenerCatalogo<PuertoLlegada>(
-        STORAGE_KEYS.PUERTOS_LLEGADA
-      )
-    );
-
-    const productos = this.crearMapa(
-      this.obtenerCatalogo<Producto>(
-        STORAGE_KEYS.PRODUCTOS
-      )
-    );
-
-    const variedades = this.crearMapa(
-      this.obtenerCatalogo<Variedad>(
-        STORAGE_KEYS.VARIEDADES
-      )
-    );
-
-    const vias = this.crearMapa(
-      this.obtenerCatalogo<Via>(
-        STORAGE_KEYS.VIAS
-      )
-    );
-
-    const situaciones = this.crearMapa(
-      this.obtenerCatalogo<Situacion>(
-        STORAGE_KEYS.SITUACIONES
-      )
-    );
-
-    const resultados = despachos
-      .filter((despacho) => {
-        if (
-          filtro.fechaDesde &&
-          despacho.fechaDespacho <
-            filtro.fechaDesde
-        ) {
-          return false;
-        }
-
-        if (
-          filtro.fechaHasta &&
-          despacho.fechaDespacho >
-            filtro.fechaHasta
-        ) {
-          return false;
-        }
-
-        if (
-          filtro.clienteId !== undefined &&
-          despacho.clienteId !==
-            filtro.clienteId
-        ) {
-          return false;
-        }
-
-        if (
-          filtro.productoId !== undefined &&
-          despacho.productoId !==
-            filtro.productoId
-        ) {
-          return false;
-        }
-
-        if (
-          filtro.variedadId !== undefined &&
-          despacho.variedadId !==
-            filtro.variedadId
-        ) {
-          return false;
-        }
-
-        if (
-          filtro.viaId !== undefined &&
-          despacho.viaId !== filtro.viaId
-        ) {
-          return false;
-        }
-
-        if (
-          filtro.situacionId !== undefined &&
-          despacho.situacionId !==
-            filtro.situacionId
-        ) {
-          return false;
-        }
-
-        if (
-          filtro.estado !== undefined &&
-          despacho.activo !== filtro.estado
-        ) {
-          return false;
-        }
-
-        return true;
+              return {
+                id: despacho.id,
+                codigo: despacho.codigo,
+                fechaDespacho:
+                  despacho.fechaDespacho,
+                fechaEstimadaLlegada:
+                  despacho.fechaEstimadaLlegada,
+                cliente:
+                  cliente?.nombreComercial ||
+                  cliente?.razonSocial ||
+                  'NO DISPONIBLE',
+                naviera:
+                  naviera?.nombre ??
+                  'NO DISPONIBLE',
+                destino: destino
+                  ? `${destino.ciudad}, ${destino.pais}`
+                  : 'NO DISPONIBLE',
+                operadorLogistico:
+                  operador?.nombreComercial ||
+                  operador?.razonSocial ||
+                  'NO DISPONIBLE',
+                puertoLlegada: puerto
+                  ? `${puerto.puerto}, ${puerto.pais}`
+                  : 'NO DISPONIBLE',
+                producto:
+                  producto?.nombre ??
+                  'NO DISPONIBLE',
+                variedad:
+                  variedad?.nombre ??
+                  'NO DISPONIBLE',
+                via:
+                  via?.descripcion ??
+                  'NO DISPONIBLE',
+                situacion:
+                  situacion?.descripcion ??
+                  'NO DISPONIBLE',
+                cantidad: despacho.cantidad,
+                unidadMedida:
+                  despacho.unidadMedida,
+                numeroContenedor:
+                  despacho.numeroContenedor,
+                observaciones:
+                  despacho.observaciones,
+                activo: despacho.activo
+              };
+            }
+          );
       })
-      .sort((a, b) =>
-        b.fechaDespacho.localeCompare(
-          a.fechaDespacho
-        )
-      )
-      .map((despacho): ReporteDespachoItem => {
-        const cliente =
-          clientes.get(despacho.clienteId);
-
-        const naviera =
-          navieras.get(despacho.navieraId);
-
-        const destino =
-          destinos.get(despacho.destinoId);
-
-        const operador =
-          operadores.get(
-            despacho.operadorLogisticoId
-          );
-
-        const puerto =
-          puertos.get(
-            despacho.puertoLlegadaId
-          );
-
-        const producto =
-          productos.get(despacho.productoId);
-
-        const variedad =
-          variedades.get(despacho.variedadId);
-
-        const via =
-          vias.get(despacho.viaId);
-
-        const situacion =
-          situaciones.get(
-            despacho.situacionId
-          );
-
-        return {
-          id: despacho.id,
-          codigo: despacho.codigo,
-          fechaDespacho:
-            despacho.fechaDespacho,
-          fechaEstimadaLlegada:
-            despacho.fechaEstimadaLlegada,
-          cliente:
-            cliente?.nombreComercial ||
-            cliente?.razonSocial ||
-            'NO DISPONIBLE',
-          naviera:
-            naviera?.nombre ??
-            'NO DISPONIBLE',
-          destino: destino
-            ? `${destino.ciudad}, ${destino.pais}`
-            : 'NO DISPONIBLE',
-          operadorLogistico:
-            operador?.nombreComercial ||
-            operador?.razonSocial ||
-            'NO DISPONIBLE',
-          puertoLlegada: puerto
-            ? `${puerto.puerto}, ${puerto.pais}`
-            : 'NO DISPONIBLE',
-          producto:
-            producto?.nombre ??
-            'NO DISPONIBLE',
-          variedad:
-            variedad?.nombre ??
-            'NO DISPONIBLE',
-          via:
-            via?.descripcion ??
-            'NO DISPONIBLE',
-          situacion:
-            situacion?.descripcion ??
-            'NO DISPONIBLE',
-          cantidad: despacho.cantidad,
-          unidadMedida:
-            despacho.unidadMedida,
-          numeroContenedor:
-            despacho.numeroContenedor,
-          observaciones:
-            despacho.observaciones,
-          activo: despacho.activo
-        };
-      });
-
-    return of(resultados);
+    );
   }
 
   obtenerResumen(
@@ -796,16 +760,6 @@ export class ReporteDespachoService {
     document.body.removeChild(enlace);
 
     URL.revokeObjectURL(url);
-  }
-
-  private obtenerCatalogo<T>(
-    key: StorageKey
-  ): T[] {
-    return (
-      this.localStorageService.obtener<T[]>(
-        key
-      ) ?? []
-    );
   }
 
   private crearMapa<

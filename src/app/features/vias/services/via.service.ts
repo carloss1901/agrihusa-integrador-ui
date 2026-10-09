@@ -1,21 +1,29 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { STORAGE_KEYS } from '../../../core/constants/storage-keys.constant';
+import {
+  from,
+  map,
+  Observable,
+  of,
+  switchMap
+} from 'rxjs';
 import { PaginatedResult } from '../../../core/models/pagination.model';
-import { LocalStorageService } from '../../../core/services/local-storage.service';
 import {
   Via,
   ViaFormData,
   ViaQuery
 } from '../models/via.model';
+import { CustomPageViaResponse } from '../../../api/api/models/custom-page-via-response';
+import { ViaResponse } from '../../../api/api/models/via-response';
+import { ViaControllerService } from '../../../api/api/services/via-controller.service';
+import { ViaRegistroRequest } from '../../../api/api/models/via-registro-request';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ViaService {
   constructor(
-    private localStorageService: LocalStorageService
+    private viaControllerService:
+      ViaControllerService
   ) {}
 
   listar(
@@ -23,132 +31,168 @@ export class ViaService {
   ): Observable<PaginatedResult<Via>> {
     const page = Math.max(1, query.page);
     const pageSize = Math.max(1, query.pageSize);
-    const texto = query.texto?.trim().toUpperCase();
 
-    const viasFiltradas = this.obtenerVias()
-      .filter((via) => {
-        if (
-          texto &&
-          !via.descripcion
-            .toUpperCase()
-            .includes(texto)
-        ) {
-          return false;
-        }
-
-        if (
-          query.estado !== undefined &&
-          via.activo !== query.estado
-        ) {
-          return false;
-        }
-
-        return true;
-      })
-      .sort((a, b) =>
-        a.descripcion.localeCompare(b.descripcion)
-      );
-
-    const inicio = (page - 1) * pageSize;
-    const items = viasFiltradas.slice(
-      inicio,
-      inicio + pageSize
+    return this.consultarVias({
+      texto: query.texto?.trim() || undefined,
+      activo: query.estado,
+      pagina: page,
+      tamPagina: pageSize
+    }).pipe(
+      map((response) => ({
+        items: (response.datos ?? []).map(
+          (item) => this.mapearVia(item)
+        ),
+        totalItems: Number(
+          response.paginacion?.totalElementos ?? 0
+        ),
+        page: Number(
+          response.paginacion?.numeroPagina ?? page
+        ),
+        pageSize: Number(
+          response.paginacion?.tamanioPagina ??
+            pageSize
+        )
+      }))
     );
+  }
 
-    return of({
-      items,
-      totalItems: viasFiltradas.length,
-      page,
-      pageSize
-    });
+  listarActivas(): Observable<Via[]> {
+    return this.consultarVias({
+      activo: true,
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) =>
+        (response.datos ?? [])
+          .map((item) =>
+            this.mapearVia(item)
+          )
+          .sort((a, b) =>
+            a.descripcion.localeCompare(
+              b.descripcion
+            )
+          )
+      )
+    );
   }
 
   obtenerPorId(
     id: number
   ): Observable<Via | null> {
-    const via =
-      this.obtenerVias().find(
-        (item) => item.id === id
-      ) ?? null;
+    return this.consultarVias({
+      pagina: 1,
+      tamPagina: 1000
+    }).pipe(
+      map((response) => {
+        const via = (response.datos ?? [])
+          .map((item) =>
+            this.mapearVia(item)
+          )
+          .find((item) => item.id === id);
 
-    return of(via);
-  }
-
-  listarActivas(): Observable<Via[]> {
-    const vias = this.obtenerVias()
-      .filter((via) => via.activo)
-      .sort((a, b) =>
-        a.descripcion.localeCompare(b.descripcion)
-      );
-
-    return of(vias);
+        return via ?? null;
+      })
+    );
   }
 
   crear(
     data: ViaFormData
   ): Observable<Via> {
-    const vias = this.obtenerVias();
+    const datos = this.normalizarDatos(data);
 
-    const nuevaVia: Via = {
-      id: this.generarId(vias),
-      ...this.normalizarDatos(data),
-      activo: true,
-      fechaCreacion: new Date().toISOString(),
-      fechaActualizacion: null
+    const body: ViaRegistroRequest = {
+      viaId: 0,
+      descripcion: datos.descripcion
     };
 
-    vias.push(nuevaVia);
-    this.guardarVias(vias);
+    return this.viaControllerService
+      .registrar({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarVias({
+            texto: datos.descripcion,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const viaCreada =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearVia(item)
+              )
+              .find(
+                (via) =>
+                  via.descripcion ===
+                    datos.descripcion
+              );
 
-    return of(nuevaVia);
+          if (!viaCreada) {
+            throw new Error(
+              'La vía fue registrada, pero no pudo recuperarse.'
+            );
+          }
+
+          return viaCreada;
+        })
+      );
   }
 
   actualizar(
     id: number,
     data: ViaFormData
   ): Observable<Via | null> {
-    const vias = this.obtenerVias();
-    const posicion = vias.findIndex(
-      (item) => item.id === id
-    );
+    const datos = this.normalizarDatos(data);
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    const viaActualizada: Via = {
-      ...vias[posicion],
-      ...this.normalizarDatos(data),
-      fechaActualizacion: new Date().toISOString()
+    const body: ViaRegistroRequest = {
+      viaId: id,
+      descripcion: datos.descripcion
     };
 
-    vias[posicion] = viaActualizada;
-    this.guardarVias(vias);
+    return this.viaControllerService
+      .actualizar({ body })
+      .pipe(
+        switchMap(() =>
+          this.consultarVias({
+            texto: datos.descripcion,
+            pagina: 1,
+            tamPagina: 10
+          })
+        ),
+        map((response) => {
+          const viaActualizada =
+            (response.datos ?? [])
+              .map((item) =>
+                this.mapearVia(item)
+              )
+              .find(
+                (via) =>
+                  via.id === id
+              );
 
-    return of(viaActualizada);
+          return viaActualizada ?? null;
+        })
+      );
   }
 
   cambiarEstado(
-    id: number
+    via: Via
   ): Observable<Via | null> {
-    const vias = this.obtenerVias();
-    const posicion = vias.findIndex(
-      (item) => item.id === id
-    );
+    const nuevoEstado = !via.activo;
 
-    if (posicion === -1) {
-      return of(null);
-    }
-
-    vias[posicion] = {
-      ...vias[posicion],
-      activo: !vias[posicion].activo,
-      fechaActualizacion: new Date().toISOString()
-    };
-
-    this.guardarVias(vias);
-
-    return of(vias[posicion]);
+    return this.viaControllerService
+      .cambiarEstado({
+        viaId: via.id,
+        activo: nuevoEstado
+      })
+      .pipe(
+        map(() => ({
+          ...via,
+          activo: nuevoEstado,
+          fechaActualizacion:
+            new Date().toISOString()
+        }))
+      );
   }
 
   existeDescripcion(
@@ -158,43 +202,52 @@ export class ViaService {
     const descripcionNormalizada =
       descripcion.trim().toUpperCase();
 
-    const existe = this.obtenerVias().some(
-      (via) =>
-        via.descripcion.toUpperCase() ===
-          descripcionNormalizada &&
-        via.id !== idExcluir
-    );
-
-    return of(existe);
-  }
-
-  private obtenerVias(): Via[] {
-    return (
-      this.localStorageService.obtener<Via[]>(
-        STORAGE_KEYS.VIAS
-      ) ?? []
-    );
-  }
-
-  private guardarVias(
-    vias: Via[]
-  ): void {
-    this.localStorageService.guardar(
-      STORAGE_KEYS.VIAS,
-      vias
+    return this.consultarVias({
+      texto: descripcion.trim(),
+      pagina: 1,
+      tamPagina: 100
+    }).pipe(
+      map((response) =>
+        (response.datos ?? []).some(
+          (item) =>
+            (item.descripcion ?? '')
+              .trim()
+              .toUpperCase() ===
+                descripcionNormalizada &&
+            item.viaId !== idExcluir
+        )
+      )
     );
   }
 
-  private generarId(
-    vias: Via[]
-  ): number {
-    return (
-      vias.reduce(
-        (mayorId, via) =>
-          Math.max(mayorId, via.id),
-        0
-      ) + 1
-    );
+  private consultarVias(
+    params: {
+      texto?: string;
+      activo?: boolean;
+      pagina?: number;
+      tamPagina?: number;
+    }
+  ): Observable<CustomPageViaResponse> {
+    return this.viaControllerService
+      .listarVias(params)
+      .pipe(
+        switchMap((response) => {
+          const contenido: unknown = response;
+
+          if (!(contenido instanceof Blob)) {
+            return of(response);
+          }
+
+          return from(contenido.text()).pipe(
+            map(
+              (texto) =>
+                JSON.parse(
+                  texto
+                ) as CustomPageViaResponse
+            )
+          );
+        })
+      );
   }
 
   private normalizarDatos(
@@ -203,6 +256,18 @@ export class ViaService {
     return {
       descripcion:
         data.descripcion.trim().toUpperCase()
+    };
+  }
+
+  private mapearVia(
+    response: ViaResponse
+  ): Via {
+    return {
+      id: response.viaId ?? 0,
+      descripcion: response.descripcion ?? '',
+      activo: response.activo ?? false,
+      fechaCreacion: '',
+      fechaActualizacion: null
     };
   }
 }

@@ -102,14 +102,22 @@ export class MantenimientoRolesComponent
   }
 
   mostrarModalEditar(): void {
+    const rolSeleccionado = this.filaSeleccionada;
+
     if (
-      !this.filaSeleccionada ||
-      this.filaSeleccionada.esSistema
+      !rolSeleccionado ||
+      rolSeleccionado.esSistema
     ) {
       return;
     }
 
-    this.abrirModal(this.filaSeleccionada);
+    this.rolService
+      .obtenerPorId(rolSeleccionado.id)
+      .subscribe((rol) => {
+        if (rol) {
+          this.abrirModal(rol);
+        }
+      });
   }
 
   cambiarEstado(): void {

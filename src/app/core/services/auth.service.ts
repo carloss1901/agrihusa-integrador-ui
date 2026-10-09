@@ -30,12 +30,14 @@ import { UsuarioService } from '../../features/usuarios/services/usuario.service
 import { LocalStorageService } from './local-storage.service';
 import { PasswordHashService } from './password-hash.service';
 import { Usuario } from '../../features/usuarios/models/usuario.model';
+import { TokenService } from './token.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
     private readonly duracionSesionHoras = 8;
+    private readonly tokenStorageKey = 'token';
 
     private readonly sesionSubject =
         new BehaviorSubject<SesionUsuario | null>(null);
@@ -48,10 +50,11 @@ export class AuthService {
         private rolService: RolService,
         private localStorageService: LocalStorageService,
         private passwordHashService: PasswordHashService,
-        private bitacoraService: BitacoraService
-    ) {
+        private bitacoraService: BitacoraService,
+        private tokenService: TokenService
+        ) {
         this.restaurarSesion();
-    }
+        }
 
     login(
         credentials: LoginCredentials
@@ -80,9 +83,67 @@ export class AuthService {
         this.localStorageService.eliminar(
             STORAGE_KEYS.SESION
         );
+        localStorage.removeItem(this.tokenStorageKey);
 
         this.sesionSubject.next(null);
     }
+
+    establecerSesionBackend(
+        token: string,
+        nombreUsuario: string
+        ): void {
+        localStorage.setItem(
+            this.tokenStorageKey,
+            token
+        );
+
+        const payload =
+            this.tokenService.obtenerPayload();
+
+        const fechaInicio = payload?.iat
+            ? new Date(payload.iat * 1000)
+            : new Date();
+
+        const fechaExpiracion = payload?.exp
+            ? new Date(payload.exp * 1000)
+            : new Date(
+                fechaInicio.getTime() +
+                this.duracionSesionHoras *
+                60 *
+                60 *
+                1000
+            );
+
+        const rolPrincipal =
+            payload?.roles?.[0];
+
+        const usuarioToken =
+            payload?.sub?.trim() ||
+            nombreUsuario.trim();
+
+        const sesion: SesionUsuario = {
+            token,
+            usuarioId: Number(
+            payload?.usuarioId ?? 0
+            ),
+            nombreUsuario: usuarioToken,
+            nombreCompleto: usuarioToken,
+            rolId: Number(
+            rolPrincipal?.rolId ?? 0
+            ),
+            fechaInicio: fechaInicio.toISOString(),
+            fechaExpiracion:
+            fechaExpiracion.toISOString(),
+            debeCambiarPassword: false
+        };
+
+        this.localStorageService.guardar(
+            STORAGE_KEYS.SESION,
+            sesion
+        );
+
+        this.sesionSubject.next(sesion);
+        }
 
     obtenerSesionActual(): SesionUsuario | null {
         const sesion = this.sesionSubject.value;
@@ -112,39 +173,14 @@ export class AuthService {
     tienePermiso(
         modulo: ModuloSistema,
         accion: AccionPermiso
-    ): Observable<boolean> {
-        const sesion = this.obtenerSesionActual();
-
-        if (!sesion) {
-            return of(false);
+        ): Observable<boolean> {
+        return of(
+            this.tokenService.tienePermiso(
+            modulo,
+            accion
+            )
+        );
         }
-
-        return this.usuarioService
-            .obtenerPorId(sesion.usuarioId)
-            .pipe(
-                switchMap((usuario) => {
-                    if (!usuario?.activo) {
-                        return of(false);
-                    }
-
-                    return this.rolService
-                        .obtenerPorId(usuario.rolId)
-                        .pipe(
-                            map((rol) => {
-                                if (!rol?.activo) {
-                                    return false;
-                                }
-
-                                return rol.permisos.some(
-                                    (permiso) =>
-                                        permiso.modulo === modulo &&
-                                        permiso.acciones.includes(accion)
-                                );
-                            })
-                        );
-                })
-            );
-    }
 
     actualizarSesionDesdeUsuario(
         usuario: Usuario
