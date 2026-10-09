@@ -1,5 +1,5 @@
 ﻿import { Injectable } from '@angular/core';
-import type { Borders } from 'exceljs';
+import type { Borders, Cell, Column } from 'exceljs';
 import { Observable, of, map } from 'rxjs';
 import { DespachoControllerService } from '../../api/api/services/despacho-controller.service';
 import { UnidadMedidaDespacho } from '../models/despacho.model';
@@ -81,7 +81,10 @@ export class ReporteDespachoService {
   async exportarExcel(
     items: ReporteDespachoItem[]
   ): Promise<void> {
-    const ExcelJS = await import('exceljs');
+    const excelModule = await import('exceljs');
+    const ExcelJS =
+      (excelModule as any).default ??
+      excelModule;
 
     const workbook =
       new ExcelJS.Workbook();
@@ -382,7 +385,7 @@ export class ReporteDespachoService {
     filaEncabezado.height = 30;
 
     filaEncabezado.eachCell(
-      (cell) => {
+      (cell: Cell) => {
         cell.font = {
           bold: true,
           color: {
@@ -419,7 +422,7 @@ export class ReporteDespachoService {
 
       fila.height = 23;
 
-      fila.eachCell((cell) => {
+      fila.eachCell((cell: Cell) => {
         cell.alignment = {
           vertical: 'middle',
           wrapText: false
@@ -518,7 +521,7 @@ export class ReporteDespachoService {
     ];
 
     worksheet.columns.forEach(
-      (columna, indice) => {
+      (columna: Column, indice: number) => {
         columna.width =
           anchos[indice];
       }
