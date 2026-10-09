@@ -1,4 +1,65 @@
-<div class="
+<main class="login-shell">
+  <section class="login-hero" aria-label="Agroindustrias Huaral">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <span class="hero-kicker">AGROINDUSTRIAS HUARAL S.A.C</span>
+      <h1>El campo que nos inspira,<br /><em>la calidad que entregamos.</em></h1>
+      <p>Gestiona tus despachos de forma simple, segura y eficiente.</p>
+      <span class="hero-line"></span>
+    </div>
+  </section>
+  <section class="login-panel" aria-labelledby="login-heading">
+    <div class="login-card">
+      <div class="login-heading">
+        <span class="eyebrow">Bienvenido</span>
+        <h2 id="login-heading">Inicia sesión</h2>
+        <p>Ingresa tus credenciales para continuar</p>
+      </div>
+      <form [formGroup]="formulario" (ngSubmit)="iniciarSesion()">
+        <div class="form-fields">
+          <div class="field-group">
+            <label for="username" class="form-label">Usuario</label>
+            <div class="input-shell">
+              <span class="input-icon" aria-hidden="true">&#64;</span>
+              <input id="username" type="text" class="form-control" placeholder="Ingrese su usuario"
+                autocomplete="username" formControlName="nombreUsuario" [class.is-invalid]="
+                  controlInvalido('nombreUsuario')
+                " />
+            </div>
+            <div class="invalid-feedback" [class.d-block]="controlInvalido('nombreUsuario')">
+              El usuario es obligatorio.
+            </div>
+          </div>
+          <div class="field-group">
+            <label for="password" class="form-label">Contraseña</label>
+            <div class="input-shell">
+              <span class="input-icon" aria-hidden="true">&#8226;</span>
+              <input id="password" [type]="mostrarPassword ? 'text' : 'password'" class="form-control" placeholder="Ingrese su contraseña"
+                autocomplete="current-password" formControlName="password" [class.is-invalid]="
+                  controlInvalido('password')
+                " />
+              <button type="button" class="password-toggle" (click)="alternarVisibilidadPassword()"
+                [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                [attr.title]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                <span aria-hidden="true">&#128065;</span>
+              </button>
+            </div>
+            <div class="invalid-feedback" [class.d-block]="controlInvalido('password')">
+              La contraseña es obligatoria.
+            </div>
+          </div>
+          <button class="login-button" type="submit" [disabled]="loading" [attr.aria-busy]="loading">
+            <span *ngIf="loading" class="login-spinner" aria-hidden="true"></span>
+            <span>{{ loading ? 'Validando...' : 'Iniciar sesión' }}</span>
+          </button>
+          <p class="login-demo">Acceso local disponible para usuarios autorizados.</p>
+        </div>
+      </form>
+    </div>
+    <footer class="login-footer">© {{ currentYear }} Agroindustrias Huaral</footer>
+  </section>
+</main>
+<!--
     contenedor
     d-flex
     justify-content-center
@@ -63,4 +124,4 @@
       </form>
     </div>
   </div>
-</div>
+</div> -->
