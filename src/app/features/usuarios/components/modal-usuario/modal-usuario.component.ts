@@ -14,21 +14,22 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { SoloNumerosDirective } from '../../../../shared/directives/dni.directive';
 import { Rol } from '../../../roles/models/rol.model';
 import {
     Usuario,
     UsuarioActualizarData,
     UsuarioCrearData
-} from '../../models/usuario.model';
+} from '../../../../core/models/usuario.model';
 
 type NombreControl =
     | 'nombreUsuario'
     | 'nombres'
-    | 'apellidos'
+    | 'apellidoPaterno'
+    | 'apellidoMaterno'
     | 'correo'
     | 'telefono'
-    | 'rolId'
-    | 'password';
+    | 'rolId';
 
 export type UsuarioModalResult =
     | {
@@ -47,55 +48,36 @@ export type UsuarioModalResult =
         CommonModule,
         ReactiveFormsModule,
         NgSelectModule,
-        AgrihusaButtonComponent
+        AgrihusaButtonComponent,
+        SoloNumerosDirective
     ],
-    templateUrl: './modal-usuario.component.html',
+    templateUrl: './modal-usuario-form.html',
     styleUrls: ['./modal-usuario.component.scss']
 })
 export class ModalUsuarioComponent implements OnInit {
     @Input() titleModal = '';
+    @Input() roles: Rol[] = [];
     private dataInterna: Usuario | null = null;
-    private rolesInternos: Rol[] = [];
 
     rolesDisponibles: Rol[] = [];
 
     @Input()
     set data(value: Usuario | null) {
         this.dataInterna = value;
-        this.actualizarRolesDisponibles();
     }
 
     get data(): Usuario | null {
         return this.dataInterna;
     }
 
-    @Input()
-    set roles(value: Rol[]) {
-        this.rolesInternos = value ?? [];
-        this.actualizarRolesDisponibles();
-    }
-
     submitted = false;
-    mostrarPassword = false;
-
-    readonly estados = [
-        {
-            valor: true,
-            descripcion: 'ACTIVO'
-        },
-        {
-            valor: false,
-            descripcion: 'INACTIVO'
-        }
-    ];
-
     readonly formulario = new FormGroup({
         nombreUsuario: new FormControl('', {
             nonNullable: true,
             validators: [
                 Validators.required,
-                Validators.maxLength(30),
-                Validators.pattern(/^[A-Za-z0-9._-]+$/)
+                Validators.maxLength(8),
+                Validators.pattern(/^\d+$/)
             ]
         }),
         nombres: new FormControl('', {
@@ -105,7 +87,14 @@ export class ModalUsuarioComponent implements OnInit {
                 Validators.maxLength(80)
             ]
         }),
-        apellidos: new FormControl('', {
+        apellidoPaterno: new FormControl('', {
+            nonNullable: true,
+            validators: [
+                Validators.required,
+                Validators.maxLength(80)
+            ]
+        }),
+        apellidoMaterno: new FormControl('', {
             nonNullable: true,
             validators: [
                 Validators.required,
@@ -123,26 +112,12 @@ export class ModalUsuarioComponent implements OnInit {
         telefono: new FormControl('', {
             nonNullable: true,
             validators: [
-                Validators.maxLength(20),
-                Validators.pattern(/^[0-9+\s()-]*$/)
+                Validators.maxLength(9),
+                Validators.pattern(/^\d*$/)
             ]
         }),
         rolId: new FormControl<number | null>(null, {
             validators: [Validators.required]
-        }),
-        activo: new FormControl(true, {
-            nonNullable: true
-        }),
-        password: new FormControl('', {
-            nonNullable: true,
-            validators: [
-                Validators.required,
-                Validators.minLength(8),
-                Validators.maxLength(64),
-                Validators.pattern(
-                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/
-                )
-            ]
         })
     });
 
@@ -151,6 +126,8 @@ export class ModalUsuarioComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
+        this.rolesDisponibles = this.roles.filter((rol) => rol.id !== 1);
+
         if (!this.data) {
             return;
         }
@@ -158,32 +135,21 @@ export class ModalUsuarioComponent implements OnInit {
         this.formulario.patchValue({
             nombreUsuario: this.data.nombreUsuario,
             nombres: this.data.nombres,
-            apellidos: this.data.apellidos,
+            apellidoPaterno: this.data.apellidos.trim().split(/\s+/).shift() ?? '',
+            apellidoMaterno: this.data.apellidos.trim().split(/\s+/).slice(1).join(' '),
             correo: this.data.correo,
             telefono: this.data.telefono,
-            rolId: this.data.rolId,
-            activo: this.data.activo
+            rolId: this.data.rolId
         });
-
-        const passwordControl =
-            this.formulario.controls.password;
-
-        passwordControl.clearValidators();
-        passwordControl.updateValueAndValidity();
 
         if (this.data.esSistema) {
             this.formulario.controls.nombreUsuario.disable();
             this.formulario.controls.rolId.disable();
-            this.formulario.controls.activo.disable();
         }
     }
 
     get modoEdicion(): boolean {
         return this.data !== null;
-    }
-
-    alternarVisibilidadPassword(): void {
-        this.mostrarPassword = !this.mostrarPassword;
     }
 
     onGuardar(): void {
@@ -199,11 +165,11 @@ export class ModalUsuarioComponent implements OnInit {
         const datosBase: UsuarioActualizarData = {
             nombreUsuario: value.nombreUsuario.trim(),
             nombres: value.nombres.trim(),
-            apellidos: value.apellidos.trim(),
+            apellidoPaterno: value.apellidoPaterno.trim(),
+            apellidoMaterno: value.apellidoMaterno.trim(),
             correo: value.correo.trim(),
             telefono: value.telefono.trim(),
-            rolId: value.rolId as number,
-            activo: value.activo
+            rolId: value.rolId as number
         };
 
         if (this.modoEdicion) {
@@ -218,10 +184,7 @@ export class ModalUsuarioComponent implements OnInit {
 
         const resultado: UsuarioModalResult = {
             modo: 'crear',
-            data: {
-                ...datosBase,
-                password: value.password
-            }
+            data: datosBase
         };
 
         this.activeModal.close(resultado);
@@ -243,12 +206,4 @@ export class ModalUsuarioComponent implements OnInit {
         );
     }
 
-    private actualizarRolesDisponibles(): void {
-        this.rolesDisponibles =
-            this.rolesInternos.filter(
-                (rol) =>
-                    rol.activo ||
-                    rol.id === this.dataInterna?.rolId
-            );
-    }
 }

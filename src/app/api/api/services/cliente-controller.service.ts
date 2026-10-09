@@ -25,17 +25,17 @@ export class ClienteControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation listar2
+   * Path part for operation listarClientes
    */
-  static readonly Listar2Path = '/api/clientes';
+  static readonly ListarClientesPath = '/api/clientes';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `listar2()` instead.
+   * To access only the response body, use `listarClientes()` instead.
    *
    * This method doesn't expect any request body.
    */
-  listar2$Response(params?: {
+  listarClientes$Response(params?: {
     texto?: string;
     tipoDocumento?: string;
     activo?: boolean;
@@ -45,7 +45,7 @@ export class ClienteControllerService extends BaseService {
   }
 ): Observable<StrictHttpResponse<CustomPageClienteResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ClienteControllerService.Listar2Path, 'get');
+    const rb = new RequestBuilder(this.rootUrl, ClienteControllerService.ListarClientesPath, 'get');
     if (params) {
       rb.query('texto', params.texto, {});
       rb.query('tipoDocumento', params.tipoDocumento, {});
@@ -68,11 +68,11 @@ export class ClienteControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `listar2$Response()` instead.
+   * To access the full response (for headers, for example), `listarClientes$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  listar2(params?: {
+  listarClientes(params?: {
     texto?: string;
     tipoDocumento?: string;
     activo?: boolean;
@@ -82,29 +82,29 @@ export class ClienteControllerService extends BaseService {
   }
 ): Observable<CustomPageClienteResponse> {
 
-    return this.listar2$Response(params).pipe(
+    return this.listarClientes$Response(params).pipe(
       map((r: StrictHttpResponse<CustomPageClienteResponse>) => r.body as CustomPageClienteResponse)
     );
   }
 
   /**
-   * Path part for operation actualizar10
+   * Path part for operation actualizarCliente
    */
-  static readonly Actualizar10Path = '/api/clientes';
+  static readonly ActualizarClientePath = '/api/clientes';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizar10()` instead.
+   * To access only the response body, use `actualizarCliente()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar10$Response(params: {
+  actualizarCliente$Response(params: {
     context?: HttpContext
     body: ClienteRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ClienteControllerService.Actualizar10Path, 'put');
+    const rb = new RequestBuilder(this.rootUrl, ClienteControllerService.ActualizarClientePath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -123,39 +123,39 @@ export class ClienteControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizar10$Response()` instead.
+   * To access the full response (for headers, for example), `actualizarCliente$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar10(params: {
+  actualizarCliente(params: {
     context?: HttpContext
     body: ClienteRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.actualizar10$Response(params).pipe(
+    return this.actualizarCliente$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation registrar11
+   * Path part for operation registrarCliente
    */
-  static readonly Registrar11Path = '/api/clientes';
+  static readonly RegistrarClientePath = '/api/clientes';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `registrar11()` instead.
+   * To access only the response body, use `registrarCliente()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar11$Response(params: {
+  registrarCliente$Response(params: {
     context?: HttpContext
     body: ClienteRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ClienteControllerService.Registrar11Path, 'post');
+    const rb = new RequestBuilder(this.rootUrl, ClienteControllerService.RegistrarClientePath, 'post');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -174,40 +174,40 @@ export class ClienteControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `registrar11$Response()` instead.
+   * To access the full response (for headers, for example), `registrarCliente$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar11(params: {
+  registrarCliente(params: {
     context?: HttpContext
     body: ClienteRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.registrar11$Response(params).pipe(
+    return this.registrarCliente$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation cambiarEstado10
+   * Path part for operation cambiarEstadoCliente
    */
-  static readonly CambiarEstado10Path = '/api/clientes';
+  static readonly CambiarEstadoClientePath = '/api/clientes';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarEstado10()` instead.
+   * To access only the response body, use `cambiarEstadoCliente()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado10$Response(params: {
+  cambiarEstadoCliente$Response(params: {
     clienteId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ClienteControllerService.CambiarEstado10Path, 'delete');
+    const rb = new RequestBuilder(this.rootUrl, ClienteControllerService.CambiarEstadoClientePath, 'delete');
     if (params) {
       rb.query('clienteId', params.clienteId, {});
       rb.query('activo', params.activo, {});
@@ -227,18 +227,18 @@ export class ClienteControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarEstado10$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarEstadoCliente$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado10(params: {
+  cambiarEstadoCliente(params: {
     clienteId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<MessageResponse> {
 
-    return this.cambiarEstado10$Response(params).pipe(
+    return this.cambiarEstadoCliente$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }

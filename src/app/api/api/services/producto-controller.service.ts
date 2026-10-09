@@ -85,23 +85,23 @@ export class ProductoControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation actualizar5
+   * Path part for operation actualizarProducto
    */
-  static readonly Actualizar5Path = '/api/productos';
+  static readonly ActualizarProductoPath = '/api/productos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizar5()` instead.
+   * To access only the response body, use `actualizarProducto()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar5$Response(params: {
+  actualizarProducto$Response(params: {
     context?: HttpContext
     body: ProductoRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.Actualizar5Path, 'put');
+    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.ActualizarProductoPath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -120,39 +120,39 @@ export class ProductoControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizar5$Response()` instead.
+   * To access the full response (for headers, for example), `actualizarProducto$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar5(params: {
+  actualizarProducto(params: {
     context?: HttpContext
     body: ProductoRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.actualizar5$Response(params).pipe(
+    return this.actualizarProducto$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation registrar6
+   * Path part for operation registrarProducto
    */
-  static readonly Registrar6Path = '/api/productos';
+  static readonly RegistrarProductoPath = '/api/productos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `registrar6()` instead.
+   * To access only the response body, use `registrarProducto()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar6$Response(params: {
+  registrarProducto$Response(params: {
     context?: HttpContext
     body: ProductoRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.Registrar6Path, 'post');
+    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.RegistrarProductoPath, 'post');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -171,40 +171,40 @@ export class ProductoControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `registrar6$Response()` instead.
+   * To access the full response (for headers, for example), `registrarProducto$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar6(params: {
+  registrarProducto(params: {
     context?: HttpContext
     body: ProductoRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.registrar6$Response(params).pipe(
+    return this.registrarProducto$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation cambiarEstado5
+   * Path part for operation cambiarEstadoProducto
    */
-  static readonly CambiarEstado5Path = '/api/productos';
+  static readonly CambiarEstadoProductoPath = '/api/productos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarEstado5()` instead.
+   * To access only the response body, use `cambiarEstadoProducto()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado5$Response(params: {
+  cambiarEstadoProducto$Response(params: {
     productoId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.CambiarEstado5Path, 'delete');
+    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.CambiarEstadoProductoPath, 'delete');
     if (params) {
       rb.query('productoId', params.productoId, {});
       rb.query('activo', params.activo, {});
@@ -224,18 +224,18 @@ export class ProductoControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarEstado5$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarEstadoProducto$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado5(params: {
+  cambiarEstadoProducto(params: {
     productoId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<MessageResponse> {
 
-    return this.cambiarEstado5$Response(params).pipe(
+    return this.cambiarEstadoProducto$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }

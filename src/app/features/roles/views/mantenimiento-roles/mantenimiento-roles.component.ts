@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   OnInit
@@ -24,7 +25,8 @@ import {
   RolFormData,
   RolQuery
 } from '../../models/rol.model';
-import { RolService } from '../../services/rol.service';
+import { RolService } from '../../../../core/services/rol.service';
+import { AlertService } from '../../../../core/services/alert.service';
 import { ModuloSistema } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
@@ -61,9 +63,8 @@ export class MantenimientoRolesComponent
 
   constructor(
     private rolService: RolService,
-    private authService: AuthService,
-    private bitacoraService: BitacoraService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private alertService: AlertService
   ) { }
 
   ngOnInit(): void {
@@ -102,10 +103,10 @@ export class MantenimientoRolesComponent
   }
 
   mostrarModalEditar(): void {
-    if (
-      !this.filaSeleccionada ||
-      this.filaSeleccionada.esSistema
-    ) {
+    if (!this.filaSeleccionada) return;
+
+    if (this.filaSeleccionada.esSistema) {
+      this.alertService.warning('El rol Administrador está protegido y no puede editarse.');
       return;
     }
 
@@ -132,7 +133,7 @@ export class MantenimientoRolesComponent
     }
 
     this.rolService
-      .cambiarEstado(rol.id)
+      .cambiarEstado(rol.id, !rol.activo)
       .subscribe((resultado) => {
         if (!resultado) {
           return;

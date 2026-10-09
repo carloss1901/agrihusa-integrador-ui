@@ -11,7 +11,7 @@
             <app-filtro-roles (buscar)="onBuscar($event)" (limpiar)="onLimpiarFiltro()"></app-filtro-roles>
         </div>
 
-        <div *ngIf="filaSeleccionada?.esSistema" class="alert alert-info" role="alert">
+        <div *ngIf="false" class="alert alert-info" role="alert">
             El rol Administrador está protegido y no puede
             editarse ni desactivarse.
         </div>
@@ -36,7 +36,6 @@
                     <div title="Editar rol">
                         <agrihusa-button color="secondary" variant="outlined" icon="edit" [esIcono]="true" [disabled]="
                 !filaSeleccionada ||
-                filaSeleccionada.esSistema ||
                 !filaSeleccionada.activo
               " (click)="mostrarModalEditar()"></agrihusa-button>
                     </div>

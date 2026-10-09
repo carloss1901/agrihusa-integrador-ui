@@ -3,7 +3,7 @@ import { CanActivateFn, Router, Routes } from '@angular/router';
 
 import { TokenService } from './core/services/token.service';
 import { LoginComponent } from './features/login/login.component';
-import { MantenimientoRolesComponent } from './features/roles/views/mantenimiento-roles/mantenimiento-roles.component';
+import { MantenimientoRolesHttpComponent } from './features/roles/views/mantenimiento-roles/mantenimiento-roles-http.component';
 import { MantenimientoUsuariosComponent } from './features/usuarios/views/mantenimiento-usuarios/mantenimiento-usuarios.component';
 import { MantenimientoDestinosComponent } from './features/destinos/views/mantenimiento-destinos/mantenimiento-destinos.component';
 import { MantenimientoViasComponent } from './features/vias/views/mantenimiento-vias/mantenimiento-vias.component';
@@ -43,7 +43,7 @@ export const authGuard: CanActivateFn = () => {
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'inicio', canActivate: [authGuard], component: InicioComponent },
-  { path: 'roles', canActivate: [authGuard], component: MantenimientoRolesComponent },
+  { path: 'roles', canActivate: [authGuard], component: MantenimientoRolesHttpComponent },
   { path: 'usuarios', canActivate: [authGuard], component: MantenimientoUsuariosComponent },
   { path: 'destinos', canActivate: [authGuard], component: MantenimientoDestinosComponent },
   { path: 'vias', canActivate: [authGuard], component: MantenimientoViasComponent },

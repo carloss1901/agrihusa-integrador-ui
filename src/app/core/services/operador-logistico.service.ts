@@ -11,8 +11,8 @@ export class OperadorLogisticoService {
   listar(query: OperadorLogisticoQuery): Observable<PaginatedResult<OperadorLogistico>> {
     return this.api.listarOperadores({ texto: query.texto?.trim() || undefined, activo: query.estado, pagina: query.page, tamPagina: query.pageSize }).pipe(map((response) => ({ items: (response.datos ?? []).map((item) => ({ id: item.operadorLogisticoId ?? 0, ruc: item.ruc ?? '', razonSocial: item.razonSocial ?? '', nombreComercial: item.nombreComercial ?? '', contacto: item.contacto ?? '', correo: item.correo ?? '', telefono: item.telefono ?? '', direccion: item.direccion ?? '', activo: item.activo ?? true, fechaCreacion: '', fechaActualizacion: null })), totalItems: response.paginacion?.totalElementos ?? 0, page: response.paginacion?.numeroPagina ?? query.page, pageSize: response.paginacion?.tamanioPagina ?? query.pageSize })));
   }
-  crear(data: OperadorLogisticoFormData): Observable<MessageResponse> { return this.api.registrar7({ body: this.request(data) }); }
-  actualizar(id: number, data: OperadorLogisticoFormData): Observable<MessageResponse> { return this.api.actualizar6({ body: this.request(data, id) }); }
-  cambiarEstado(id: number, activo: boolean): Observable<MessageResponse> { return this.api.cambiarEstado6({ operadorLogisticoId: id, activo }); }
+  crear(data: OperadorLogisticoFormData): Observable<MessageResponse> { return this.api.registrarOperadorLogistico({ body: this.request(data) }); }
+  actualizar(id: number, data: OperadorLogisticoFormData): Observable<MessageResponse> { return this.api.actualizarOperadorLogistico({ body: this.request(data, id) }); }
+  cambiarEstado(id: number, activo: boolean): Observable<MessageResponse> { return this.api.cambiarEstadoOperadorLogistico({ operadorLogisticoId: id, activo }); }
   private request(data: OperadorLogisticoFormData, operadorLogisticoId = 0): OperadorLogisticoRegistroRequest { return { operadorLogisticoId, ruc: data.ruc.trim(), razonSocial: data.razonSocial.trim().toUpperCase(), nombreComercial: data.nombreComercial.trim().toUpperCase(), contacto: data.contacto.trim(), correo: data.correo.trim().toLowerCase(), telefono: data.telefono.trim(), direccion: data.direccion.trim() }; }
 }

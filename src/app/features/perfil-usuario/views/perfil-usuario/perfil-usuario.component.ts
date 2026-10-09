@@ -29,8 +29,8 @@ import {
 } from '../../../auditoria/models/bitacora.model';
 import { BitacoraService } from '../../../auditoria/services/bitacora.service';
 import { RolService } from '../../../roles/services/rol.service';
-import { Usuario } from '../../../usuarios/models/usuario.model';
-import { UsuarioService } from '../../../usuarios/services/usuario.service';
+import { Usuario } from '../../../../core/models/usuario.model';
+import { UsuarioService } from '../../../../core/services/usuario.service';
 import {
     CambioPasswordData,
     PerfilUsuarioActualizarData

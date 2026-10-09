@@ -88,23 +88,23 @@ export class VariedadControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation actualizar1
+   * Path part for operation actualizarVariedad
    */
-  static readonly Actualizar1Path = '/api/variedades';
+  static readonly ActualizarVariedadPath = '/api/variedades';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizar1()` instead.
+   * To access only the response body, use `actualizarVariedad()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar1$Response(params: {
+  actualizarVariedad$Response(params: {
     context?: HttpContext
     body: VariedadRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, VariedadControllerService.Actualizar1Path, 'put');
+    const rb = new RequestBuilder(this.rootUrl, VariedadControllerService.ActualizarVariedadPath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -123,39 +123,39 @@ export class VariedadControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizar1$Response()` instead.
+   * To access the full response (for headers, for example), `actualizarVariedad$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar1(params: {
+  actualizarVariedad(params: {
     context?: HttpContext
     body: VariedadRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.actualizar1$Response(params).pipe(
+    return this.actualizarVariedad$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation registrar1
+   * Path part for operation registrarVariedad
    */
-  static readonly Registrar1Path = '/api/variedades';
+  static readonly RegistrarVariedadPath = '/api/variedades';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `registrar1()` instead.
+   * To access only the response body, use `registrarVariedad()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar1$Response(params: {
+  registrarVariedad$Response(params: {
     context?: HttpContext
     body: VariedadRegistroRequest
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, VariedadControllerService.Registrar1Path, 'post');
+    const rb = new RequestBuilder(this.rootUrl, VariedadControllerService.RegistrarVariedadPath, 'post');
     if (params) {
       rb.body(params.body, 'application/json');
     }
@@ -174,40 +174,40 @@ export class VariedadControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `registrar1$Response()` instead.
+   * To access the full response (for headers, for example), `registrarVariedad$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar1(params: {
+  registrarVariedad(params: {
     context?: HttpContext
     body: VariedadRegistroRequest
   }
 ): Observable<MessageResponse> {
 
-    return this.registrar1$Response(params).pipe(
+    return this.registrarVariedad$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation cambiarEstado1
+   * Path part for operation cambiarEstadoVariedad
    */
-  static readonly CambiarEstado1Path = '/api/variedades';
+  static readonly CambiarEstadoVariedadPath = '/api/variedades';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarEstado1()` instead.
+   * To access only the response body, use `cambiarEstadoVariedad()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado1$Response(params: {
+  cambiarEstadoVariedad$Response(params: {
     variedadId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, VariedadControllerService.CambiarEstado1Path, 'delete');
+    const rb = new RequestBuilder(this.rootUrl, VariedadControllerService.CambiarEstadoVariedadPath, 'delete');
     if (params) {
       rb.query('variedadId', params.variedadId, {});
       rb.query('activo', params.activo, {});
@@ -227,18 +227,18 @@ export class VariedadControllerService extends BaseService {
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarEstado1$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarEstadoVariedad$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado1(params: {
+  cambiarEstadoVariedad(params: {
     variedadId: number;
     activo: boolean;
     context?: HttpContext
   }
 ): Observable<MessageResponse> {
 
-    return this.cambiarEstado1$Response(params).pipe(
+    return this.cambiarEstadoVariedad$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
