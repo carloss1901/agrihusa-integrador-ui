@@ -4,7 +4,7 @@ import { PuertoLlegadaControllerService } from '../../api/api/services/puerto-ll
 import { MessageResponse } from '../../api/api/models/message-response';
 import { PuertoLlegadaRegistroRequest } from '../../api/api/models/puerto-llegada-registro-request';
 import { PaginatedResult } from '../models/pagination.model';
-import { PuertoLlegada, PuertoLlegadaFormData, PuertoLlegadaQuery } from '../../features/puertos-llegada/models/puerto-llegada.model';
+import { PuertoLlegada, PuertoLlegadaFormData, PuertoLlegadaQuery } from '../models/puerto-llegada.model';
 @Injectable({ providedIn: 'root' })
 export class PuertoLlegadaService {
   constructor(private readonly api: PuertoLlegadaControllerService) {}

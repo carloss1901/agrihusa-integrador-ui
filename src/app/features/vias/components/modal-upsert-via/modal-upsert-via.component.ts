@@ -16,7 +16,7 @@ import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-
 import {
   Via,
   ViaFormData
-} from '../../models/via.model';
+} from '../../../../core/models/via.model';
 
 type NombreControl = 'descripcion';
 

@@ -6,7 +6,7 @@ import { MessageResponse } from '../../api/api/models/message-response';
 import { RolRegistroRequest } from '../../api/api/models/rol-registro-request';
 import { PaginatedResult } from '../models/pagination.model';
 import { AccionPermiso, ModuloSistema } from '../models/permiso.model';
-import { Rol, RolFormData, RolQuery } from '../../features/roles/models/rol.model';
+import { Rol, RolFormData, RolQuery } from '../models/rol.model';
 
 @Injectable({ providedIn: 'root' })
 export class RolService {

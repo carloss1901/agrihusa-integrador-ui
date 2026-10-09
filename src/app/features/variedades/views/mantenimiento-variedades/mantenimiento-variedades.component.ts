@@ -8,8 +8,8 @@ import { AlertService } from '../../../../core/services/alert.service';
 import { AccionPermiso, ModuloSistema } from '../../../../core/models/permiso.model';
 import { TokenService } from '../../../../core/services/token.service';
 import { VariedadService } from '../../../../core/services/variedad.service';
-import { Variedad, VariedadFilter, VariedadFormData, VariedadQuery } from '../../models/variedad.model';
-import { Producto } from '../../../productos/models/producto.model';
+import { Variedad, VariedadFilter, VariedadQuery } from '../../../../core/models/variedad.model';
+import { Producto } from '../../../../core/models/producto.model';
 import { ProductoService } from '../../../../core/services/producto.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import { IChangePaginate } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
@@ -35,8 +35,7 @@ export class MantenimientoVariedadesComponent implements OnInit {
   mostrarModalEditar(): void { if (!this.filaSeleccionada || !this.filaSeleccionada.activo) return; this.abrirModal(this.filaSeleccionada); }
   cambiarEstado(): void { const item = this.filaSeleccionada; if (!item) return; const modalRef = this.modalService.open(ModalConfirmacionComponent, { backdrop: 'static', keyboard: false, centered: true }); modalRef.componentInstance.titulo = item.activo ? 'Confirmar eliminación' : 'Confirmar activación'; modalRef.componentInstance.mensaje = `¿Deseas ${item.activo ? 'desactivar' : 'activar'} la variedad "${item.nombre}"?`; modalRef.result.then((confirmado: boolean) => { if (!confirmado) return; this.variedadService.cambiarEstado(item.id, !item.activo).subscribe({ next: (response) => { this.alertService.success(response.message!); this.cargarVariedades(); }, error: (error: HttpErrorResponse) => this.mostrarError(error) }); }).catch(() => {}); }
   private cargarVariedades(): void { const query: VariedadQuery = { ...this.filtro, page: this.page, pageSize: this.pageSize }; this.loading = true; this.filaSeleccionada = null; this.variedadService.listar(query).pipe(finalize(() => { this.loading = false; })).subscribe({ next: (resultado) => { this.variedades = resultado.items; this.totalItems = resultado.totalItems; }, error: (error: HttpErrorResponse) => this.mostrarError(error) }); }
-  private abrirModal(item: Variedad | null): void { const modalRef = this.modalService.open(ModalUpsertVariedadComponent, { backdrop: 'static', keyboard: false, size: 'lg', centered: true, scrollable: true }); modalRef.componentInstance.titleModal = item ? 'EDITAR VARIEDAD' : 'REGISTRAR VARIEDAD'; modalRef.componentInstance.data = item; modalRef.result.then((resultado: VariedadFormData) => { if (resultado) this.guardar(resultado, item); }).catch(() => {}); }
-  private guardar(data: VariedadFormData, item: Variedad | null): void { (item ? this.variedadService.actualizar(item.id, data) : this.variedadService.crear(data)).subscribe({ next: (response) => { this.alertService.success(response.message!); this.page = 1; this.cargarVariedades(); }, error: (error: HttpErrorResponse) => this.mostrarError(error) }); }
+  private abrirModal(item: Variedad | null): void { const modalRef = this.modalService.open(ModalUpsertVariedadComponent, { backdrop: 'static', keyboard: false, size: 'lg', centered: true, scrollable: true }); modalRef.componentInstance.titleModal = item ? 'EDITAR VARIEDAD' : 'REGISTRAR VARIEDAD'; modalRef.componentInstance.data = item; modalRef.componentInstance.productos = this.productos; modalRef.result.then((guardado: boolean) => { if (guardado) { this.page = 1; this.cargarVariedades(); } }).catch(() => {}); }
   private mostrarError(error: HttpErrorResponse): void { this.alertService.error((error.error as { message?: string }).message!); }
-  private cargarProductos(): void { this.productoService.listar({ page: 1, pageSize: 1000, estado: true }).subscribe({ next: (resultado) => { this.productos = resultado.items; }, error: (error: HttpErrorResponse) => this.mostrarError(error) }); }
+  private cargarProductos(): void { this.productoService.listarActivos().subscribe({ next: (productos) => { this.productos = productos; }, error: (error: HttpErrorResponse) => this.mostrarError(error) }); }
 }

@@ -12,7 +12,7 @@ import {
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaLoadingComponent } from '../../../../shared/components/agrihusa-loading/agrihusa-loading.component';
 import { AgrihusaNoResultsComponent } from '../../../../shared/components/agrihusa-no-results/agrihusa-no-results.component';
-import { Via } from '../../models/via.model';
+import { Via } from '../../../../core/models/via.model';
 
 @Component({
   selector: 'app-tabla-mant-vias',

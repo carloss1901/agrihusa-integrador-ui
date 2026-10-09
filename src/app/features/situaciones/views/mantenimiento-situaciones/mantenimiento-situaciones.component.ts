@@ -1,32 +1,21 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import {
   Component,
   OnInit
 } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {
-  EMPTY,
-  finalize,
-  forkJoin,
-  switchMap
-} from 'rxjs';
+import { finalize } from 'rxjs';
 
 import {
   AccionPermiso,
   ModuloSistema
 } from '../../../../core/models/permiso.model';
-import { AuthService } from '../../../../core/services/auth.service';
+import { TokenService } from '../../../../core/services/token.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
-import {
-  AccionBitacora,
-  RegistroBitacoraCrearData,
-  ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
 import { FiltroSituacionesComponent } from '../../components/filtro-situaciones/filtro-situaciones.component';
 import { ModalSituacionComponent } from '../../components/modal-situacion/modal-situacion.component';
 import { TablaSituacionesComponent } from '../../components/tabla-situaciones/tabla-situaciones.component';
@@ -35,8 +24,8 @@ import {
   SituacionFilter,
   SituacionFormData,
   SituacionQuery
-} from '../../models/situacion.model';
-import { SituacionService } from '../../services/situacion.service';
+} from '../../../../core/models/situacion.model';
+import { SituacionService } from '../../../../core/services/situacion.service';
 
 @Component({
   selector: 'app-mantenimiento-situaciones',
@@ -71,8 +60,7 @@ export class MantenimientoSituacionesComponent
 
   constructor(
     private situacionService: SituacionService,
-    private authService: AuthService,
-    private bitacoraService: BitacoraService,
+    private tokenService: TokenService,
     private modalService: NgbModal
   ) {}
 
@@ -147,7 +135,7 @@ export class MantenimientoSituacionesComponent
       : 'activar';
 
     const confirmado = window.confirm(
-      `¿Deseas ${accion} la situación ` +
+      `Â¿Deseas ${accion} la situaciÃ³n ` +
       `"${situacion.descripcion}"?`
     );
 
@@ -156,26 +144,8 @@ export class MantenimientoSituacionesComponent
     }
 
     this.situacionService
-      .cambiarEstado(situacion.id)
-      .subscribe((resultado) => {
-        if (!resultado) {
-          return;
-        }
-
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
-
-        this.registrarEventoSituacion(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó la situación ${resultado.descripcion}.`
-            : `Se desactivó la situación ${resultado.descripcion}.`
-        );
-
-        this.cargarSituaciones();
-      });
+      .cambiarEstado(situacion.id, !situacion.activo)
+      .subscribe(() => this.cargarSituaciones());
   }
 
   private cargarSituaciones(): void {
@@ -215,8 +185,8 @@ export class MantenimientoSituacionesComponent
     );
 
     modalRef.componentInstance.titleModal = situacion
-      ? 'EDITAR SITUACIÓN'
-      : 'REGISTRAR SITUACIÓN';
+      ? 'EDITAR SITUACIÃ“N'
+      : 'REGISTRAR SITUACIÃ“N';
 
     modalRef.componentInstance.data = situacion;
 
@@ -238,105 +208,20 @@ export class MantenimientoSituacionesComponent
     data: SituacionFormData,
     situacion: Situacion | null
   ): void {
-    this.situacionService
-      .existeDescripcion(
-        data.descripcion,
-        situacion?.id
-      )
-      .pipe(
-        switchMap((existeDescripcion) => {
-          if (existeDescripcion) {
-            window.alert(
-              'Ya existe una situación con esa descripción.'
-            );
+    const request = situacion
+      ? this.situacionService.actualizar(situacion.id, data)
+      : this.situacionService.crear(data);
 
-            return EMPTY;
-          }
-
-          if (!situacion) {
-            return this.situacionService.crear(data);
-          }
-
-          return this.situacionService.actualizar(
-            situacion.id,
-            data
-          );
-        })
-      )
-      .subscribe((situacionGuardada) => {
-        if (!situacionGuardada) {
-          return;
-        }
-
-        if (!situacion) {
-          this.registrarEventoSituacion(
-            AccionBitacora.CREAR,
-            situacionGuardada,
-            `Se creó la situación ` +
-              `${situacionGuardada.descripcion}.`
-          );
-        } else {
-          this.registrarEventoSituacion(
-            AccionBitacora.EDITAR,
-            situacionGuardada,
-            `Se actualizó la situación ` +
-              `${situacionGuardada.descripcion}.`
-          );
-        }
-
-        this.page = 1;
-        this.cargarSituaciones();
-      });
-  }
-
-  private cargarPermisos(): void {
-    forkJoin({
-      crear: this.authService.tienePermiso(
-        ModuloSistema.SITUACIONES,
-        AccionPermiso.CREAR
-      ),
-      editar: this.authService.tienePermiso(
-        ModuloSistema.SITUACIONES,
-        AccionPermiso.EDITAR
-      ),
-      cambiarEstado:
-        this.authService.tienePermiso(
-          ModuloSistema.SITUACIONES,
-          AccionPermiso.ELIMINAR
-        )
-    }).subscribe((permisos) => {
-      this.puedeCrear = permisos.crear;
-      this.puedeEditar = permisos.editar;
-      this.puedeCambiarEstado =
-        permisos.cambiarEstado;
+    request.subscribe(() => {
+      this.page = 1;
+      this.cargarSituaciones();
     });
   }
 
-  private registrarEventoSituacion(
-    accion: AccionBitacora,
-    situacion: Situacion,
-    detalle: string
-  ): void {
-    const sesion =
-      this.authService.obtenerSesionActual();
-
-    if (!sesion) {
-      return;
-    }
-
-    const evento: RegistroBitacoraCrearData = {
-      usuarioId: sesion.usuarioId,
-      nombreUsuario: sesion.nombreUsuario,
-      modulo: ModuloSistema.SITUACIONES,
-      accion,
-      entidad: 'Situación',
-      registroId: situacion.id,
-      detalle,
-      resultado: ResultadoBitacora.EXITO
-    };
-
-    this.bitacoraService
-      .registrar(evento)
-      .subscribe();
+  private cargarPermisos(): void {
+    this.puedeCrear = this.tokenService.tienePermiso(ModuloSistema.SITUACIONES, AccionPermiso.CREAR);
+    this.puedeEditar = this.tokenService.tienePermiso(ModuloSistema.SITUACIONES, AccionPermiso.EDITAR);
+    this.puedeCambiarEstado = this.tokenService.tienePermiso(ModuloSistema.SITUACIONES, AccionPermiso.ELIMINAR);
   }
 }
+

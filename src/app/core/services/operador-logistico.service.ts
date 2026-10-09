@@ -4,7 +4,7 @@ import { OperadorLogisticoControllerService } from '../../api/api/services/opera
 import { MessageResponse } from '../../api/api/models/message-response';
 import { OperadorLogisticoRegistroRequest } from '../../api/api/models/operador-logistico-registro-request';
 import { PaginatedResult } from '../models/pagination.model';
-import { OperadorLogistico, OperadorLogisticoFormData, OperadorLogisticoQuery } from '../../features/operadores-logisticos/models/operador-logistico.model';
+import { OperadorLogistico, OperadorLogisticoFormData, OperadorLogisticoQuery } from '../models/operador-logistico.model';
 @Injectable({ providedIn: 'root' })
 export class OperadorLogisticoService {
   constructor(private readonly api: OperadorLogisticoControllerService) {}

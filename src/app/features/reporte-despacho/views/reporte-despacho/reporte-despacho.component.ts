@@ -9,7 +9,7 @@ import {
   AccionPermiso,
   ModuloSistema
 } from '../../../../core/models/permiso.model';
-import { AuthService } from '../../../../core/services/auth.service';
+import { TokenService } from '../../../../core/services/token.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import {
   IChangePaginate
@@ -18,16 +18,16 @@ import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-
 import {
   AccionBitacora,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { FiltroReporteDespachoComponent } from '../../components/filtro-reporte-despacho/filtro-reporte-despacho.component';
 import { TablaReporteDespachoComponent } from '../../components/tabla-reporte-despacho/tabla-reporte-despacho.component';
 import {
   ReporteDespachoFilter,
   ReporteDespachoItem,
   ResumenReporteDespacho
-} from '../../models/reporte-despacho.model';
-import { ReporteDespachoService } from '../../services/reporte-despacho.service';
+} from '../../../../core/models/reporte-despacho.model';
+import { ReporteDespachoService } from '../../../../core/services/reporte-despacho.service';
 
 @Component({
   selector: 'app-reporte-despacho',
@@ -77,8 +77,8 @@ export class ReporteDespachoComponent
   constructor(
     private reporteService:
       ReporteDespachoService,
-    private authService:
-      AuthService,
+    private tokenService:
+      TokenService,
     private bitacoraService:
       BitacoraService
   ) {}
@@ -211,34 +211,29 @@ export class ReporteDespachoComponent
   }
 
   private cargarPermisoExportar(): void {
-    this.authService
-      .tienePermiso(
+    this.puedeExportar =
+      this.tokenService.tienePermiso(
         ModuloSistema.REPORTE_DESPACHO,
         AccionPermiso.EXPORTAR
-      )
-      .subscribe((permitido) => {
-        this.puedeExportar =
-          permitido;
-      });
+      );
   }
 
   private registrarExportacion(
     cantidad: number
   ): void {
-    const sesion =
-      this.authService
-        .obtenerSesionActual();
+    const payload =
+      this.tokenService.obtenerPayload();
 
-    if (!sesion) {
+    if (!payload?.usuarioId) {
       return;
     }
 
     this.bitacoraService
       .registrar({
         usuarioId:
-          sesion.usuarioId,
+          payload.usuarioId,
         nombreUsuario:
-          sesion.nombreUsuario,
+          payload.sub ?? '',
         modulo:
           ModuloSistema.REPORTE_DESPACHO,
         accion:

@@ -15,7 +15,7 @@ import { AgrihusaNoResultsComponent } from '../../../../shared/components/agrihu
 import {
     Cliente,
     TipoDocumentoCliente
-} from '../../models/cliente.model';
+} from '../../../../core/models/cliente.model';
 
 @Component({
     selector: 'app-tabla-clientes',

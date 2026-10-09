@@ -16,7 +16,7 @@ import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-
 import {
     ClienteFilter,
     TipoDocumentoCliente
-} from '../../models/cliente.model';
+} from '../../../../core/models/cliente.model';
 
 interface TipoDocumentoOption {
     valor: TipoDocumentoCliente;

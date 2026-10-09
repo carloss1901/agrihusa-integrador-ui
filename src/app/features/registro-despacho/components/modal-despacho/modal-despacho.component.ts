@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   Input,
@@ -12,32 +13,34 @@ import {
 } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { forkJoin } from 'rxjs';
+import { finalize } from 'rxjs';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { Cliente } from '../../../clientes/models/cliente.model';
-import { ClienteService } from '../../../clientes/services/cliente.service';
+import { ComunControllerService } from '../../../../api/api/services/comun-controller.service';
+import { Cliente } from '../../../../core/models/cliente.model';
+import { ClienteService } from '../../../../core/services/cliente.service';
 import { Destino } from '../../../../core/models/destino.model';
 import { DestinoService } from '../../../../core/services/destino.service';
-import { Naviera } from '../../../navieras/models/naviera.model';
-import { NavieraService } from '../../../navieras/services/naviera.service';
-import { OperadorLogistico } from '../../../operadores-logisticos/models/operador-logistico.model';
-import { OperadorLogisticoService } from '../../../operadores-logisticos/services/operador-logistico.service';
-import { Producto } from '../../../productos/models/producto.model';
-import { ProductoService } from '../../../productos/services/producto.service';
-import { PuertoLlegada } from '../../../puertos-llegada/models/puerto-llegada.model';
-import { PuertoLlegadaService } from '../../../puertos-llegada/services/puerto-llegada.service';
-import { Situacion } from '../../../situaciones/models/situacion.model';
-import { SituacionService } from '../../../situaciones/services/situacion.service';
-import { Variedad } from '../../../variedades/models/variedad.model';
-import { VariedadService } from '../../../variedades/services/variedad.service';
-import { Via } from '../../../vias/models/via.model';
-import { ViaService } from '../../../vias/services/via.service';
+import { Naviera } from '../../../../core/models/naviera.model';
+import { NavieraService } from '../../../../core/services/naviera.service';
+import { OperadorLogistico } from '../../../../core/models/operador-logistico.model';
+import { OperadorLogisticoService } from '../../../../core/services/operador-logistico.service';
+import { Producto } from '../../../../core/models/producto.model';
+import { ProductoService } from '../../../../core/services/producto.service';
+import { PuertoLlegada } from '../../../../core/models/puerto-llegada.model';
+import { PuertoLlegadaService } from '../../../../core/services/puerto-llegada.service';
+import { Situacion } from '../../../../core/models/situacion.model';
+import { SituacionService } from '../../../../core/services/situacion.service';
+import { Variedad } from '../../../../core/models/variedad.model';
+import { Via } from '../../../../core/models/via.model';
+import { ViaService } from '../../../../core/services/via.service';
 import {
   Despacho,
   DespachoFormData,
   UnidadMedidaDespacho
-} from '../../models/despacho.model';
+} from '../../../../core/models/despacho.model';
+import { DespachoService } from '../../../../core/services/despacho.service';
+import { AlertService } from '../../../../core/services/alert.service';
 
 type NombreControl =
   | 'fechaDespacho'
@@ -80,18 +83,21 @@ export class ModalDespachoComponent
   implements OnInit {
   @Input() titleModal = '';
   @Input() data: Despacho | null = null;
+  @Input() clientes: Cliente[] = [];
+  @Input() productos: Producto[] = [];
+  @Input() situaciones: Situacion[] = [];
+  @Input() navieras: Naviera[] = [];
+  @Input() destinos: Destino[] = [];
+  @Input() operadores: OperadorLogistico[] = [];
+  @Input() puertos: PuertoLlegada[] = [];
+  @Input() vias: Via[] = [];
+  @Input() catalogoVariedades: Variedad[] = [];
 
-  clientes: Cliente[] = [];
-  navieras: Naviera[] = [];
-  destinos: Destino[] = [];
-  operadores: OperadorLogistico[] = [];
-  puertos: PuertoLlegada[] = [];
-  productos: Producto[] = [];
   variedades: Variedad[] = [];
-  vias: Via[] = [];
-  situaciones: Situacion[] = [];
+  private variedadesCatalogo: Variedad[] = [];
 
   submitted = false;
+  guardando = false;
 
   readonly unidadesMedida: UnidadMedidaOption[] = [
     {
@@ -219,13 +225,14 @@ export class ModalDespachoComponent
       OperadorLogisticoService,
     private puertoService: PuertoLlegadaService,
     private productoService: ProductoService,
-    private variedadService: VariedadService,
     private viaService: ViaService,
-    private situacionService: SituacionService
+    private situacionService: SituacionService,
+    private despachoService: DespachoService,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
-    this.cargarCatalogos();
+    this.variedadesCatalogo = this.catalogoVariedades;
     this.configurarCambioProducto();
 
     if (!this.data) {
@@ -325,10 +332,33 @@ export class ModalDespachoComponent
         value.observaciones.trim()
     };
 
-    this.activeModal.close(resultado);
+    this.guardando = true;
+
+    const request = this.data
+      ? this.despachoService.actualizar(this.data.id, resultado)
+      : this.despachoService.crear(resultado);
+
+    request
+      .pipe(finalize(() => { this.guardando = false; }))
+      .subscribe({
+        next: (response) => {
+          this.alertService.success(response.message!);
+          this.activeModal.close(true);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.alertService.error(
+            (error.error as { message?: string })?.message ??
+              'No se pudo guardar el despacho.'
+          );
+        }
+      });
   }
 
   onCerrarModal(): void {
+    if (this.guardando) {
+      return;
+    }
+
     this.activeModal.dismiss();
   }
 
@@ -365,38 +395,20 @@ export class ModalDespachoComponent
       return;
     }
 
-    this.variedadService
-      .listarPorProducto(
-        productoId,
-        soloActivas
-      )
-      .subscribe((variedades) => {
-        this.variedades = variedades;
-      });
+    this.variedades = this.variedadesCatalogo.filter((variedad) =>
+      variedad.productoId === productoId &&
+      (soloActivas ? variedad.activo : true)
+    );
+
+    const variedadActual = this.formulario.controls.variedadId.value;
+    const variedadSeleccionada = this.variedades.find(
+      (variedad) => variedad.id === variedadActual
+    ) ?? this.variedades[0];
+
+    this.formulario.controls.variedadId.setValue(
+      variedadSeleccionada?.id ?? null,
+      { emitEvent: false }
+    );
   }
 
-  private cargarCatalogos(): void {
-    forkJoin({
-      clientes: this.clienteService.listarActivos(),
-      navieras: this.navieraService.listarActivas(),
-      destinos: this.destinoService.listarActivos(),
-      operadores:
-        this.operadorService.listarActivos(),
-      puertos: this.puertoService.listarActivos(),
-      productos:
-        this.productoService.listarActivos(),
-      vias: this.viaService.listarActivas(),
-      situaciones:
-        this.situacionService.listarActivas()
-    }).subscribe((catalogos) => {
-      this.clientes = catalogos.clientes;
-      this.navieras = catalogos.navieras;
-      this.destinos = catalogos.destinos;
-      this.operadores = catalogos.operadores;
-      this.puertos = catalogos.puertos;
-      this.productos = catalogos.productos;
-      this.vias = catalogos.vias;
-      this.situaciones = catalogos.situaciones;
-    });
-  }
 }

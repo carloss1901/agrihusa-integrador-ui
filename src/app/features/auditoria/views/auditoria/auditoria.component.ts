@@ -20,12 +20,12 @@ import {
   BitacoraQuery,
   RegistroBitacora,
   ResultadoBitacora
-} from '../../models/bitacora.model';
+} from '../../../../core/models/bitacora.model';
 import {
   AccionPermiso,
   ModuloSistema
 } from '../../../../core/models/permiso.model';
-import { BitacoraService } from '../../services/bitacora.service';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({

@@ -40,6 +40,7 @@ export { CustomPageDestinoResponse } from './models/custom-page-destino-response
 export { DestinoResponse } from './models/destino-response';
 export { CustomPageDespachoResponse } from './models/custom-page-despacho-response';
 export { DespachoResponse } from './models/despacho-response';
+export { ReporteDespachoResponse } from './models/reporte-despacho-response';
 export { ComunResponse } from './models/comun-response';
 export { ClienteResponse } from './models/cliente-response';
 export { CustomPageClienteResponse } from './models/custom-page-cliente-response';

@@ -15,17 +15,17 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { forkJoin } from 'rxjs';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { Cliente } from '../../../clientes/models/cliente.model';
-import { ClienteService } from '../../../clientes/services/cliente.service';
-import { Producto } from '../../../productos/models/producto.model';
-import { ProductoService } from '../../../productos/services/producto.service';
-import { Situacion } from '../../../situaciones/models/situacion.model';
-import { SituacionService } from '../../../situaciones/services/situacion.service';
-import { Variedad } from '../../../variedades/models/variedad.model';
-import { VariedadService } from '../../../variedades/services/variedad.service';
-import { Via } from '../../../vias/models/via.model';
-import { ViaService } from '../../../vias/services/via.service';
-import { ReporteDespachoFilter } from '../../models/reporte-despacho.model';
+import { Cliente } from '../../../../core/models/cliente.model';
+import { ClienteService } from '../../../../core/services/cliente.service';
+import { Producto } from '../../../../core/models/producto.model';
+import { ProductoService } from '../../../../core/services/producto.service';
+import { Situacion } from '../../../../core/models/situacion.model';
+import { SituacionService } from '../../../../core/services/situacion.service';
+import { Variedad } from '../../../../core/models/variedad.model';
+import { VariedadService } from '../../../../core/services/variedad.service';
+import { Via } from '../../../../core/models/via.model';
+import { ViaService } from '../../../../core/services/via.service';
+import { ReporteDespachoFilter } from '../../../../core/models/reporte-despacho.model';
 
 interface EstadoOption {
   valor: boolean;

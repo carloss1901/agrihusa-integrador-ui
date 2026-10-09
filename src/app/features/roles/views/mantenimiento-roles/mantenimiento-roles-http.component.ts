@@ -12,7 +12,7 @@ import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-
 import { FiltroRolesComponent } from '../../components/filtro-roles/filtro-roles.component';
 import { ModalRolComponent } from '../../components/modal-rol/modal-rol.component';
 import { TablaRolesComponent } from '../../components/tabla-roles/tabla-roles.component';
-import { Rol, RolFilter, RolFormData, RolQuery } from '../../models/rol.model';
+import { Rol, RolFilter, RolFormData, RolQuery } from '../../../../core/models/rol.model';
 
 @Component({
   selector: 'app-mantenimiento-roles',

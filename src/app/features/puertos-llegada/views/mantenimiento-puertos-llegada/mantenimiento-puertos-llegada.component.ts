@@ -8,7 +8,7 @@ import { AlertService } from '../../../../core/services/alert.service';
 import { AccionPermiso, ModuloSistema } from '../../../../core/models/permiso.model';
 import { TokenService } from '../../../../core/services/token.service';
 import { PuertoLlegadaService } from '../../../../core/services/puerto-llegada.service';
-import { PuertoLlegada, PuertoLlegadaFilter, PuertoLlegadaFormData, PuertoLlegadaQuery } from '../../models/puerto-llegada.model';
+import { PuertoLlegada, PuertoLlegadaFilter, PuertoLlegadaFormData, PuertoLlegadaQuery } from '../../../../core/models/puerto-llegada.model';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import { IChangePaginate } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';

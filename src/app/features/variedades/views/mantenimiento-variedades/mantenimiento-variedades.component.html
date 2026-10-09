@@ -12,6 +12,7 @@
   <div class="frame-layout__body">
     <div class="agrihusa-card mb-component">
       <app-filtro-mant-variedades
+        [productos]="productos"
         (buscar)="onBuscar($event)"
         (limpiar)="onLimpiarFiltro()"
       ></app-filtro-mant-variedades>

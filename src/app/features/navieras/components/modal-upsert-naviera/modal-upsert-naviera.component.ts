@@ -16,7 +16,7 @@ import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-
 import {
   Naviera,
   NavieraFormData
-} from '../../models/naviera.model';
+} from '../../../../core/models/naviera.model';
 
 type NombreControl =
   | 'codigo'

@@ -15,7 +15,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import { SoloNumerosDirective } from '../../../../shared/directives/dni.directive';
-import { Rol } from '../../../roles/models/rol.model';
+import { Rol } from '../../../../core/models/rol.model';
 import {
     Usuario,
     UsuarioActualizarData,

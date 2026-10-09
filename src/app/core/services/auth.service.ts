@@ -18,18 +18,19 @@ import {
     AccionBitacora,
     MODULO_AUTENTICACION,
     ResultadoBitacora
-} from '../../features/auditoria/models/bitacora.model';
-import { BitacoraService } from '../../features/auditoria/services/bitacora.service';
+} from '../models/bitacora.model';
+import { BitacoraService } from './bitacora.service';
 import {
     AccionPermiso,
     ModuloSistema
 } from '../models/permiso.model';
 import { STORAGE_KEYS } from '../constants/storage-keys.constant';
-import { RolService } from '../../features/roles/services/rol.service';
+import { RolService } from './rol.service';
 import { UsuarioService } from './usuario.service';
 import { LocalStorageService } from './local-storage.service';
 import { PasswordHashService } from './password-hash.service';
 import { Usuario } from '../models/usuario.model';
+import { TokenService } from './token.service';
 
 @Injectable({
     providedIn: 'root'
@@ -49,7 +50,8 @@ export class AuthService {
         private rolService: RolService,
         private localStorageService: LocalStorageService,
         private passwordHashService: PasswordHashService,
-        private bitacoraService: BitacoraService
+        private bitacoraService: BitacoraService,
+        private tokenService: TokenService
     ) {
         this.restaurarSesion();
     }
@@ -144,6 +146,10 @@ export class AuthService {
 
         if (!sesion) {
             return of(false);
+        }
+
+        if (this.tokenService.esAdministrador()) {
+            return of(true);
         }
 
         return this.usuarioService

@@ -24,7 +24,7 @@ import {
   RolFilter,
   RolFormData,
   RolQuery
-} from '../../models/rol.model';
+} from '../../../../core/models/rol.model';
 import { RolService } from '../../../../core/services/rol.service';
 import { AlertService } from '../../../../core/services/alert.service';
 import { ModuloSistema } from '../../../../core/models/permiso.model';
@@ -33,8 +33,8 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 
 @Component({
   selector: 'app-mantenimiento-roles',

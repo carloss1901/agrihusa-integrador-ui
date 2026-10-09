@@ -16,7 +16,7 @@ import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-
 import {
   OperadorLogistico,
   OperadorLogisticoFormData
-} from '../../models/operador-logistico.model';
+} from '../../../../core/models/operador-logistico.model';
 
 type NombreControl =
   | 'ruc'

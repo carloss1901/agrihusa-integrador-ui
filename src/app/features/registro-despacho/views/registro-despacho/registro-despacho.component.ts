@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
+  OnDestroy,
   OnInit
 } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
-  EMPTY,
   finalize,
-  forkJoin,
-  switchMap
+  forkJoin
 } from 'rxjs';
 
 import {
@@ -16,6 +15,7 @@ import {
   ModuloSistema
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
+import { TokenService } from '../../../../core/services/token.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import {
   IChangePaginate
@@ -25,28 +25,32 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
-import { Cliente } from '../../../clientes/models/cliente.model';
-import { ClienteService } from '../../../clientes/services/cliente.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
+import { Cliente } from '../../../../core/models/cliente.model';
+import { ClienteService } from '../../../../core/services/cliente.service';
 import { Destino } from '../../../../core/models/destino.model';
 import { DestinoService } from '../../../../core/services/destino.service';
-import { Producto } from '../../../productos/models/producto.model';
-import { ProductoService } from '../../../productos/services/producto.service';
-import { Situacion } from '../../../situaciones/models/situacion.model';
-import { SituacionService } from '../../../situaciones/services/situacion.service';
-import { Variedad } from '../../../variedades/models/variedad.model';
-import { VariedadService } from '../../../variedades/services/variedad.service';
+import { Naviera } from '../../../../core/models/naviera.model';
+import { OperadorLogistico } from '../../../../core/models/operador-logistico.model';
+import { PuertoLlegada } from '../../../../core/models/puerto-llegada.model';
+import { Via } from '../../../../core/models/via.model';
+import { Producto } from '../../../../core/models/producto.model';
+import { ProductoService } from '../../../../core/services/producto.service';
+import { Situacion } from '../../../../core/models/situacion.model';
+import { SituacionService } from '../../../../core/services/situacion.service';
+import { Variedad } from '../../../../core/models/variedad.model';
+import { VariedadService } from '../../../../core/services/variedad.service';
 import { FiltroDespachosComponent } from '../../components/filtro-despachos/filtro-despachos.component';
 import { ModalDespachoComponent } from '../../components/modal-despacho/modal-despacho.component';
 import { TablaDespachosComponent } from '../../components/tabla-despachos/tabla-despachos.component';
 import {
   Despacho,
   DespachoFilter,
-  DespachoFormData,
   DespachoQuery
-} from '../../models/despacho.model';
-import { DespachoService } from '../../services/despacho.service';
+} from '../../../../core/models/despacho.model';
+import { DespachoService } from '../../../../core/services/despacho.service';
+import { ComunControllerService } from '../../../../api/api/services/comun-controller.service';
 
 @Component({
   selector: 'app-registro-despacho',
@@ -62,7 +66,7 @@ import { DespachoService } from '../../services/despacho.service';
     './registro-despacho.component.html'
 })
 export class RegistroDespachoComponent
-  implements OnInit {
+  implements OnInit, OnDestroy {
   readonly titulo = 'Registro de Despacho';
 
   despachos: Despacho[] = [];
@@ -71,6 +75,10 @@ export class RegistroDespachoComponent
   productos: Producto[] = [];
   variedades: Variedad[] = [];
   situaciones: Situacion[] = [];
+  navieras: Naviera[] = [];
+  operadores: OperadorLogistico[] = [];
+  puertos: PuertoLlegada[] = [];
+  vias: Via[] = [];
 
   filaSeleccionada: Despacho | null = null;
   loading = false;
@@ -92,7 +100,9 @@ export class RegistroDespachoComponent
     private variedadService: VariedadService,
     private situacionService: SituacionService,
     private authService: AuthService,
+    private tokenService: TokenService,
     private bitacoraService: BitacoraService,
+    private comunService: ComunControllerService,
     private modalService: NgbModal
   ) {}
 
@@ -100,6 +110,17 @@ export class RegistroDespachoComponent
     this.cargarPermisos();
     this.cargarCatalogosTabla();
     this.cargarDespachos();
+  }
+
+  ngOnDestroy(): void {
+    this.clientes = [];
+    this.productos = [];
+    this.situaciones = [];
+    this.navieras = [];
+    this.operadores = [];
+    this.puertos = [];
+    this.vias = [];
+    this.variedades = [];
   }
 
   onBuscar(
@@ -168,7 +189,7 @@ export class RegistroDespachoComponent
       : 'activar';
 
     const confirmado = window.confirm(
-      `¿Deseas ${accion} el despacho ` +
+      `Â¿Deseas ${accion} el despacho ` +
       `"${despacho.codigo}"?`
     );
 
@@ -191,8 +212,8 @@ export class RegistroDespachoComponent
           accionBitacora,
           resultado,
           resultado.activo
-            ? `Se activó el despacho ${resultado.codigo}.`
-            : `Se desactivó el despacho ${resultado.codigo}.`
+            ? `Se activÃ³ el despacho ${resultado.codigo}.`
+            : `Se desactivÃ³ el despacho ${resultado.codigo}.`
         );
 
         this.cargarDespachos();
@@ -200,28 +221,26 @@ export class RegistroDespachoComponent
   }
 
   private cargarCatalogosTabla(): void {
-    const consultaCatalogo = {
-      page: 1,
-      pageSize: 1000
-    };
-
     forkJoin({
-      clientes:
-        this.clienteService.listar(consultaCatalogo),
-      destinos:
-        this.destinoService.listar(consultaCatalogo),
-      productos:
-        this.productoService.listar(consultaCatalogo),
-      variedades:
-        this.variedadService.listar(consultaCatalogo),
-      situaciones:
-        this.situacionService.listar(consultaCatalogo)
+      clientes: this.comunService.listarClientesActivos(),
+      destinos: this.comunService.listarDestinosActivos(),
+      productos: this.comunService.listarProductosActivos(),
+      situaciones: this.comunService.listarSituacionesActivas(),
+      navieras: this.comunService.listarNavierasActivas(),
+      operadores: this.comunService.listarOperadoresLogisticosActivos(),
+      puertos: this.comunService.listarPuertosLlegadaActivos(),
+      vias: this.comunService.listarViasActivos(),
+      variedades: this.comunService.listarVariedadesActivas()
     }).subscribe((catalogos) => {
-      this.clientes = catalogos.clientes.items;
-      this.destinos = catalogos.destinos.items;
-      this.productos = catalogos.productos.items;
-      this.variedades = catalogos.variedades.items;
-      this.situaciones = catalogos.situaciones.items;
+      this.clientes = catalogos.clientes.map((item) => ({ id: item.id ?? 0, tipoDocumento: 'OTRO' as any, numeroDocumento: '', razonSocial: item.descripcion ?? '', nombreComercial: item.descripcion ?? '', contacto: '', correo: '', telefono: '', direccion: '', pais: '', activo: true, fechaCreacion: '', fechaActualizacion: null }));
+      this.productos = catalogos.productos.map((item) => ({ id: item.id ?? 0, codigo: '', nombre: item.descripcion ?? '', descripcion: item.descripcion ?? '', activo: true, fechaCreacion: '', fechaActualizacion: null }));
+      this.destinos = catalogos.destinos.map((item) => ({ id: item.id ?? 0, pais: '', ciudad: item.descripcion ?? '', activo: true, fechaCreacion: '', fechaActualizacion: null }));
+      this.situaciones = catalogos.situaciones.map((item) => ({ id: item.id ?? 0, descripcion: item.descripcion ?? '', activo: true, fechaCreacion: '', fechaActualizacion: null }));
+      this.navieras = catalogos.navieras.map((item) => ({ id: item.id ?? 0, codigo: '', nombre: item.descripcion ?? '', pais: '', contacto: '', correo: '', telefono: '', sitioWeb: '', activo: true, fechaCreacion: '', fechaActualizacion: null }));
+      this.operadores = catalogos.operadores.map((item) => ({ id: item.id ?? 0, ruc: '', razonSocial: item.descripcion ?? '', nombreComercial: item.descripcion ?? '', contacto: '', correo: '', telefono: '', direccion: '', activo: true, fechaCreacion: '', fechaActualizacion: null }));
+      this.puertos = catalogos.puertos.map((item) => ({ id: item.id ?? 0, codigo: '', puerto: item.descripcion ?? '', pais: '', activo: true, fechaCreacion: '', fechaActualizacion: null }));
+      this.vias = catalogos.vias.map((item) => ({ id: item.id ?? 0, descripcion: item.descripcion ?? '', activo: true, fechaCreacion: '', fechaActualizacion: null }));
+      this.variedades = catalogos.variedades.map((item) => ({ id: item.id ?? 0, productoId: item.value2 ?? 0, nombre: item.descripcion ?? '', activo: true, fechaCreacion: '', fechaActualizacion: null }));
     });
   }
 
@@ -266,98 +285,41 @@ export class RegistroDespachoComponent
       : 'REGISTRAR DESPACHO';
 
     modalRef.componentInstance.data = despacho;
+    modalRef.componentInstance.clientes = this.clientes;
+    modalRef.componentInstance.productos = this.productos;
+    modalRef.componentInstance.situaciones = this.situaciones;
+    modalRef.componentInstance.navieras = this.navieras;
+    modalRef.componentInstance.destinos = this.destinos;
+    modalRef.componentInstance.operadores = this.operadores;
+    modalRef.componentInstance.puertos = this.puertos;
+    modalRef.componentInstance.vias = this.vias;
+    modalRef.componentInstance.catalogoVariedades = this.variedades;
 
     modalRef.result
       .then(
-        (resultado: DespachoFormData) => {
+        (resultado: boolean) => {
           if (resultado) {
-            this.guardarDespacho(
-              resultado,
-              despacho
-            );
+            this.page = 1;
+            this.cargarDespachos();
           }
         }
       )
       .catch(() => {});
   }
 
-  private guardarDespacho(
-    data: DespachoFormData,
-    despacho: Despacho | null
-  ): void {
-    this.despachoService
-      .relacionProductoVariedadValida(
-        data.productoId,
-        data.variedadId
-      )
-      .pipe(
-        switchMap((relacionValida) => {
-          if (!relacionValida) {
-            window.alert(
-              'La variedad seleccionada no pertenece ' +
-              'al producto indicado.'
-            );
-
-            return EMPTY;
-          }
-
-          if (!despacho) {
-            return this.despachoService.crear(data);
-          }
-
-          return this.despachoService.actualizar(
-            despacho.id,
-            data
-          );
-        })
-      )
-      .subscribe((despachoGuardado) => {
-        if (!despachoGuardado) {
-          return;
-        }
-
-        if (!despacho) {
-          this.registrarEventoDespacho(
-            AccionBitacora.CREAR,
-            despachoGuardado,
-            `Se creó el despacho ` +
-              `${despachoGuardado.codigo}.`
-          );
-        } else {
-          this.registrarEventoDespacho(
-            AccionBitacora.EDITAR,
-            despachoGuardado,
-            `Se actualizó el despacho ` +
-              `${despachoGuardado.codigo}.`
-          );
-        }
-
-        this.page = 1;
-        this.cargarDespachos();
-      });
-  }
-
   private cargarPermisos(): void {
-    forkJoin({
-      crear: this.authService.tienePermiso(
-        ModuloSistema.REGISTRO_DESPACHO,
-        AccionPermiso.CREAR
-      ),
-      editar: this.authService.tienePermiso(
-        ModuloSistema.REGISTRO_DESPACHO,
-        AccionPermiso.EDITAR
-      ),
-      cambiarEstado:
-        this.authService.tienePermiso(
-          ModuloSistema.REGISTRO_DESPACHO,
-          AccionPermiso.ELIMINAR
-        )
-    }).subscribe((permisos) => {
-      this.puedeCrear = permisos.crear;
-      this.puedeEditar = permisos.editar;
-      this.puedeCambiarEstado =
-        permisos.cambiarEstado;
-    });
+    this.puedeCrear = this.tokenService.tienePermiso(
+      ModuloSistema.REGISTRO_DESPACHO,
+      AccionPermiso.CREAR
+    );
+    this.puedeEditar = this.tokenService.tienePermiso(
+      ModuloSistema.REGISTRO_DESPACHO,
+      AccionPermiso.EDITAR
+    );
+    this.puedeCambiarEstado = this.tokenService.tienePermiso(
+      ModuloSistema.REGISTRO_DESPACHO,
+      AccionPermiso.ELIMINAR
+    );
   }
 
   private registrarEventoDespacho(
@@ -388,3 +350,4 @@ export class RegistroDespachoComponent
       .subscribe();
   }
 }
+

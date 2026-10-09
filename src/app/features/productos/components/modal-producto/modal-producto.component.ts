@@ -11,12 +11,15 @@ import {
   Validators
 } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { AlertService } from '../../../../core/services/alert.service';
+import { ProductoService } from '../../../../core/services/producto.service';
+import { ModalCrudBase } from '../../../../shared/components/modal-crud/modal-crud-base';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import {
   Producto,
   ProductoFormData
-} from '../../models/producto.model';
+} from '../../../../core/models/producto.model';
 
 type NombreControl =
   | 'codigo'
@@ -34,7 +37,7 @@ type NombreControl =
   templateUrl: './modal-producto.component.html',
   styleUrls: ['./modal-producto.component.scss']
 })
-export class ModalProductoComponent implements OnInit {
+export class ModalProductoComponent extends ModalCrudBase<ProductoFormData> implements OnInit {
   @Input() titleModal = '';
   @Input() data: Producto | null = null;
 
@@ -73,8 +76,10 @@ export class ModalProductoComponent implements OnInit {
   });
 
   constructor(
-    public activeModal: NgbActiveModal
-  ) {}
+    activeModal: NgbActiveModal,
+    alertService: AlertService,
+    private readonly productoService: ProductoService
+  ) { super(activeModal, alertService); }
 
   ngOnInit(): void {
     if (!this.data) {
@@ -104,11 +109,14 @@ export class ModalProductoComponent implements OnInit {
       descripcion: value.descripcion.trim()
     };
 
-    this.activeModal.close(resultado);
+    const request = this.data
+      ? this.productoService.actualizar(this.data.id, resultado)
+      : this.productoService.crear(resultado);
+    this.ejecutarGuardado(request, resultado);
   }
 
   onCerrarModal(): void {
-    this.activeModal.dismiss();
+    this.cerrarModal();
   }
 
   controlInvalido(

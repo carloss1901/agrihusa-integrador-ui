@@ -14,7 +14,7 @@ import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { Rol } from '../../../roles/models/rol.model';
+import { Rol } from '../../../../core/models/rol.model';
 import { UsuarioFilter } from '../../../../core/models/usuario.model';
 
 interface EstadoOption {
