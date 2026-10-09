@@ -18,7 +18,7 @@ import { ModalUsuarioComponent } from '../../components/modal-usuario/modal-usua
 import { TablaUsuariosComponent } from '../../components/tabla-usuarios/tabla-usuarios.component';
 import { Usuario, UsuarioFilter, UsuarioQuery } from '../../../../core/models/usuario.model';
 import { UsuarioModalResult } from '../../components/modal-usuario/modal-usuario.component';
-import { Rol } from '../../../roles/models/rol.model';
+import { Rol } from '../../../../core/models/rol.model';
 
 @Component({
     selector: 'app-mantenimiento-usuarios',

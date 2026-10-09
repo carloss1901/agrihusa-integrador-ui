@@ -8,7 +8,7 @@ import { AlertService } from '../../../../core/services/alert.service';
 import { AccionPermiso, ModuloSistema } from '../../../../core/models/permiso.model';
 import { TokenService } from '../../../../core/services/token.service';
 import { ClienteService } from '../../../../core/services/cliente.service';
-import { Cliente, ClienteFilter, ClienteFormData, ClienteQuery } from '../../models/cliente.model';
+import { Cliente, ClienteFilter, ClienteFormData, ClienteQuery } from '../../../../core/models/cliente.model';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import { IChangePaginate } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';

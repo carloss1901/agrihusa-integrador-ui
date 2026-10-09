@@ -357,9 +357,7 @@
               placeholder="-- SELECCIONAR --"
               [clearable]="true"
               [searchable]="true"
-              [readonly]="
-                !formulario.controls.productoId.value
-              "
+              [readonly]="true"
               formControlName="variedadId"
               [class.is-invalid]="
                 controlInvalido('variedadId')
@@ -553,6 +551,9 @@
   <agrihusa-button
     texto="Guardar"
     icon="check"
+    [loading]="guardando"
+    loadingTexto="Guardando..."
+    [disabled]="guardando"
     (click)="onGuardar()"
   ></agrihusa-button>
 </div>

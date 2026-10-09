@@ -13,7 +13,7 @@ import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { RolFilter } from '../../models/rol.model';
+import { RolFilter } from '../../../../core/models/rol.model';
 
 interface EstadoOption {
   valor: boolean;

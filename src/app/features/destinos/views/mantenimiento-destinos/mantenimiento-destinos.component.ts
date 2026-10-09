@@ -189,29 +189,13 @@ export class MantenimientoDestinosComponent
     modalRef.componentInstance.data = destino;
 
     modalRef.result
-      .then((resultado: DestinoFormData) => {
-        if (resultado) {
-          this.guardarDestino(
-            resultado,
-            destino
-          );
+      .then((guardado: boolean) => {
+        if (guardado) {
+          this.page = 1;
+          this.cargarDestinos();
         }
       })
       .catch(() => {});
-  }
-
-  private guardarDestino(data: DestinoFormData, destino: Destino | null): void {
-    (destino
-      ? this.destinoService.actualizar(destino.id, data)
-      : this.destinoService.crear(data)
-    ).subscribe({
-      next: (response) => {
-        this.alertService.success(response.message!);
-        this.page = 1;
-        this.cargarDestinos();
-      },
-      error: (error: HttpErrorResponse) => this.mostrarError(error)
-    });
   }
 
   private mostrarError(error: HttpErrorResponse): void {

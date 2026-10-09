@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   EventEmitter,
+  Input,
   OnInit,
   Output
 } from '@angular/core';
@@ -14,9 +15,8 @@ import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { Producto } from '../../../productos/models/producto.model';
-import { ProductoService } from '../../../productos/services/producto.service';
-import { VariedadFilter } from '../../models/variedad.model';
+import { Producto } from '../../../../core/models/producto.model';
+import { VariedadFilter } from '../../../../core/models/variedad.model';
 
 interface EstadoOption {
   valor: boolean;
@@ -44,6 +44,7 @@ export class FiltroMantVariedadesComponent
   @Output()
   limpiar = new EventEmitter<void>();
 
+  @Input()
   productos: Producto[] = [];
 
   readonly estados: EstadoOption[] = [
@@ -65,13 +66,9 @@ export class FiltroMantVariedadesComponent
     estado: new FormControl<boolean | null>(null)
   });
 
-  constructor(
-    private productoService: ProductoService
-  ) {}
+  constructor() {}
 
-  ngOnInit(): void {
-    this.cargarProductos();
-  }
+  ngOnInit(): void {}
 
   onBuscar(): void {
     const value = this.formulario.getRawValue();
@@ -100,13 +97,5 @@ export class FiltroMantVariedadesComponent
     });
 
     this.limpiar.emit();
-  }
-
-  private cargarProductos(): void {
-    this.productoService
-      .listarActivos()
-      .subscribe((productos) => {
-        this.productos = productos;
-      });
   }
 }

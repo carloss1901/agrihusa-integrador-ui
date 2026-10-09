@@ -12,6 +12,7 @@ import { map, filter } from 'rxjs/operators';
 import { CustomPageDespachoResponse } from '../models/custom-page-despacho-response';
 import { DespachoRegistroRequest } from '../models/despacho-registro-request';
 import { MessageResponse } from '../models/message-response';
+import { ReporteDespachoResponse } from '../models/reporte-despacho-response';
 
 @Injectable({
   providedIn: 'root',
@@ -57,8 +58,8 @@ export class DespachoControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
@@ -243,6 +244,78 @@ export class DespachoControllerService extends BaseService {
 
     return this.cambiarEstadoDespacho$Response(params).pipe(
       map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
+    );
+  }
+
+  /**
+   * Path part for operation listarReporte
+   */
+  static readonly ListarReportePath = '/api/despachos/reporte';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `listarReporte()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  listarReporte$Response(params?: {
+    fechaDesde?: string;
+    fechaHasta?: string;
+    clienteId?: number;
+    productoId?: number;
+    variedadId?: number;
+    viaId?: number;
+    situacionId?: number;
+    activo?: boolean;
+    context?: HttpContext
+  }
+): Observable<StrictHttpResponse<Array<ReporteDespachoResponse>>> {
+
+    const rb = new RequestBuilder(this.rootUrl, DespachoControllerService.ListarReportePath, 'get');
+    if (params) {
+      rb.query('fechaDesde', params.fechaDesde, {});
+      rb.query('fechaHasta', params.fechaHasta, {});
+      rb.query('clienteId', params.clienteId, {});
+      rb.query('productoId', params.productoId, {});
+      rb.query('variedadId', params.variedadId, {});
+      rb.query('viaId', params.viaId, {});
+      rb.query('situacionId', params.situacionId, {});
+      rb.query('activo', params.activo, {});
+    }
+
+    return this.http.request(rb.build({
+      responseType: 'json',
+      accept: 'application/json',
+      context: params?.context
+    })).pipe(
+      filter((r: any) => r instanceof HttpResponse),
+      map((r: HttpResponse<any>) => {
+        return r as StrictHttpResponse<Array<ReporteDespachoResponse>>;
+      })
+    );
+  }
+
+  /**
+   * This method provides access to only to the response body.
+   * To access the full response (for headers, for example), `listarReporte$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  listarReporte(params?: {
+    fechaDesde?: string;
+    fechaHasta?: string;
+    clienteId?: number;
+    productoId?: number;
+    variedadId?: number;
+    viaId?: number;
+    situacionId?: number;
+    activo?: boolean;
+    context?: HttpContext
+  }
+): Observable<Array<ReporteDespachoResponse>> {
+
+    return this.listarReporte$Response(params).pipe(
+      map((r: StrictHttpResponse<Array<ReporteDespachoResponse>>) => r.body as Array<ReporteDespachoResponse>)
     );
   }
 

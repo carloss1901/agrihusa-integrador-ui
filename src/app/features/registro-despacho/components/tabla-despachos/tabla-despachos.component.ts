@@ -12,12 +12,12 @@ import {
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaLoadingComponent } from '../../../../shared/components/agrihusa-loading/agrihusa-loading.component';
 import { AgrihusaNoResultsComponent } from '../../../../shared/components/agrihusa-no-results/agrihusa-no-results.component';
-import { Cliente } from '../../../clientes/models/cliente.model';
+import { Cliente } from '../../../../core/models/cliente.model';
 import { Destino } from '../../../../core/models/destino.model';
-import { Producto } from '../../../productos/models/producto.model';
-import { Situacion } from '../../../situaciones/models/situacion.model';
-import { Variedad } from '../../../variedades/models/variedad.model';
-import { Despacho } from '../../models/despacho.model';
+import { Producto } from '../../../../core/models/producto.model';
+import { Situacion } from '../../../../core/models/situacion.model';
+import { Variedad } from '../../../../core/models/variedad.model';
+import { Despacho } from '../../../../core/models/despacho.model';
 
 @Component({
   selector: 'app-tabla-despachos',
@@ -156,28 +156,32 @@ export class TablaDespachosComponent {
 
   switch (descripcion) {
     case 'PROGRAMADO':
-      return 'situacion-programado';
+      return 'labels-programado';
 
     case 'EN PREPARACION':
-      return 'situacion-preparacion';
+    case 'EN ESPERA':
+      return 'labels-pendiente';
 
     case 'DESPACHADO':
-      return 'situacion-despachado';
+      return 'labels-enviadoopp';
 
     case 'EN TRANSITO':
-      return 'situacion-transito';
+      return 'labels-enproceso';
 
     case 'ENTREGADO':
-      return 'situacion-entregado';
+      return 'labels-culminado';
+
+    case 'A TIEMPO':
+      return 'labels-activo';
 
     case 'CANCELADO':
-      return 'situacion-cancelado';
+      return 'labels-inactivo';
 
     case 'OBSERVADO':
-      return 'situacion-observado';
+      return 'labels-observado';
 
     default:
-      return 'situacion-default';
+      return 'labels-verificado';
   }
 }
 }

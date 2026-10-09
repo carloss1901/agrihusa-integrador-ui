@@ -91,20 +91,19 @@
         </td>
 
         <td>
-        <span
-        class="situacion-badge"
-        [ngClass]="
-            obtenerClaseSituacion(
-            despacho.situacionId
-            )
-        "
-        >
-        {{
-            obtenerNombreSituacion(
-            despacho.situacionId
-            )
-        }}
-        </span>
+          <span
+            class="labels"
+            [ngClass]="obtenerClaseSituacion(despacho.situacionId)"
+          >
+            <span
+              class="labels_circle"
+              aria-hidden="true"
+            ></span>
+
+            <span>
+              {{ obtenerNombreSituacion(despacho.situacionId) }}
+            </span>
+          </span>
         </td>
 
         <td>

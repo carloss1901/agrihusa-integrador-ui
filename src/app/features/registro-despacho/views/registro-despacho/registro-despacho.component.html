@@ -12,6 +12,9 @@
   <div class="frame-layout__body">
     <div class="agrihusa-card mb-component">
       <app-filtro-despachos
+        [clientes]="clientes"
+        [productos]="productos"
+        [situaciones]="situaciones"
         (buscar)="onBuscar($event)"
         (limpiar)="onLimpiarFiltro()"
       ></app-filtro-despachos>

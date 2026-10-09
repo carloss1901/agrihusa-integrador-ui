@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   EventEmitter,
+  Input,
   OnInit,
   Output
 } from '@angular/core';
@@ -12,16 +13,12 @@ import {
 } from '@angular/forms';
 import { NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { forkJoin } from 'rxjs';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { Cliente } from '../../../clientes/models/cliente.model';
-import { ClienteService } from '../../../clientes/services/cliente.service';
-import { Producto } from '../../../productos/models/producto.model';
-import { ProductoService } from '../../../productos/services/producto.service';
-import { Situacion } from '../../../situaciones/models/situacion.model';
-import { SituacionService } from '../../../situaciones/services/situacion.service';
-import { DespachoFilter } from '../../models/despacho.model';
+import { Cliente } from '../../../../core/models/cliente.model';
+import { Producto } from '../../../../core/models/producto.model';
+import { Situacion } from '../../../../core/models/situacion.model';
+import { DespachoFilter } from '../../../../core/models/despacho.model';
 
 interface EstadoOption {
   valor: boolean;
@@ -49,9 +46,9 @@ export class FiltroDespachosComponent
   @Output()
   limpiar = new EventEmitter<void>();
 
-  clientes: Cliente[] = [];
-  productos: Producto[] = [];
-  situaciones: Situacion[] = [];
+  @Input() clientes: Cliente[] = [];
+  @Input() productos: Producto[] = [];
+  @Input() situaciones: Situacion[] = [];
 
   readonly estados: EstadoOption[] = [
     {
@@ -80,15 +77,9 @@ export class FiltroDespachosComponent
     estado: new FormControl<boolean | null>(null)
   });
 
-  constructor(
-    private clienteService: ClienteService,
-    private productoService: ProductoService,
-    private situacionService: SituacionService
-  ) {}
+  constructor() {}
 
-  ngOnInit(): void {
-    this.cargarCatalogos();
-  }
+  ngOnInit(): void {}
 
   onBuscar(): void {
     const value = this.formulario.getRawValue();
@@ -153,16 +144,4 @@ export class FiltroDespachosComponent
     this.limpiar.emit();
   }
 
-  private cargarCatalogos(): void {
-    forkJoin({
-      clientes: this.clienteService.listarActivos(),
-      productos: this.productoService.listarActivos(),
-      situaciones:
-        this.situacionService.listarActivas()
-    }).subscribe((catalogos) => {
-      this.clientes = catalogos.clientes;
-      this.productos = catalogos.productos;
-      this.situaciones = catalogos.situaciones;
-    });
-  }
 }

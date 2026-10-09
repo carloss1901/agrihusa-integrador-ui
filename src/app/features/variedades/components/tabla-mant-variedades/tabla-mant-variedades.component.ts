@@ -6,14 +6,14 @@ import {
   Output
 } from '@angular/core';
 
-import { Producto } from '../../../productos/models/producto.model';
+import { Producto } from '../../../../core/models/producto.model';
 import {
   IChangePaginate,
   TableFooterPaginationComponent
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaLoadingComponent } from '../../../../shared/components/agrihusa-loading/agrihusa-loading.component';
 import { AgrihusaNoResultsComponent } from '../../../../shared/components/agrihusa-no-results/agrihusa-no-results.component';
-import { Variedad } from '../../models/variedad.model';
+import { Variedad } from '../../../../core/models/variedad.model';
 
 @Component({
   selector: 'app-tabla-mant-variedades',

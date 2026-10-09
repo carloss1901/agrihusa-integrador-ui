@@ -4,7 +4,7 @@ import { VariedadControllerService } from '../../api/api/services/variedad-contr
 import { MessageResponse } from '../../api/api/models/message-response';
 import { VariedadRegistroRequest } from '../../api/api/models/variedad-registro-request';
 import { PaginatedResult } from '../models/pagination.model';
-import { Variedad, VariedadFormData, VariedadQuery } from '../../features/variedades/models/variedad.model';
+import { Variedad, VariedadFormData, VariedadQuery } from '../models/variedad.model';
 @Injectable({ providedIn: 'root' })
 export class VariedadService {
   constructor(private readonly api: VariedadControllerService) {}

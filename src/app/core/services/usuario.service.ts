@@ -8,7 +8,7 @@ import { UsuarioRegistroRequest } from '../../api/api/models/usuario-registro-re
 import { UsuarioControllerService } from '../../api/api/services/usuario-controller.service';
 import { PaginatedResult } from '../models/pagination.model';
 import { Usuario, UsuarioActualizarData, UsuarioCrearData, UsuarioQuery } from '../models/usuario.model';
-import { PerfilUsuarioActualizarData } from '../../features/perfil-usuario/models/perfil-usuario.model';
+import { PerfilUsuarioActualizarData } from '../models/perfil-usuario.model';
 
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
