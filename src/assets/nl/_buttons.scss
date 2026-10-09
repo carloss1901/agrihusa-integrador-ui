@@ -1,7 +1,8 @@
 @use "variables" as *;
 @use "mixin" as *;
 
-.agrihusa {
+.agrihusa,
+.modal {
 	.btn {
 		display: inline-flex;
 		align-items: center;
@@ -143,6 +144,12 @@
 		}
 	}
 	
+}
+
+// Los modales de ng-bootstrap se insertan fuera de #agrihusa.
+// Mantener el texto blanco en los botones de peligro también en ese contexto.
+.btn.btn-danger {
+	color: $nl-white !important;
 }
 
 

@@ -26,7 +26,7 @@ import {
   ModuloSistema
 } from '../../../../core/models/permiso.model';
 import { BitacoraService } from '../../../../core/services/bitacora.service';
-import { AuthService } from '../../../../core/services/auth.service';
+import { TokenService } from '../../../../core/services/token.service';
 
 @Component({
   selector: 'app-auditoria',
@@ -58,7 +58,7 @@ export class AuditoriaComponent
 
   constructor(
     private bitacoraService: BitacoraService,
-    private authService: AuthService,
+    private tokenService: TokenService,
     private modalService: NgbModal
   ) { }
 
@@ -210,14 +210,10 @@ export class AuditoriaComponent
       });
   }
   private cargarPermisoExportar(): void {
-    this.authService
-      .tienePermiso(
+    this.puedeExportar = this.tokenService.tienePermiso(
         ModuloSistema.BITACORA,
         AccionPermiso.EXPORTAR
-      )
-      .subscribe((permitido) => {
-        this.puedeExportar = permitido;
-      });
+      );
   }
 
   private escaparValorCsv(
@@ -261,17 +257,17 @@ export class AuditoriaComponent
   private registrarExportacion(
     cantidad: number
   ): void {
-    const sesion =
-      this.authService.obtenerSesionActual();
+    const payload =
+      this.tokenService.obtenerPayload();
 
-    if (!sesion) {
+    if (!payload?.usuarioId) {
       return;
     }
 
     this.bitacoraService
       .registrar({
-        usuarioId: sesion.usuarioId,
-        nombreUsuario: sesion.nombreUsuario,
+        usuarioId: payload.usuarioId,
+        nombreUsuario: payload.sub ?? '',
         modulo: ModuloSistema.BITACORA,
         accion: AccionBitacora.EXPORTAR,
         entidad: 'Bitácora',

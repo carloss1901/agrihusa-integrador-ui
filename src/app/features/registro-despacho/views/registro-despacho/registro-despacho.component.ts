@@ -14,7 +14,6 @@ import {
   AccionPermiso,
   ModuloSistema
 } from '../../../../core/models/permiso.model';
-import { AuthService } from '../../../../core/services/auth.service';
 import { TokenService } from '../../../../core/services/token.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import {
@@ -99,7 +98,6 @@ export class RegistroDespachoComponent
     private productoService: ProductoService,
     private variedadService: VariedadService,
     private situacionService: SituacionService,
-    private authService: AuthService,
     private tokenService: TokenService,
     private bitacoraService: BitacoraService,
     private comunService: ComunControllerService,
@@ -327,16 +325,16 @@ export class RegistroDespachoComponent
     despacho: Despacho,
     detalle: string
   ): void {
-    const sesion =
-      this.authService.obtenerSesionActual();
+    const payload =
+      this.tokenService.obtenerPayload();
 
-    if (!sesion) {
+    if (!payload?.usuarioId) {
       return;
     }
 
     const evento: RegistroBitacoraCrearData = {
-      usuarioId: sesion.usuarioId,
-      nombreUsuario: sesion.nombreUsuario,
+      usuarioId: payload.usuarioId,
+      nombreUsuario: payload.sub ?? '',
       modulo: ModuloSistema.REGISTRO_DESPACHO,
       accion,
       entidad: 'Despacho',
