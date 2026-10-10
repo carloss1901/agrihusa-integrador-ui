@@ -15,29 +15,29 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { forkJoin } from 'rxjs';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { Cliente } from '../../../clientes/models/cliente.model';
-import { ClienteService } from '../../../clientes/services/cliente.service';
-import { Destino } from '../../../destinos/models/destino.model';
-import { DestinoService } from '../../../destinos/services/destino.service';
-import { Naviera } from '../../../navieras/models/naviera.model';
-import { NavieraService } from '../../../navieras/services/naviera.service';
-import { OperadorLogistico } from '../../../operadores-logisticos/models/operador-logistico.model';
-import { OperadorLogisticoService } from '../../../operadores-logisticos/services/operador-logistico.service';
-import { Producto } from '../../../productos/models/producto.model';
-import { ProductoService } from '../../../productos/services/producto.service';
-import { PuertoLlegada } from '../../../puertos-llegada/models/puerto-llegada.model';
-import { PuertoLlegadaService } from '../../../puertos-llegada/services/puerto-llegada.service';
-import { Situacion } from '../../../situaciones/models/situacion.model';
-import { SituacionService } from '../../../situaciones/services/situacion.service';
-import { Variedad } from '../../../variedades/models/variedad.model';
-import { VariedadService } from '../../../variedades/services/variedad.service';
-import { Via } from '../../../vias/models/via.model';
-import { ViaService } from '../../../vias/services/via.service';
+import { Cliente } from '../../../../core/models/cliente.model';
+import { ClienteService } from '../../../../core/services/cliente.service';
+import { Destino } from '../../../../core/models/destino.model';
+import { DestinoService } from '../../../../core/services/destino.service';
+import { Naviera } from '../../../../core/models/naviera.model';
+import { NavieraService } from '../../../../core/services/naviera.service';
+import { OperadorLogistico } from '../../../../core/models/operador-logistico.model';
+import { OperadorLogisticoService } from '../../../../core/services/operador-logistico.service';
+import { Producto } from '../../../../core/models/producto.model';
+import { ProductoService } from '../../../../core/services/producto.service';
+import { PuertoLlegada } from '../../../../core/models/puerto-llegada.model';
+import { PuertoLlegadaService } from '../../../../core/services/puerto-llegada.service';
+import { Situacion } from '../../../../core/models/situacion.model';
+import { SituacionService } from '../../../../core/services/situacion.service';
+import { Variedad } from '../../../../core/models/variedad.model';
+import { VariedadService } from '../../../../core/services/variedad.service';
+import { Via } from '../../../../core/models/via.model';
+import { ViaService } from '../../../../core/services/via.service';
 import {
   Despacho,
   DespachoFormData,
   UnidadMedidaDespacho
-} from '../../models/despacho.model';
+} from '../../../../core/models/despacho.model';
 
 type NombreControl =
   | 'fechaDespacho'

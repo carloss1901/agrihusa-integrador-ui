@@ -20,7 +20,7 @@ import {
   MODULO_AUTENTICACION,
   ModuloBitacora,
   ResultadoBitacora
-} from '../../models/bitacora.model';
+} from '../../../../core/models/bitacora.model';
 
 interface SelectOption<T> {
   valor: T;

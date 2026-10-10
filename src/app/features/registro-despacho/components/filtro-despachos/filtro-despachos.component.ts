@@ -15,13 +15,13 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { forkJoin } from 'rxjs';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { Cliente } from '../../../clientes/models/cliente.model';
-import { ClienteService } from '../../../clientes/services/cliente.service';
-import { Producto } from '../../../productos/models/producto.model';
-import { ProductoService } from '../../../productos/services/producto.service';
-import { Situacion } from '../../../situaciones/models/situacion.model';
-import { SituacionService } from '../../../situaciones/services/situacion.service';
-import { DespachoFilter } from '../../models/despacho.model';
+import { Cliente } from '../../../../core/models/cliente.model';
+import { ClienteService } from '../../../../core/services/cliente.service';
+import { Producto } from '../../../../core/models/producto.model';
+import { ProductoService } from '../../../../core/services/producto.service';
+import { Situacion } from '../../../../core/models/situacion.model';
+import { SituacionService } from '../../../../core/services/situacion.service';
+import { DespachoFilter } from '../../../../core/models/despacho.model';
 
 interface EstadoOption {
   valor: boolean;

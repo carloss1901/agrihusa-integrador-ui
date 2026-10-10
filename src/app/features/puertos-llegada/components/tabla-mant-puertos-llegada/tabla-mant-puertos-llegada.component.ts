@@ -12,7 +12,7 @@ import {
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaLoadingComponent } from '../../../../shared/components/agrihusa-loading/agrihusa-loading.component';
 import { AgrihusaNoResultsComponent } from '../../../../shared/components/agrihusa-no-results/agrihusa-no-results.component';
-import { PuertoLlegada } from '../../models/puerto-llegada.model';
+import { PuertoLlegada } from '../../../../core/models/puerto-llegada.model';
 
 @Component({
   selector: 'app-tabla-mant-puertos-llegada',

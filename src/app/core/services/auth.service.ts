@@ -18,18 +18,18 @@ import {
     AccionBitacora,
     MODULO_AUTENTICACION,
     ResultadoBitacora
-} from '../../features/auditoria/models/bitacora.model';
-import { BitacoraService } from '../../features/auditoria/services/bitacora.service';
+} from '../models/bitacora.model';
+import { BitacoraService } from './bitacora.service';
 import {
     AccionPermiso,
     ModuloSistema
 } from '../models/permiso.model';
 import { STORAGE_KEYS } from '../constants/storage-keys.constant';
-import { RolService } from '../../features/roles/services/rol.service';
-import { UsuarioService } from '../../features/usuarios/services/usuario.service';
+import { RolService } from './rol.service';
+import { UsuarioService } from './usuario.service';
 import { LocalStorageService } from './local-storage.service';
 import { PasswordHashService } from './password-hash.service';
-import { Usuario } from '../../features/usuarios/models/usuario.model';
+import { Usuario } from '../models/usuario.model';
 import { TokenService } from './token.service';
 
 @Injectable({

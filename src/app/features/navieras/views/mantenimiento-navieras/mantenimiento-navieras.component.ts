@@ -17,6 +17,7 @@ import {
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
@@ -25,8 +26,8 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { FiltroMantNavierasComponent } from '../../components/filtro-mant-navieras/filtro-mant-navieras.component';
 import { ModalUpsertNavieraComponent } from '../../components/modal-upsert-naviera/modal-upsert-naviera.component';
 import { TablaMantNavierasComponent } from '../../components/tabla-mant-navieras/tabla-mant-navieras.component';
@@ -35,8 +36,8 @@ import {
   NavieraFilter,
   NavieraFormData,
   NavieraQuery
-} from '../../models/naviera.model';
-import { NavieraService } from '../../services/naviera.service';
+} from '../../../../core/models/naviera.model';
+import { NavieraService } from '../../../../core/services/naviera.service';
 
 @Component({
   selector: 'app-mantenimiento-navieras',
@@ -143,36 +144,48 @@ export class MantenimientoNavierasComponent
       ? 'desactivar'
       : 'activar';
 
-    const confirmado = window.confirm(
+    const modalRef = this.modalService.open(ModalConfirmacionComponent, {
+      backdrop: 'static',
+      keyboard: false,
+      centered: true
+    });
+
+    modalRef.componentInstance.titulo = naviera.activo
+      ? 'Confirmar desactivación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
       `¿Deseas ${accion} la naviera ` +
-      `"${naviera.nombre}"?`
-    );
+      `"${naviera.nombre}"?`;
 
-    if (!confirmado) {
-      return;
-    }
-
-    this.navieraService
-      .cambiarEstado(naviera)
-      .subscribe((resultado) => {
-        if (!resultado) {
+    modalRef.result
+      .then((confirmado: boolean) => {
+        if (!confirmado) {
           return;
         }
 
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
+        this.navieraService
+          .cambiarEstado(naviera)
+          .subscribe((resultado) => {
+            if (!resultado) {
+              return;
+            }
 
-        this.registrarEventoNaviera(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó la naviera ${resultado.nombre}.`
-            : `Se desactivó la naviera ${resultado.nombre}.`
-        );
+            const accionBitacora = resultado.activo
+              ? AccionBitacora.ACTIVAR
+              : AccionBitacora.DESACTIVAR;
 
-        this.cargarNavieras();
-      });
+            this.registrarEventoNaviera(
+              accionBitacora,
+              resultado,
+              resultado.activo
+                ? `Se activó la naviera ${resultado.nombre}.`
+                : `Se desactivó la naviera ${resultado.nombre}.`
+            );
+
+            this.cargarNavieras();
+          });
+      })
+      .catch(() => {});
   }
 
   private cargarNavieras(): void {

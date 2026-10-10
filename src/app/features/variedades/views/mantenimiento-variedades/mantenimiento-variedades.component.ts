@@ -17,6 +17,7 @@ import {
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
@@ -25,10 +26,10 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
-import { Producto } from '../../../productos/models/producto.model';
-import { ProductoService } from '../../../productos/services/producto.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
+import { Producto } from '../../../../core/models/producto.model';
+import { ProductoService } from '../../../../core/services/producto.service';
 import { FiltroMantVariedadesComponent } from '../../components/filtro-mant-variedades/filtro-mant-variedades.component';
 import { ModalUpsertVariedadComponent } from '../../components/modal-upsert-variedad/modal-upsert-variedad.component';
 import { TablaMantVariedadesComponent } from '../../components/tabla-mant-variedades/tabla-mant-variedades.component';
@@ -37,8 +38,8 @@ import {
   VariedadFilter,
   VariedadFormData,
   VariedadQuery
-} from '../../models/variedad.model';
-import { VariedadService } from '../../services/variedad.service';
+} from '../../../../core/models/variedad.model';
+import { VariedadService } from '../../../../core/services/variedad.service';
 
 @Component({
   selector: 'app-mantenimiento-variedades',
@@ -167,36 +168,48 @@ export class MantenimientoVariedadesComponent
       ? 'desactivar'
       : 'activar';
 
-    const confirmado = window.confirm(
+    const modalRef = this.modalService.open(ModalConfirmacionComponent, {
+      backdrop: 'static',
+      keyboard: false,
+      centered: true
+    });
+
+    modalRef.componentInstance.titulo = variedad.activo
+      ? 'Confirmar desactivación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
       `¿Deseas ${accion} la variedad ` +
-      `"${variedad.nombre}"?`
-    );
+      `"${variedad.nombre}"?`;
 
-    if (!confirmado) {
-      return;
-    }
-
-    this.variedadService
-      .cambiarEstado(variedad)
-      .subscribe((resultado) => {
-        if (!resultado) {
+    modalRef.result
+      .then((confirmado: boolean) => {
+        if (!confirmado) {
           return;
         }
 
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
+        this.variedadService
+          .cambiarEstado(variedad)
+          .subscribe((resultado) => {
+            if (!resultado) {
+              return;
+            }
 
-        this.registrarEventoVariedad(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó la variedad ${resultado.nombre}.`
-            : `Se desactivó la variedad ${resultado.nombre}.`
-        );
+            const accionBitacora = resultado.activo
+              ? AccionBitacora.ACTIVAR
+              : AccionBitacora.DESACTIVAR;
 
-        this.cargarVariedades();
-      });
+            this.registrarEventoVariedad(
+              accionBitacora,
+              resultado,
+              resultado.activo
+                ? `Se activó la variedad ${resultado.nombre}.`
+                : `Se desactivó la variedad ${resultado.nombre}.`
+            );
+
+            this.cargarVariedades();
+          });
+      })
+      .catch(() => {});
   }
 
   private cargarProductos(): void {

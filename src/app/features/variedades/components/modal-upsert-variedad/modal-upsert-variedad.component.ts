@@ -14,12 +14,12 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { Producto } from '../../../productos/models/producto.model';
-import { ProductoService } from '../../../productos/services/producto.service';
+import { Producto } from '../../../../core/models/producto.model';
+import { ProductoService } from '../../../../core/services/producto.service';
 import {
   Variedad,
   VariedadFormData
-} from '../../models/variedad.model';
+} from '../../../../core/models/variedad.model';
 
 type NombreControl =
   | 'productoId'

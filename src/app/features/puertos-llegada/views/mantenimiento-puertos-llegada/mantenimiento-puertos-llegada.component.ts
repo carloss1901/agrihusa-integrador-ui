@@ -17,6 +17,7 @@ import {
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
@@ -25,8 +26,8 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { FiltroMantPuertosLlegadaComponent } from '../../components/filtro-mant-puertos-llegada/filtro-mant-puertos-llegada.component';
 import { ModalUpsertPuertoLlegadaComponent } from '../../components/modal-upsert-puerto-llegada/modal-upsert-puerto-llegada.component';
 import { TablaMantPuertosLlegadaComponent } from '../../components/tabla-mant-puertos-llegada/tabla-mant-puertos-llegada.component';
@@ -35,8 +36,8 @@ import {
   PuertoLlegadaFilter,
   PuertoLlegadaFormData,
   PuertoLlegadaQuery
-} from '../../models/puerto-llegada.model';
-import { PuertoLlegadaService } from '../../services/puerto-llegada.service';
+} from '../../../../core/models/puerto-llegada.model';
+import { PuertoLlegadaService } from '../../../../core/services/puerto-llegada.service';
 
 @Component({
   selector: 'app-mantenimiento-puertos-llegada',
@@ -146,36 +147,51 @@ export class MantenimientoPuertosLlegadaComponent
       ? 'desactivar'
       : 'activar';
 
-    const confirmado = window.confirm(
-      `¿Deseas ${accion} el puerto ` +
-      `"${puerto.puerto} - ${puerto.pais}"?`
+    const modalRef = this.modalService.open(
+      ModalConfirmacionComponent,
+      {
+        backdrop: 'static',
+        keyboard: false,
+        centered: true
+      }
     );
 
-    if (!confirmado) {
-      return;
-    }
+    modalRef.componentInstance.titulo = puerto.activo
+      ? 'Confirmar desactivación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
+      `¿Deseas ${accion} el puerto ` +
+      `"${puerto.puerto} - ${puerto.pais}"?`;
 
-    this.puertoService
-      .cambiarEstado(puerto)
-      .subscribe((resultado) => {
-        if (!resultado) {
+    modalRef.result
+      .then((confirmado: boolean) => {
+        if (!confirmado) {
           return;
         }
 
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
+        this.puertoService
+          .cambiarEstado(puerto)
+          .subscribe((resultado) => {
+            if (!resultado) {
+              return;
+            }
 
-        this.registrarEventoPuerto(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó el puerto ${resultado.puerto} - ${resultado.pais}.`
-            : `Se desactivó el puerto ${resultado.puerto} - ${resultado.pais}.`
-        );
+            const accionBitacora = resultado.activo
+              ? AccionBitacora.ACTIVAR
+              : AccionBitacora.DESACTIVAR;
 
-        this.cargarPuertos();
-      });
+            this.registrarEventoPuerto(
+              accionBitacora,
+              resultado,
+              resultado.activo
+                ? `Se activó el puerto ${resultado.puerto} - ${resultado.pais}.`
+                : `Se desactivó el puerto ${resultado.puerto} - ${resultado.pais}.`
+            );
+
+            this.cargarPuertos();
+          });
+      })
+      .catch(() => {});
   }
 
   private cargarPuertos(): void {

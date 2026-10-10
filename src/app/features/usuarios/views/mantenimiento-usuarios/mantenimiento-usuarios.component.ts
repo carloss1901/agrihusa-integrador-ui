@@ -17,12 +17,13 @@ import {
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
     IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
-import { Rol } from '../../../roles/models/rol.model';
-import { RolService } from '../../../roles/services/rol.service';
+import { Rol } from '../../../../core/models/rol.model';
+import { RolService } from '../../../../core/services/rol.service';
 import { FiltroUsuariosComponent } from '../../components/filtro-usuarios/filtro-usuarios.component';
 import {
     ModalUsuarioComponent,
@@ -33,14 +34,14 @@ import {
     Usuario,
     UsuarioFilter,
     UsuarioQuery
-} from '../../models/usuario.model';
+} from '../../../../core/models/usuario.model';
 import {
     AccionBitacora,
     RegistroBitacoraCrearData,
     ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
-import { UsuarioService } from '../../services/usuario.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
+import { UsuarioService } from '../../../../core/services/usuario.service';
 
 @Component({
     selector: 'app-mantenimiento-usuarios',
@@ -158,36 +159,51 @@ export class MantenimientoUsuariosComponent
             ? 'desactivar'
             : 'activar';
 
-        const confirmado = window.confirm(
-            `¿Deseas ${accion} al usuario ` +
-            `"${usuario.nombreUsuario}"?`
+        const modalRef = this.modalService.open(
+            ModalConfirmacionComponent,
+            {
+                backdrop: 'static',
+                keyboard: false,
+                centered: true
+            }
         );
 
-        if (!confirmado) {
-            return;
-        }
+        modalRef.componentInstance.titulo = usuario.activo
+            ? 'Confirmar desactivación'
+            : 'Confirmar activación';
+        modalRef.componentInstance.mensaje =
+            `¿Deseas ${accion} al usuario ` +
+            `"${usuario.nombreUsuario}"?`;
 
-        this.usuarioService
-            .cambiarEstado(usuario.id)
-            .subscribe((resultado) => {
-                if (!resultado) {
+        modalRef.result
+            .then((confirmado: boolean) => {
+                if (!confirmado) {
                     return;
                 }
 
-                const accionBitacora = resultado.activo
-                    ? AccionBitacora.ACTIVAR
-                    : AccionBitacora.DESACTIVAR;
+                this.usuarioService
+                    .cambiarEstado(usuario.id)
+                    .subscribe((resultado) => {
+                        if (!resultado) {
+                            return;
+                        }
 
-                this.registrarEventoUsuario(
-                    accionBitacora,
-                    resultado,
-                    resultado.activo
-                        ? `Se activó al usuario ${resultado.nombreUsuario}.`
-                        : `Se desactivó al usuario ${resultado.nombreUsuario}.`
-                );
+                        const accionBitacora = resultado.activo
+                            ? AccionBitacora.ACTIVAR
+                            : AccionBitacora.DESACTIVAR;
 
-                this.cargarUsuarios();
-            });
+                        this.registrarEventoUsuario(
+                            accionBitacora,
+                            resultado,
+                            resultado.activo
+                                ? `Se activó al usuario ${resultado.nombreUsuario}.`
+                                : `Se desactivó al usuario ${resultado.nombreUsuario}.`
+                        );
+
+                        this.cargarUsuarios();
+                    });
+            })
+            .catch(() => {});
     }
 
     private cargarUsuarios(): void {

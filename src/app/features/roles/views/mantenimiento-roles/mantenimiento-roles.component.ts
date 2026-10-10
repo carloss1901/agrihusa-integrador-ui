@@ -14,6 +14,7 @@ import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
 import { FiltroRolesComponent } from '../../components/filtro-roles/filtro-roles.component';
 import { ModalRolComponent } from '../../components/modal-rol/modal-rol.component';
@@ -23,16 +24,16 @@ import {
   RolFilter,
   RolFormData,
   RolQuery
-} from '../../models/rol.model';
-import { RolService } from '../../services/rol.service';
+} from '../../../../core/models/rol.model';
+import { RolService } from '../../../../core/services/rol.service';
 import { ModuloSistema } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 
 @Component({
   selector: 'app-mantenimiento-roles',
@@ -131,35 +132,47 @@ export class MantenimientoRolesComponent
       ? 'desactivar'
       : 'activar';
 
-    const confirmado = window.confirm(
-      `¿Deseas ${accion} el rol "${rol.nombre}"?`
-    );
+    const modalRef = this.modalService.open(ModalConfirmacionComponent, {
+      backdrop: 'static',
+      keyboard: false,
+      centered: true
+    });
 
-    if (!confirmado) {
-      return;
-    }
+    modalRef.componentInstance.titulo = rol.activo
+      ? 'Confirmar desactivación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
+      `¿Deseas ${accion} el rol "${rol.nombre}"?`;
 
-    this.rolService
-      .cambiarEstado(rol.id)
-      .subscribe((resultado) => {
-        if (!resultado) {
+    modalRef.result
+      .then((confirmado: boolean) => {
+        if (!confirmado) {
           return;
         }
 
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
+        this.rolService
+          .cambiarEstado(rol.id)
+          .subscribe((resultado) => {
+            if (!resultado) {
+              return;
+            }
 
-        this.registrarEventoRol(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó el rol ${resultado.nombre}.`
-            : `Se desactivó el rol ${resultado.nombre}.`
-        );
+            const accionBitacora = resultado.activo
+              ? AccionBitacora.ACTIVAR
+              : AccionBitacora.DESACTIVAR;
 
-        this.cargarRoles();
-      });
+            this.registrarEventoRol(
+              accionBitacora,
+              resultado,
+              resultado.activo
+                ? `Se activó el rol ${resultado.nombre}.`
+                : `Se desactivó el rol ${resultado.nombre}.`
+            );
+
+            this.cargarRoles();
+          });
+      })
+      .catch(() => {});
   }
 
   private cargarRoles(): void {

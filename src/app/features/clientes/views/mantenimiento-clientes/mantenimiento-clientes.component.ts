@@ -17,6 +17,7 @@ import {
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
@@ -25,8 +26,8 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { FiltroClientesComponent } from '../../components/filtro-clientes/filtro-clientes.component';
 import { ModalClienteComponent } from '../../components/modal-cliente/modal-cliente.component';
 import { TablaClientesComponent } from '../../components/tabla-clientes/tabla-clientes.component';
@@ -35,8 +36,8 @@ import {
   ClienteFilter,
   ClienteFormData,
   ClienteQuery
-} from '../../models/cliente.model';
-import { ClienteService } from '../../services/cliente.service';
+} from '../../../../core/models/cliente.model';
+import { ClienteService } from '../../../../core/services/cliente.service';
 
 @Component({
   selector: 'app-mantenimiento-clientes',
@@ -143,36 +144,51 @@ export class MantenimientoClientesComponent
       ? 'desactivar'
       : 'activar';
 
-    const confirmado = window.confirm(
-      `¿Deseas ${accion} al cliente ` +
-      `"${cliente.razonSocial}"?`
+    const modalRef = this.modalService.open(
+      ModalConfirmacionComponent,
+      {
+        backdrop: 'static',
+        keyboard: false,
+        centered: true
+      }
     );
 
-    if (!confirmado) {
-      return;
-    }
+    modalRef.componentInstance.titulo = cliente.activo
+      ? 'Confirmar desactivación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
+      `¿Deseas ${accion} al cliente ` +
+      `"${cliente.razonSocial}"?`;
 
-    this.clienteService
-      .cambiarEstado(cliente)
-      .subscribe((resultado) => {
-        if (!resultado) {
+    modalRef.result
+      .then((confirmado: boolean) => {
+        if (!confirmado) {
           return;
         }
 
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
+        this.clienteService
+          .cambiarEstado(cliente)
+          .subscribe((resultado) => {
+            if (!resultado) {
+              return;
+            }
 
-        this.registrarEventoCliente(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó al cliente ${resultado.razonSocial}.`
-            : `Se desactivó al cliente ${resultado.razonSocial}.`
-        );
+            const accionBitacora = resultado.activo
+              ? AccionBitacora.ACTIVAR
+              : AccionBitacora.DESACTIVAR;
 
-        this.cargarClientes();
-      });
+            this.registrarEventoCliente(
+              accionBitacora,
+              resultado,
+              resultado.activo
+                ? `Se activó al cliente ${resultado.razonSocial}.`
+                : `Se desactivó al cliente ${resultado.razonSocial}.`
+            );
+
+            this.cargarClientes();
+          });
+      })
+      .catch(() => {});
   }
 
   private cargarClientes(): void {

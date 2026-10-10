@@ -17,6 +17,7 @@ import {
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
@@ -25,8 +26,8 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { FiltroSituacionesComponent } from '../../components/filtro-situaciones/filtro-situaciones.component';
 import { ModalSituacionComponent } from '../../components/modal-situacion/modal-situacion.component';
 import { TablaSituacionesComponent } from '../../components/tabla-situaciones/tabla-situaciones.component';
@@ -35,8 +36,8 @@ import {
   SituacionFilter,
   SituacionFormData,
   SituacionQuery
-} from '../../models/situacion.model';
-import { SituacionService } from '../../services/situacion.service';
+} from '../../../../core/models/situacion.model';
+import { SituacionService } from '../../../../core/services/situacion.service';
 
 @Component({
   selector: 'app-mantenimiento-situaciones',
@@ -146,36 +147,48 @@ export class MantenimientoSituacionesComponent
       ? 'desactivar'
       : 'activar';
 
-    const confirmado = window.confirm(
+    const modalRef = this.modalService.open(ModalConfirmacionComponent, {
+      backdrop: 'static',
+      keyboard: false,
+      centered: true
+    });
+
+    modalRef.componentInstance.titulo = situacion.activo
+      ? 'Confirmar desactivación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
       `¿Deseas ${accion} la situación ` +
-      `"${situacion.descripcion}"?`
-    );
+      `"${situacion.descripcion}"?`;
 
-    if (!confirmado) {
-      return;
-    }
-
-    this.situacionService
-      .cambiarEstado(situacion)
-      .subscribe((resultado) => {
-        if (!resultado) {
+    modalRef.result
+      .then((confirmado: boolean) => {
+        if (!confirmado) {
           return;
         }
 
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
+        this.situacionService
+          .cambiarEstado(situacion)
+          .subscribe((resultado) => {
+            if (!resultado) {
+              return;
+            }
 
-        this.registrarEventoSituacion(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó la situación ${resultado.descripcion}.`
-            : `Se desactivó la situación ${resultado.descripcion}.`
-        );
+            const accionBitacora = resultado.activo
+              ? AccionBitacora.ACTIVAR
+              : AccionBitacora.DESACTIVAR;
 
-        this.cargarSituaciones();
-      });
+            this.registrarEventoSituacion(
+              accionBitacora,
+              resultado,
+              resultado.activo
+                ? `Se activó la situación ${resultado.descripcion}.`
+                : `Se desactivó la situación ${resultado.descripcion}.`
+            );
+
+            this.cargarSituaciones();
+          });
+      })
+      .catch(() => {});
   }
 
   private cargarSituaciones(): void {

@@ -16,7 +16,7 @@ import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-
 import {
   Situacion,
   SituacionFormData
-} from '../../models/situacion.model';
+} from '../../../../core/models/situacion.model';
 
 type NombreControl = 'descripcion';
 

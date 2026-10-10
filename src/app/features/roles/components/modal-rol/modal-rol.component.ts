@@ -25,7 +25,7 @@ import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-
 import {
   Rol,
   RolFormData
-} from '../../models/rol.model';
+} from '../../../../core/models/rol.model';
 
 type NombreControl = 'nombre' | 'descripcion';
 

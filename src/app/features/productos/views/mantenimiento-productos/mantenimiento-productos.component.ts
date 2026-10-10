@@ -17,6 +17,7 @@ import {
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
@@ -25,8 +26,8 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { FiltroProductosComponent } from '../../components/filtro-productos/filtro-productos.component';
 import { ModalProductoComponent } from '../../components/modal-producto/modal-producto.component';
 import { TablaProductosComponent } from '../../components/tabla-productos/tabla-productos.component';
@@ -35,8 +36,8 @@ import {
   ProductoFilter,
   ProductoFormData,
   ProductoQuery
-} from '../../models/producto.model';
-import { ProductoService } from '../../services/producto.service';
+} from '../../../../core/models/producto.model';
+import { ProductoService } from '../../../../core/services/producto.service';
 
 @Component({
   selector: 'app-mantenimiento-productos',
@@ -143,36 +144,51 @@ export class MantenimientoProductosComponent implements OnInit {
       ? 'desactivar'
       : 'activar';
 
-    const confirmado = window.confirm(
-      `¿Deseas ${accion} el producto ` +
-      `"${producto.nombre}"?`
+    const modalRef = this.modalService.open(
+      ModalConfirmacionComponent,
+      {
+        backdrop: 'static',
+        keyboard: false,
+        centered: true
+      }
     );
 
-    if (!confirmado) {
-      return;
-    }
+    modalRef.componentInstance.titulo = producto.activo
+      ? 'Confirmar desactivación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
+      `¿Deseas ${accion} el producto ` +
+      `"${producto.nombre}"?`;
 
-    this.productoService
-      .cambiarEstado(producto)
-      .subscribe((resultado) => {
-        if (!resultado) {
+    modalRef.result
+      .then((confirmado: boolean) => {
+        if (!confirmado) {
           return;
         }
 
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
+        this.productoService
+          .cambiarEstado(producto)
+          .subscribe((resultado) => {
+            if (!resultado) {
+              return;
+            }
 
-        this.registrarEventoProducto(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó el producto ${resultado.nombre}.`
-            : `Se desactivó el producto ${resultado.nombre}.`
-        );
+            const accionBitacora = resultado.activo
+              ? AccionBitacora.ACTIVAR
+              : AccionBitacora.DESACTIVAR;
 
-        this.cargarProductos();
-      });
+            this.registrarEventoProducto(
+              accionBitacora,
+              resultado,
+              resultado.activo
+                ? `Se activó el producto ${resultado.nombre}.`
+                : `Se desactivó el producto ${resultado.nombre}.`
+            );
+
+            this.cargarProductos();
+          });
+      })
+      .catch(() => {});
   }
 
   private cargarProductos(): void {

@@ -14,12 +14,13 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { Rol } from '../../../roles/models/rol.model';
+import { SoloNumerosDirective } from '../../../../shared/directives/dni.directive';
+import { Rol } from '../../../../core/models/rol.model';
 import {
     Usuario,
     UsuarioActualizarData,
     UsuarioCrearData
-} from '../../models/usuario.model';
+} from '../../../../core/models/usuario.model';
 
 type NombreControl =
     | 'nombreUsuario'
@@ -47,6 +48,7 @@ export type UsuarioModalResult =
         CommonModule,
         ReactiveFormsModule,
         NgSelectModule,
+        SoloNumerosDirective,
         AgrihusaButtonComponent
     ],
     templateUrl: './modal-usuario.component.html',

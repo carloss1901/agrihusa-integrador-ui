@@ -17,6 +17,7 @@ import {
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
@@ -25,18 +26,18 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
-import { Cliente } from '../../../clientes/models/cliente.model';
-import { ClienteService } from '../../../clientes/services/cliente.service';
-import { Destino } from '../../../destinos/models/destino.model';
-import { DestinoService } from '../../../destinos/services/destino.service';
-import { Producto } from '../../../productos/models/producto.model';
-import { ProductoService } from '../../../productos/services/producto.service';
-import { Situacion } from '../../../situaciones/models/situacion.model';
-import { SituacionService } from '../../../situaciones/services/situacion.service';
-import { Variedad } from '../../../variedades/models/variedad.model';
-import { VariedadService } from '../../../variedades/services/variedad.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
+import { Cliente } from '../../../../core/models/cliente.model';
+import { ClienteService } from '../../../../core/services/cliente.service';
+import { Destino } from '../../../../core/models/destino.model';
+import { DestinoService } from '../../../../core/services/destino.service';
+import { Producto } from '../../../../core/models/producto.model';
+import { ProductoService } from '../../../../core/services/producto.service';
+import { Situacion } from '../../../../core/models/situacion.model';
+import { SituacionService } from '../../../../core/services/situacion.service';
+import { Variedad } from '../../../../core/models/variedad.model';
+import { VariedadService } from '../../../../core/services/variedad.service';
 import { FiltroDespachosComponent } from '../../components/filtro-despachos/filtro-despachos.component';
 import { ModalDespachoComponent } from '../../components/modal-despacho/modal-despacho.component';
 import { TablaDespachosComponent } from '../../components/tabla-despachos/tabla-despachos.component';
@@ -45,8 +46,8 @@ import {
   DespachoFilter,
   DespachoFormData,
   DespachoQuery
-} from '../../models/despacho.model';
-import { DespachoService } from '../../services/despacho.service';
+} from '../../../../core/models/despacho.model';
+import { DespachoService } from '../../../../core/services/despacho.service';
 
 @Component({
   selector: 'app-registro-despacho',
@@ -167,36 +168,48 @@ export class RegistroDespachoComponent
       ? 'desactivar'
       : 'activar';
 
-    const confirmado = window.confirm(
+    const modalRef = this.modalService.open(ModalConfirmacionComponent, {
+      backdrop: 'static',
+      keyboard: false,
+      centered: true
+    });
+
+    modalRef.componentInstance.titulo = despacho.activo
+      ? 'Confirmar desactivación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
       `¿Deseas ${accion} el despacho ` +
-      `"${despacho.codigo}"?`
-    );
+      `"${despacho.codigo}"?`;
 
-    if (!confirmado) {
-      return;
-    }
-
-    this.despachoService
-      .cambiarEstado(despacho.id)
-      .subscribe((resultado) => {
-        if (!resultado) {
+    modalRef.result
+      .then((confirmado: boolean) => {
+        if (!confirmado) {
           return;
         }
 
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
+        this.despachoService
+          .cambiarEstado(despacho.id)
+          .subscribe((resultado) => {
+            if (!resultado) {
+              return;
+            }
 
-        this.registrarEventoDespacho(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó el despacho ${resultado.codigo}.`
-            : `Se desactivó el despacho ${resultado.codigo}.`
-        );
+            const accionBitacora = resultado.activo
+              ? AccionBitacora.ACTIVAR
+              : AccionBitacora.DESACTIVAR;
 
-        this.cargarDespachos();
-      });
+            this.registrarEventoDespacho(
+              accionBitacora,
+              resultado,
+              resultado.activo
+                ? `Se activó el despacho ${resultado.codigo}.`
+                : `Se desactivó el despacho ${resultado.codigo}.`
+            );
+
+            this.cargarDespachos();
+          });
+      })
+      .catch(() => {});
   }
 
   private cargarCatalogosTabla(): void {

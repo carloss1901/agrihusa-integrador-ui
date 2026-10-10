@@ -19,7 +19,7 @@ import {
   ModuloBitacora,
   RegistroBitacora,
   ResultadoBitacora
-} from '../../models/bitacora.model';
+} from '../../../../core/models/bitacora.model';
 
 @Component({
   selector: 'app-tabla-auditoria',

@@ -14,7 +14,7 @@ import {
   MODULO_AUTENTICACION,
   ModuloBitacora,
   RegistroBitacora
-} from '../../models/bitacora.model';
+} from '../../../../core/models/bitacora.model';
 
 @Component({
   selector: 'app-modal-detalle-auditoria',

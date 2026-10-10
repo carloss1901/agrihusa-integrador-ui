@@ -17,6 +17,7 @@ import {
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
@@ -25,8 +26,8 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { FiltroOperadoresLogisticosComponent } from '../../components/filtro-operadores-logisticos/filtro-operadores-logisticos.component';
 import { ModalOperadorLogisticoComponent } from '../../components/modal-operador-logistico/modal-operador-logistico.component';
 import { TablaOperadoresLogisticosComponent } from '../../components/tabla-operadores-logisticos/tabla-operadores-logisticos.component';
@@ -35,8 +36,8 @@ import {
   OperadorLogisticoFilter,
   OperadorLogisticoFormData,
   OperadorLogisticoQuery
-} from '../../models/operador-logistico.model';
-import { OperadorLogisticoService } from '../../services/operador-logistico.service';
+} from '../../../../core/models/operador-logistico.model';
+import { OperadorLogisticoService } from '../../../../core/services/operador-logistico.service';
 
 @Component({
   selector:
@@ -148,36 +149,51 @@ export class MantenimientoOperadoresLogisticosComponent
       ? 'desactivar'
       : 'activar';
 
-    const confirmado = window.confirm(
-      `¿Deseas ${accion} al operador ` +
-      `"${operador.razonSocial}"?`
+    const modalRef = this.modalService.open(
+      ModalConfirmacionComponent,
+      {
+        backdrop: 'static',
+        keyboard: false,
+        centered: true
+      }
     );
 
-    if (!confirmado) {
-      return;
-    }
+    modalRef.componentInstance.titulo = operador.activo
+      ? 'Confirmar desactivación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
+      `¿Deseas ${accion} al operador ` +
+      `"${operador.razonSocial}"?`;
 
-    this.operadorService
-      .cambiarEstado(operador)
-      .subscribe((resultado) => {
-        if (!resultado) {
+    modalRef.result
+      .then((confirmado: boolean) => {
+        if (!confirmado) {
           return;
         }
 
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
+        this.operadorService
+          .cambiarEstado(operador)
+          .subscribe((resultado) => {
+            if (!resultado) {
+              return;
+            }
 
-        this.registrarEventoOperador(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó al operador ${resultado.razonSocial}.`
-            : `Se desactivó al operador ${resultado.razonSocial}.`
-        );
+            const accionBitacora = resultado.activo
+              ? AccionBitacora.ACTIVAR
+              : AccionBitacora.DESACTIVAR;
 
-        this.cargarOperadores();
-      });
+            this.registrarEventoOperador(
+              accionBitacora,
+              resultado,
+              resultado.activo
+                ? `Se activó al operador ${resultado.razonSocial}.`
+                : `Se desactivó al operador ${resultado.razonSocial}.`
+            );
+
+            this.cargarOperadores();
+          });
+      })
+      .catch(() => {});
   }
 
   private cargarOperadores(): void {

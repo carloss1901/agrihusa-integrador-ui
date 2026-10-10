@@ -17,6 +17,7 @@ import {
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
@@ -25,8 +26,8 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { FiltroMantDestinosComponent } from '../../components/filtro-mant-destinos/filtro-mant-destinos.component';
 import { ModalUpsertDestinoComponent } from '../../components/modal-upsert-destino/modal-upsert-destino.component';
 import { TablaMantDestinosComponent } from '../../components/tabla-mant-destinos/tabla-mant-destinos.component';
@@ -35,8 +36,8 @@ import {
   DestinoFilter,
   DestinoFormData,
   DestinoQuery
-} from '../../models/destino.model';
-import { DestinoService } from '../../services/destino.service';
+} from '../../../../core/models/destino.model';
+import { DestinoService } from '../../../../core/services/destino.service';
 
 @Component({
   selector: 'app-mantenimiento-destinos',
@@ -143,36 +144,48 @@ export class MantenimientoDestinosComponent
       ? 'desactivar'
       : 'activar';
 
-    const confirmado = window.confirm(
+    const modalRef = this.modalService.open(ModalConfirmacionComponent, {
+      backdrop: 'static',
+      keyboard: false,
+      centered: true
+    });
+
+    modalRef.componentInstance.titulo = destino.activo
+      ? 'Confirmar desactivación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
       `¿Deseas ${accion} el destino ` +
-      `"${destino.ciudad} - ${destino.pais}"?`
-    );
+      `"${destino.ciudad} - ${destino.pais}"?`;
 
-    if (!confirmado) {
-      return;
-    }
-
-    this.destinoService
-      .cambiarEstado(destino)
-      .subscribe((resultado) => {
-        if (!resultado) {
+    modalRef.result
+      .then((confirmado: boolean) => {
+        if (!confirmado) {
           return;
         }
 
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
+        this.destinoService
+          .cambiarEstado(destino)
+          .subscribe((resultado) => {
+            if (!resultado) {
+              return;
+            }
 
-        this.registrarEventoDestino(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó el destino ${resultado.ciudad} - ${resultado.pais}.`
-            : `Se desactivó el destino ${resultado.ciudad} - ${resultado.pais}.`
-        );
+            const accionBitacora = resultado.activo
+              ? AccionBitacora.ACTIVAR
+              : AccionBitacora.DESACTIVAR;
 
-        this.cargarDestinos();
-      });
+            this.registrarEventoDestino(
+              accionBitacora,
+              resultado,
+              resultado.activo
+                ? `Se activó el destino ${resultado.ciudad} - ${resultado.pais}.`
+                : `Se desactivó el destino ${resultado.ciudad} - ${resultado.pais}.`
+            );
+
+            this.cargarDestinos();
+          });
+      })
+      .catch(() => {});
   }
 
   private cargarDestinos(): void {

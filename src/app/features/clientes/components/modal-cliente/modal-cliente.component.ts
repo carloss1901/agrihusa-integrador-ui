@@ -18,7 +18,7 @@ import {
     Cliente,
     ClienteFormData,
     TipoDocumentoCliente
-} from '../../models/cliente.model';
+} from '../../../../core/models/cliente.model';
 
 type NombreControl =
     | 'tipoDocumento'

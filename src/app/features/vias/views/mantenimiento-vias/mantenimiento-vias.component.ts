@@ -17,6 +17,7 @@ import {
 } from '../../../../core/models/permiso.model';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
@@ -25,8 +26,8 @@ import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { FiltroMantViasComponent } from '../../components/filtro-mant-vias/filtro-mant-vias.component';
 import { ModalUpsertViaComponent } from '../../components/modal-upsert-via/modal-upsert-via.component';
 import { TablaMantViasComponent } from '../../components/tabla-mant-vias/tabla-mant-vias.component';
@@ -35,8 +36,8 @@ import {
   ViaFilter,
   ViaFormData,
   ViaQuery
-} from '../../models/via.model';
-import { ViaService } from '../../services/via.service';
+} from '../../../../core/models/via.model';
+import { ViaService } from '../../../../core/services/via.service';
 
 @Component({
   selector: 'app-mantenimiento-vias',
@@ -145,36 +146,48 @@ export class MantenimientoViasComponent
       ? 'desactivar'
       : 'activar';
 
-    const confirmado = window.confirm(
+    const modalRef = this.modalService.open(ModalConfirmacionComponent, {
+      backdrop: 'static',
+      keyboard: false,
+      centered: true
+    });
+
+    modalRef.componentInstance.titulo = via.activo
+      ? 'Confirmar desactivación'
+      : 'Confirmar activación';
+    modalRef.componentInstance.mensaje =
       `¿Deseas ${accion} la vía ` +
-      `"${via.descripcion}"?`
-    );
+      `"${via.descripcion}"?`;
 
-    if (!confirmado) {
-      return;
-    }
-
-    this.viaService
-      .cambiarEstado(via)
-      .subscribe((resultado) => {
-        if (!resultado) {
+    modalRef.result
+      .then((confirmado: boolean) => {
+        if (!confirmado) {
           return;
         }
 
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
+        this.viaService
+          .cambiarEstado(via)
+          .subscribe((resultado) => {
+            if (!resultado) {
+              return;
+            }
 
-        this.registrarEventoVia(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activó la vía ${resultado.descripcion}.`
-            : `Se desactivó la vía ${resultado.descripcion}.`
-        );
+            const accionBitacora = resultado.activo
+              ? AccionBitacora.ACTIVAR
+              : AccionBitacora.DESACTIVAR;
 
-        this.cargarVias();
-      });
+            this.registrarEventoVia(
+              accionBitacora,
+              resultado,
+              resultado.activo
+                ? `Se activó la vía ${resultado.descripcion}.`
+                : `Se desactivó la vía ${resultado.descripcion}.`
+            );
+
+            this.cargarVias();
+          });
+      })
+      .catch(() => {});
   }
 
   private cargarVias(): void {

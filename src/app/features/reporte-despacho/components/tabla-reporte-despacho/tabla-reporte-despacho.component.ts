@@ -12,7 +12,7 @@ import {
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaLoadingComponent } from '../../../../shared/components/agrihusa-loading/agrihusa-loading.component';
 import { AgrihusaNoResultsComponent } from '../../../../shared/components/agrihusa-no-results/agrihusa-no-results.component';
-import { ReporteDespachoItem } from '../../models/reporte-despacho.model';
+import { ReporteDespachoItem } from '../../../../core/models/reporte-despacho.model';
 
 @Component({
   selector: 'app-tabla-reporte-despacho',

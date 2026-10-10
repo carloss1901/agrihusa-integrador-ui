@@ -18,16 +18,16 @@ import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-
 import {
   AccionBitacora,
   ResultadoBitacora
-} from '../../../auditoria/models/bitacora.model';
-import { BitacoraService } from '../../../auditoria/services/bitacora.service';
+} from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { FiltroReporteDespachoComponent } from '../../components/filtro-reporte-despacho/filtro-reporte-despacho.component';
 import { TablaReporteDespachoComponent } from '../../components/tabla-reporte-despacho/tabla-reporte-despacho.component';
 import {
   ReporteDespachoFilter,
   ReporteDespachoItem,
   ResumenReporteDespacho
-} from '../../models/reporte-despacho.model';
-import { ReporteDespachoService } from '../../services/reporte-despacho.service';
+} from '../../../../core/models/reporte-despacho.model';
+import { ReporteDespachoService } from '../../../../core/services/reporte-despacho.service';
 
 @Component({
   selector: 'app-reporte-despacho',

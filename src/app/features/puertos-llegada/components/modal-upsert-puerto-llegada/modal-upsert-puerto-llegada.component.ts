@@ -16,7 +16,7 @@ import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-
 import {
   PuertoLlegada,
   PuertoLlegadaFormData
-} from '../../models/puerto-llegada.model';
+} from '../../../../core/models/puerto-llegada.model';
 
 type NombreControl =
   | 'codigo'

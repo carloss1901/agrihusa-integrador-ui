@@ -16,7 +16,7 @@ import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-
 import {
   Producto,
   ProductoFormData
-} from '../../models/producto.model';
+} from '../../../../core/models/producto.model';
 
 type NombreControl =
   | 'codigo'
