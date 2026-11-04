@@ -18,6 +18,7 @@ import { DespachoControllerService } from './services/despacho-controller.servic
 import { ClienteControllerService } from './services/cliente-controller.service';
 import { LoginControllerService } from './services/login-controller.service';
 import { BitacoraControllerService } from './services/bitacora-controller.service';
+import { ClimaControllerService } from './services/clima-controller.service';
 import { ComunControllerService } from './services/comun-controller.service';
 
 /**
@@ -42,6 +43,7 @@ import { ComunControllerService } from './services/comun-controller.service';
     ClienteControllerService,
     LoginControllerService,
     BitacoraControllerService,
+    ClimaControllerService,
     ComunControllerService,
     ApiConfiguration
   ],

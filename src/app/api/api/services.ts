@@ -12,4 +12,5 @@ export { DespachoControllerService } from './services/despacho-controller.servic
 export { ClienteControllerService } from './services/cliente-controller.service';
 export { LoginControllerService } from './services/login-controller.service';
 export { BitacoraControllerService } from './services/bitacora-controller.service';
+export { ClimaControllerService } from './services/clima-controller.service';
 export { ComunControllerService } from './services/comun-controller.service';
