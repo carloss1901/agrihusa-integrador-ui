@@ -47,7 +47,8 @@
                         </label>
 
                         <input id="numeroDocumentoCliente" type="text" class="form-control text-uppercase"
-                            formControlName="numeroDocumento" maxlength="20" autocomplete="off"
+                            formControlName="numeroDocumento" [attr.maxlength]="longitudDocumento"
+                            [appSoloNumeros]="limiteNumericoDocumento" autocomplete="off"
                             placeholder="Ingrese el documento" [class.is-invalid]="
                 controlInvalido('numeroDocumento')
               " />
@@ -180,13 +181,12 @@
                         </label>
 
                         <input id="telefonoCliente" type="tel" class="form-control" formControlName="telefono"
-                            maxlength="20" placeholder="+51 999 999 999" [class.is-invalid]="
+                            maxlength="9" [appSoloNumeros]="9" placeholder="999999999" [class.is-invalid]="
                 controlInvalido('telefono')
               " />
 
                         <div *ngIf="controlInvalido('telefono')" class="invalid-feedback">
-                            Ingresa un teléfono válido de máximo
-                            20 caracteres.
+                            Ingresa un teléfono válido de 9 dígitos.
                         </div>
                     </div>
                 </div>

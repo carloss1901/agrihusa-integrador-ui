@@ -11,6 +11,7 @@ import { map, filter } from 'rxjs/operators';
 
 import { CustomPageDestinoResponse } from '../models/custom-page-destino-response';
 import { DestinoRegistroRequest } from '../models/destino-registro-request';
+import { MessageResponse } from '../models/message-response';
 
 @Injectable({
   providedIn: 'root',
@@ -54,8 +55,8 @@ export class DestinoControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
@@ -87,173 +88,158 @@ export class DestinoControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation actualizar9
+   * Path part for operation actualizarDestino
    */
-  static readonly Actualizar9Path = '/api/destinos';
+  static readonly ActualizarDestinoPath = '/api/destinos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizar9()` instead.
+   * To access only the response body, use `actualizarDestino()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar9$Response(params: {
+  actualizarDestino$Response(params: {
     context?: HttpContext
     body: DestinoRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, DestinoControllerService.Actualizar9Path, 'put');
+    const rb = new RequestBuilder(this.rootUrl, DestinoControllerService.ActualizarDestinoPath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizar9$Response()` instead.
+   * To access the full response (for headers, for example), `actualizarDestino$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar9(params: {
+  actualizarDestino(params: {
     context?: HttpContext
     body: DestinoRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
-    return this.actualizar9$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+    return this.actualizarDestino$Response(params).pipe(
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation registrar9
+   * Path part for operation registrarDestino
    */
-  static readonly Registrar9Path = '/api/destinos';
+  static readonly RegistrarDestinoPath = '/api/destinos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `registrar9()` instead.
+   * To access only the response body, use `registrarDestino()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar9$Response(params: {
+  registrarDestino$Response(params: {
     context?: HttpContext
     body: DestinoRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, DestinoControllerService.Registrar9Path, 'post');
+    const rb = new RequestBuilder(this.rootUrl, DestinoControllerService.RegistrarDestinoPath, 'post');
     if (params) {
       rb.body(params.body, 'application/json');
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `registrar9$Response()` instead.
+   * To access the full response (for headers, for example), `registrarDestino$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar9(params: {
+  registrarDestino(params: {
     context?: HttpContext
     body: DestinoRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
-    return this.registrar9$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+    return this.registrarDestino$Response(params).pipe(
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation cambiarEstado9
+   * Path part for operation cambiarEstadoDestino
    */
-  static readonly CambiarEstado9Path = '/api/destinos';
+  static readonly CambiarEstadoDestinoPath = '/api/destinos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarEstado9()` instead.
+   * To access only the response body, use `cambiarEstadoDestino()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado9$Response(params: {
+  cambiarEstadoDestino$Response(params: {
     destinoId: number;
     activo: boolean;
     context?: HttpContext
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, DestinoControllerService.CambiarEstado9Path, 'delete');
+    const rb = new RequestBuilder(this.rootUrl, DestinoControllerService.CambiarEstadoDestinoPath, 'delete');
     if (params) {
       rb.query('destinoId', params.destinoId, {});
       rb.query('activo', params.activo, {});
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarEstado9$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarEstadoDestino$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado9(params: {
+  cambiarEstadoDestino(params: {
     destinoId: number;
     activo: boolean;
     context?: HttpContext
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
-    return this.cambiarEstado9$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+    return this.cambiarEstadoDestino$Response(params).pipe(
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 

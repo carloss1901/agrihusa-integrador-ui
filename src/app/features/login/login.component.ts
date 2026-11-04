@@ -1,20 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, EventEmitter, Output } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import {
-  finalize,
-  from,
-  map,
-  of,
-  switchMap
-} from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
+import { finalize } from 'rxjs';
+
 import { MessageResponse } from '../../api/api/models/message-response';
 import { LoginControllerService } from '../../api/api/services/login-controller.service';
 import { AlertService } from '../../core/services/alert.service';
@@ -43,11 +38,13 @@ export class LoginComponent {
   loading = false;
   submitted = false;
   errorMessage = '';
+  mostrarPassword = false;
+  readonly currentYear = new Date().getFullYear();
 
   constructor(
     private loginControllerService: LoginControllerService,
     private alertService: AlertService,
-    private authService: AuthService
+    private router: Router
   ) {}
 
   iniciarSesion(): void {
@@ -70,55 +67,26 @@ export class LoginComponent {
           contrasenia: credentials.password
         }
       })
-      .pipe(
-        switchMap((response) => {
-          const contenido: unknown = response;
-
-          if (!(contenido instanceof Blob)) {
-            return of(response);
-          }
-
-          return from(contenido.text()).pipe(
-            map(
-              (texto) =>
-                JSON.parse(texto) as MessageResponse
-            )
-          );
-        }),
-        finalize(() => {
-          this.loading = false;
-        })
-      )
+      .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (respuesta: MessageResponse) => {
           if (respuesta.success === true) {
-            const token = typeof respuesta.data === 'string'
-              ? respuesta.data.trim()
-              : '';
+            this.alertService.success(
+              respuesta.message ?? 'Inicio de sesion correcto.'
+            );
 
-            if (!token || token.split('.').length !== 3) {
-              this.errorMessage =
-                'El servidor no devolvió un token válido.';
-
-              this.alertService.error(this.errorMessage);
-              return;
+            const token = respuesta.data as unknown as string;
+            if (token) {
+              localStorage.setItem('token', token);
             }
 
-            this.authService.establecerSesionBackend(
-              token,
-              nombreUsuario
-            );
-
-            this.alertService.success(
-              respuesta.message ?? 'Inicio de sesión correcto.'
-            );
-
             this.loginSuccess.emit();
+            void this.router.navigate(['/inicio']);
             return;
           }
 
           this.alertService.error(
-            respuesta.message ?? 'No se pudo iniciar sesión.'
+            respuesta.message ?? 'No se pudo iniciar sesion.'
           );
         },
         error: (error: HttpErrorResponse) => {
@@ -134,5 +102,9 @@ export class LoginComponent {
   ): boolean {
     const control = this.formulario.controls[controlName];
     return control.invalid && (control.touched || this.submitted);
+  }
+
+  alternarVisibilidadPassword(): void {
+    this.mostrarPassword = !this.mostrarPassword;
   }
 }

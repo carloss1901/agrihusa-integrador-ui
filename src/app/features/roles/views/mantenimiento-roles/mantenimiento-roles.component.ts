@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   OnInit
@@ -14,7 +15,6 @@ import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
 import { FiltroRolesComponent } from '../../components/filtro-roles/filtro-roles.component';
 import { ModalRolComponent } from '../../components/modal-rol/modal-rol.component';
@@ -26,13 +26,15 @@ import {
   RolQuery
 } from '../../../../core/models/rol.model';
 import { RolService } from '../../../../core/services/rol.service';
+import { AlertService } from '../../../../core/services/alert.service';
 import { ModuloSistema } from '../../../../core/models/permiso.model';
-import { AuthService } from '../../../../core/services/auth.service';
+import { TokenService } from '../../../../core/services/token.service';
 import {
   AccionBitacora,
   RegistroBitacoraCrearData,
   ResultadoBitacora
 } from '../../../../core/models/bitacora.model';
+import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { BitacoraService } from '../../../../core/services/bitacora.service';
 
 @Component({
@@ -62,9 +64,10 @@ export class MantenimientoRolesComponent
 
   constructor(
     private rolService: RolService,
-    private authService: AuthService,
-    private bitacoraService: BitacoraService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private alertService: AlertService,
+    private tokenService: TokenService,
+    private bitacoraService: BitacoraService
   ) { }
 
   ngOnInit(): void {
@@ -103,22 +106,14 @@ export class MantenimientoRolesComponent
   }
 
   mostrarModalEditar(): void {
-    const rolSeleccionado = this.filaSeleccionada;
+    if (!this.filaSeleccionada) return;
 
-    if (
-      !rolSeleccionado ||
-      rolSeleccionado.esSistema
-    ) {
+    if (this.filaSeleccionada.esSistema) {
+      this.alertService.warning('El rol Administrador está protegido y no puede editarse.');
       return;
     }
 
-    this.rolService
-      .obtenerPorId(rolSeleccionado.id)
-      .subscribe((rol) => {
-        if (rol) {
-          this.abrirModal(rol);
-        }
-      });
+    this.abrirModal(this.filaSeleccionada);
   }
 
   cambiarEstado(): void {
@@ -132,47 +127,35 @@ export class MantenimientoRolesComponent
       ? 'desactivar'
       : 'activar';
 
-    const modalRef = this.modalService.open(ModalConfirmacionComponent, {
-      backdrop: 'static',
-      keyboard: false,
-      centered: true
-    });
+    const confirmado = window.confirm(
+      `¿Deseas ${accion} el rol "${rol.nombre}"?`
+    );
 
-    modalRef.componentInstance.titulo = rol.activo
-      ? 'Confirmar desactivación'
-      : 'Confirmar activación';
-    modalRef.componentInstance.mensaje =
-      `¿Deseas ${accion} el rol "${rol.nombre}"?`;
+    if (!confirmado) {
+      return;
+    }
 
-    modalRef.result
-      .then((confirmado: boolean) => {
-        if (!confirmado) {
+    this.rolService
+      .cambiarEstado(rol.id, !rol.activo)
+      .subscribe((resultado) => {
+        if (!resultado) {
           return;
         }
 
-        this.rolService
-          .cambiarEstado(rol.id)
-          .subscribe((resultado) => {
-            if (!resultado) {
-              return;
-            }
+        const accionBitacora = resultado.activo
+          ? AccionBitacora.ACTIVAR
+          : AccionBitacora.DESACTIVAR;
 
-            const accionBitacora = resultado.activo
-              ? AccionBitacora.ACTIVAR
-              : AccionBitacora.DESACTIVAR;
+        this.registrarEventoRol(
+          accionBitacora,
+          resultado,
+          resultado.activo
+            ? `Se activó el rol ${resultado.nombre}.`
+            : `Se desactivó el rol ${resultado.nombre}.`
+        );
 
-            this.registrarEventoRol(
-              accionBitacora,
-              resultado,
-              resultado.activo
-                ? `Se activó el rol ${resultado.nombre}.`
-                : `Se desactivó el rol ${resultado.nombre}.`
-            );
-
-            this.cargarRoles();
-          });
-      })
-      .catch(() => {});
+        this.cargarRoles();
+      });
   }
 
   private cargarRoles(): void {
@@ -274,16 +257,16 @@ export class MantenimientoRolesComponent
     rol: Rol,
     detalle: string
   ): void {
-    const sesion =
-      this.authService.obtenerSesionActual();
+    const payload =
+      this.tokenService.obtenerPayload();
 
-    if (!sesion) {
+    if (!payload?.usuarioId) {
       return;
     }
 
     const evento: RegistroBitacoraCrearData = {
-      usuarioId: sesion.usuarioId,
-      nombreUsuario: sesion.nombreUsuario,
+      usuarioId: payload.usuarioId,
+      nombreUsuario: payload.sub ?? '',
       modulo: ModuloSistema.ROLES,
       accion,
       entidad: 'Rol',

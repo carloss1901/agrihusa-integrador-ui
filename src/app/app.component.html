@@ -1,33 +1,15 @@
 <div id="agrihusaApp" class="agrihusa">
-  <agrihusa-alert
-    aria-live="polite"
-    aria-atomic="true">
-  </agrihusa-alert>
-
-  <div
-    class="agrihusa-header"
-    *ngIf="isAuthenticated">
-
+  <agrihusa-alert aria-live="polite" aria-atomic="true"></agrihusa-alert>
+  <div class="agrihusa-header" *ngIf="isAuthenticated">
     <header>
-      <app-header
-        (onToggleSideNav)="toggleMenu($event)"
-        (onLogout)="logout()">
-      </app-header>
+      <app-header (onToggleSideNav)="toggleMenu($event)" (onLogout)="logout()"></app-header>
     </header>
-
     <div class="agrihusaApp-content-container">
-      <aside
-        class="agrihusaApp-content_sidebar"
-        [class.d-none]="!menuVisible">
-
+      <aside class="agrihusaApp-content_sidebar" [class.d-none]="!menuVisible">
         <section>
-          <app-menu
-            (onToggleSideNav)="toggleMenu($event)"
-            (onSelectItem)="onSelectMenu($event)">
-          </app-menu>
+          <app-menu (onToggleSideNav)="toggleMenu($event)" (onSelectItem)="onSelectMenu($event)"></app-menu>
         </section>
       </aside>
-
       <main class="agrihusaApp-content_main">
         <router-outlet></router-outlet>
       </main>

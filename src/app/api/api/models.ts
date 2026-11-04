@@ -1,7 +1,7 @@
 export { ViaRegistroRequest } from './models/via-registro-request';
+export { MessageResponse } from './models/message-response';
 export { VariedadRegistroRequest } from './models/variedad-registro-request';
-export { UsuarioActualizarRequest } from './models/usuario-actualizar-request';
-export { PerfilUsuarioActualizarRequest } from './models/perfil-usuario-actualizar-request';
+export { UsuarioRegistroRequest } from './models/usuario-registro-request';
 export { CambiarContraseniaRequest } from './models/cambiar-contrasenia-request';
 export { SituacionRegistroRequest } from './models/situacion-registro-request';
 export { RolPermisoRequest } from './models/rol-permiso-request';
@@ -13,9 +13,7 @@ export { NavieraRegistroRequest } from './models/naviera-registro-request';
 export { DestinoRegistroRequest } from './models/destino-registro-request';
 export { DespachoRegistroRequest } from './models/despacho-registro-request';
 export { ClienteRegistroRequest } from './models/cliente-registro-request';
-export { UsuarioRegistroRequest } from './models/usuario-registro-request';
 export { LoginRequest } from './models/login-request';
-export { MessageResponse } from './models/message-response';
 export { BitacoraRegistroRequest } from './models/bitacora-registro-request';
 export { CustomPageViaResponse } from './models/custom-page-via-response';
 export { CustomPageable } from './models/custom-pageable';
@@ -42,6 +40,8 @@ export { CustomPageDestinoResponse } from './models/custom-page-destino-response
 export { DestinoResponse } from './models/destino-response';
 export { CustomPageDespachoResponse } from './models/custom-page-despacho-response';
 export { DespachoResponse } from './models/despacho-response';
+export { ReporteDespachoResponse } from './models/reporte-despacho-response';
+export { ComunResponse } from './models/comun-response';
 export { ClienteResponse } from './models/cliente-response';
 export { CustomPageClienteResponse } from './models/custom-page-cliente-response';
 export { BitacoraResponse } from './models/bitacora-response';

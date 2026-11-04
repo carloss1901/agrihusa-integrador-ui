@@ -6,6 +6,7 @@ export interface Rol extends BaseEntity {
   nombre: string;
   descripcion: string;
   esSistema: boolean;
+  cantidadPermisos?: number;
   permisos: Permiso[];
 }
 

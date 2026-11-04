@@ -11,6 +11,9 @@ import {
   Validators
 } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { AlertService } from '../../../../core/services/alert.service';
+import { DestinoService } from '../../../../core/services/destino.service';
+import { ModalCrudBase } from '../../../../shared/components/modal-crud/modal-crud-base';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import {
@@ -35,7 +38,7 @@ type NombreControl = 'pais' | 'ciudad';
   ]
 })
 export class ModalUpsertDestinoComponent
-  implements OnInit {
+  extends ModalCrudBase<DestinoFormData> implements OnInit {
   @Input() titleModal = '';
   @Input() data: Destino | null = null;
 
@@ -65,8 +68,10 @@ export class ModalUpsertDestinoComponent
   });
 
   constructor(
-    public activeModal: NgbActiveModal
-  ) {}
+    activeModal: NgbActiveModal,
+    alertService: AlertService,
+    private readonly destinoService: DestinoService
+  ) { super(activeModal, alertService); }
 
   ngOnInit(): void {
     if (!this.data) {
@@ -94,11 +99,14 @@ export class ModalUpsertDestinoComponent
       ciudad: value.ciudad.trim()
     };
 
-    this.activeModal.close(resultado);
+    const request = this.data
+      ? this.destinoService.actualizar(this.data.id, resultado)
+      : this.destinoService.crear(resultado);
+    this.ejecutarGuardado(request, resultado);
   }
 
   onCerrarModal(): void {
-    this.activeModal.dismiss();
+    this.cerrarModal();
   }
 
   controlInvalido(

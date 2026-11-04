@@ -28,21 +28,14 @@
                 <div class="col-12 col-md-6">
                     <div class="form-group mb-3">
                         <label class="form-label" for="nombreUsuario">
-                        DNI / Usuario:
-                        <span class="text-danger">*</span>
+                            Nombre de usuario:
+                            <span class="text-danger">*</span>
                         </label>
 
-                        <input
-                        id="nombreUsuario"
-                        type="text"
-                        class="form-control"
-                        formControlName="nombreUsuario"
-                        [appSoloNumeros]="8"
-                        maxlength="8"
-                        autocomplete="off"
-                        placeholder="Ejemplo: 71477205"
-                        [class.is-invalid]="controlInvalido('nombreUsuario')"
-                        />
+                        <input id="nombreUsuario" type="text" class="form-control" formControlName="nombreUsuario"
+                            maxlength="30" autocomplete="off" placeholder="Ejemplo: OPERADOR01" [class.is-invalid]="
+                controlInvalido('nombreUsuario')
+              " />
 
                         <div *ngIf="controlInvalido('nombreUsuario')" class="invalid-feedback">
                             <span *ngIf="
@@ -50,7 +43,7 @@
                     'required'
                   )
                 ">
-                                El DNI es obligatorio.
+                                El nombre de usuario es obligatorio.
                             </span>
 
                             <span *ngIf="
@@ -58,7 +51,7 @@
                     'maxlength'
                   )
                 ">
-                                Permite un máximo de 8 caracteres.
+                                Permite un máximo de 30 caracteres.
                             </span>
 
                             <span *ngIf="
@@ -66,7 +59,8 @@
                     'pattern'
                   )
                 ">
-                                El DNI debe contener exactamente 8 números.
+                                Solo puede utilizar letras, números, puntos,
+                                guiones y guion bajo.
                             </span>
                         </div>
                     </div>

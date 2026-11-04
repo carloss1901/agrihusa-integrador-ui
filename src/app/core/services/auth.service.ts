@@ -52,9 +52,9 @@ export class AuthService {
         private passwordHashService: PasswordHashService,
         private bitacoraService: BitacoraService,
         private tokenService: TokenService
-        ) {
+    ) {
         this.restaurarSesion();
-        }
+    }
 
     login(
         credentials: LoginCredentials
@@ -91,59 +91,27 @@ export class AuthService {
     establecerSesionBackend(
         token: string,
         nombreUsuario: string
-        ): void {
-        localStorage.setItem(
-            this.tokenStorageKey,
-            token
+    ): void {
+        const fechaInicio = new Date();
+        const fechaExpiracion = new Date(
+            fechaInicio.getTime() +
+            this.duracionSesionHoras * 60 * 60 * 1000
         );
-
-        const payload =
-            this.tokenService.obtenerPayload();
-
-        const fechaInicio = payload?.iat
-            ? new Date(payload.iat * 1000)
-            : new Date();
-
-        const fechaExpiracion = payload?.exp
-            ? new Date(payload.exp * 1000)
-            : new Date(
-                fechaInicio.getTime() +
-                this.duracionSesionHoras *
-                60 *
-                60 *
-                1000
-            );
-
-        const rolPrincipal =
-            payload?.roles?.[0];
-
-        const usuarioToken =
-            payload?.sub?.trim() ||
-            nombreUsuario.trim();
-
         const sesion: SesionUsuario = {
             token,
-            usuarioId: Number(
-            payload?.usuarioId ?? 0
-            ),
-            nombreUsuario: usuarioToken,
-            nombreCompleto: usuarioToken,
-            rolId: Number(
-            rolPrincipal?.rolId ?? 0
-            ),
+            usuarioId: 0,
+            nombreUsuario,
+            nombreCompleto: nombreUsuario,
+            rolId: 0,
             fechaInicio: fechaInicio.toISOString(),
-            fechaExpiracion:
-            fechaExpiracion.toISOString(),
+            fechaExpiracion: fechaExpiracion.toISOString(),
             debeCambiarPassword: false
         };
 
-        this.localStorageService.guardar(
-            STORAGE_KEYS.SESION,
-            sesion
-        );
-
+        localStorage.setItem(this.tokenStorageKey, token);
+        this.localStorageService.guardar(STORAGE_KEYS.SESION, sesion);
         this.sesionSubject.next(sesion);
-        }
+    }
 
     obtenerSesionActual(): SesionUsuario | null {
         const sesion = this.sesionSubject.value;
@@ -173,14 +141,43 @@ export class AuthService {
     tienePermiso(
         modulo: ModuloSistema,
         accion: AccionPermiso
-        ): Observable<boolean> {
-        return of(
-            this.tokenService.tienePermiso(
-            modulo,
-            accion
-            )
-        );
+    ): Observable<boolean> {
+        const sesion = this.obtenerSesionActual();
+
+        if (!sesion) {
+            return of(false);
         }
+
+        if (this.tokenService.esAdministrador()) {
+            return of(true);
+        }
+
+        return this.usuarioService
+            .obtenerPorId(sesion.usuarioId)
+            .pipe(
+                switchMap((usuario) => {
+                    if (!usuario?.activo) {
+                        return of(false);
+                    }
+
+                    return this.rolService
+                        .obtenerPorId(usuario.rolId)
+                        .pipe(
+                            map((rol) => {
+                                if (!rol?.activo) {
+                                    return false;
+                                }
+
+                                return rol.permisos.some(
+                                    (permiso) =>
+                                        permiso.modulo === modulo &&
+                                        permiso.acciones.includes(accion)
+                                );
+                            })
+                        );
+                })
+            );
+    }
 
     actualizarSesionDesdeUsuario(
         usuario: Usuario

@@ -2,17 +2,15 @@
 /* eslint-disable */
 export interface UsuarioResponse {
   activo?: boolean;
-  apellidoMaterno?: string;
-  apellidoPaterno?: string;
+  apellidos?: string;
   correo?: string;
-  dni?: string;
   esSistema?: boolean;
-  fechaCreacion?: string;
-  fechaModificacion?: string;
+  estadoDsc?: string;
+  estadoId?: number;
   nombres?: string;
-  resetContrasenia?: boolean;
+  rolDescripcion?: string;
   rolId?: number;
-  telefono?: string;
+  tipo?: string;
   ultimoAcceso?: string;
   usuario?: string;
   usuarioId?: number;

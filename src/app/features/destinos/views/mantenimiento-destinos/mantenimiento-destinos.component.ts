@@ -1,35 +1,21 @@
 import { CommonModule } from '@angular/common';
+import { inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   OnInit
 } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {
-  EMPTY,
-  finalize,
-  forkJoin,
-  switchMap
-} from 'rxjs';
+import { finalize } from 'rxjs';
 
-import {
-  AccionPermiso,
-  ModuloSistema
-} from '../../../../core/models/permiso.model';
-import { AuthService } from '../../../../core/services/auth.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
-import { ModalConfirmacionComponent } from '../../../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import {
   IChangePaginate
 } from '../../../../shared/components/agrihusa-table-footer/agrihusa-table-footer.component';
 import { AgrihusaTopBarComponent } from '../../../../shared/components/agrihusa-topbar/agrihusa-topbar.component';
-import {
-  AccionBitacora,
-  RegistroBitacoraCrearData,
-  ResultadoBitacora
-} from '../../../../core/models/bitacora.model';
-import { BitacoraService } from '../../../../core/services/bitacora.service';
 import { FiltroMantDestinosComponent } from '../../components/filtro-mant-destinos/filtro-mant-destinos.component';
 import { ModalUpsertDestinoComponent } from '../../components/modal-upsert-destino/modal-upsert-destino.component';
+import { ModalConfirmarDestinoComponent } from '../../components/modal-confirmar-destino/modal-confirmar-destino.component';
 import { TablaMantDestinosComponent } from '../../components/tabla-mant-destinos/tabla-mant-destinos.component';
 import {
   Destino,
@@ -38,6 +24,9 @@ import {
   DestinoQuery
 } from '../../../../core/models/destino.model';
 import { DestinoService } from '../../../../core/services/destino.service';
+import { AlertService } from '../../../../core/services/alert.service';
+import { AccionPermiso, ModuloSistema } from '../../../../core/models/permiso.model';
+import { TokenService } from '../../../../core/services/token.service';
 
 @Component({
   selector: 'app-mantenimiento-destinos',
@@ -54,6 +43,10 @@ import { DestinoService } from '../../../../core/services/destino.service';
 })
 export class MantenimientoDestinosComponent
   implements OnInit {
+  private readonly tokenService = inject(TokenService);
+  readonly puedeRegistrar = this.tokenService.tienePermiso(ModuloSistema.DESTINOS, AccionPermiso.CREAR);
+  readonly puedeEditar = this.tokenService.tienePermiso(ModuloSistema.DESTINOS, AccionPermiso.EDITAR);
+  readonly puedeEliminar = this.tokenService.tienePermiso(ModuloSistema.DESTINOS, AccionPermiso.ELIMINAR);
   readonly titulo = 'Mantenimiento de Destinos';
 
   destinos: Destino[] = [];
@@ -63,21 +56,15 @@ export class MantenimientoDestinosComponent
   page = 1;
   pageSize = 10;
 
-  puedeCrear = false;
-  puedeEditar = false;
-  puedeCambiarEstado = false;
-
   private filtro: DestinoFilter = {};
 
   constructor(
     private destinoService: DestinoService,
-    private authService: AuthService,
-    private bitacoraService: BitacoraService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
-    this.cargarPermisos();
     this.cargarDestinos();
   }
 
@@ -111,16 +98,11 @@ export class MantenimientoDestinosComponent
   }
 
   mostrarModalCrear(): void {
-    if (!this.puedeCrear) {
-      return;
-    }
-
     this.abrirModal(null);
   }
 
   mostrarModalEditar(): void {
     if (
-      !this.puedeEditar ||
       !this.filaSeleccionada ||
       !this.filaSeleccionada.activo
     ) {
@@ -132,60 +114,36 @@ export class MantenimientoDestinosComponent
 
   cambiarEstado(): void {
     const destino = this.filaSeleccionada;
-
-    if (
-      !this.puedeCambiarEstado ||
-      !destino
-    ) {
+    if (!destino) {
       return;
     }
 
-    const accion = destino.activo
-      ? 'desactivar'
-      : 'activar';
-
-    const modalRef = this.modalService.open(ModalConfirmacionComponent, {
+    const modalRef = this.modalService.open(ModalConfirmarDestinoComponent, {
       backdrop: 'static',
       keyboard: false,
       centered: true
     });
-
     modalRef.componentInstance.titulo = destino.activo
-      ? 'Confirmar desactivación'
+      ? 'Confirmar eliminación'
       : 'Confirmar activación';
     modalRef.componentInstance.mensaje =
-      `¿Deseas ${accion} el destino ` +
-      `"${destino.ciudad} - ${destino.pais}"?`;
+      `¿Deseas ${destino.activo ? 'desactivar' : 'activar'} el destino "${destino.ciudad} - ${destino.pais}"?`;
 
-    modalRef.result
-      .then((confirmado: boolean) => {
-        if (!confirmado) {
-          return;
-        }
+    modalRef.result.then((confirmado: boolean) => {
+      if (!confirmado) {
+        return;
+      }
 
-        this.destinoService
-          .cambiarEstado(destino)
-          .subscribe((resultado) => {
-            if (!resultado) {
-              return;
-            }
-
-            const accionBitacora = resultado.activo
-              ? AccionBitacora.ACTIVAR
-              : AccionBitacora.DESACTIVAR;
-
-            this.registrarEventoDestino(
-              accionBitacora,
-              resultado,
-              resultado.activo
-                ? `Se activó el destino ${resultado.ciudad} - ${resultado.pais}.`
-                : `Se desactivó el destino ${resultado.ciudad} - ${resultado.pais}.`
-            );
-
+      this.destinoService
+        .cambiarEstado(destino.id, !destino.activo)
+        .subscribe({
+          next: (response) => {
+            this.alertService.success(response.message!);
             this.cargarDestinos();
-          });
-      })
-      .catch(() => {});
+          },
+          error: (error: HttpErrorResponse) => this.mostrarError(error)
+        });
+    }).catch(() => {});
   }
 
   private cargarDestinos(): void {
@@ -231,123 +189,19 @@ export class MantenimientoDestinosComponent
     modalRef.componentInstance.data = destino;
 
     modalRef.result
-      .then((resultado: DestinoFormData) => {
-        if (resultado) {
-          this.guardarDestino(
-            resultado,
-            destino
-          );
+      .then((guardado: boolean) => {
+        if (guardado) {
+          this.page = 1;
+          this.cargarDestinos();
         }
       })
       .catch(() => {});
   }
 
-  private guardarDestino(
-    data: DestinoFormData,
-    destino: Destino | null
-  ): void {
-    this.destinoService
-      .existeUbicacion(
-        data.pais,
-        data.ciudad,
-        destino?.id
-      )
-      .pipe(
-        switchMap((existeUbicacion) => {
-          if (existeUbicacion) {
-            window.alert(
-              'Ya existe ese destino para el país y ciudad indicados.'
-            );
-
-            return EMPTY;
-          }
-
-          if (!destino) {
-            return this.destinoService.crear(data);
-          }
-
-          return this.destinoService.actualizar(
-            destino.id,
-            data
-          );
-        })
-      )
-      .subscribe((destinoGuardado) => {
-        if (!destinoGuardado) {
-          return;
-        }
-
-        if (!destino) {
-          this.registrarEventoDestino(
-            AccionBitacora.CREAR,
-            destinoGuardado,
-            `Se creó el destino ` +
-              `${destinoGuardado.ciudad} - ` +
-              `${destinoGuardado.pais}.`
-          );
-        } else {
-          this.registrarEventoDestino(
-            AccionBitacora.EDITAR,
-            destinoGuardado,
-            `Se actualizó el destino ` +
-              `${destinoGuardado.ciudad} - ` +
-              `${destinoGuardado.pais}.`
-          );
-        }
-
-        this.page = 1;
-        this.cargarDestinos();
-      });
+  private mostrarError(error: HttpErrorResponse): void {
+    this.alertService.error(
+      (error.error as { message?: string }).message!
+    );
   }
 
-  private cargarPermisos(): void {
-    forkJoin({
-      crear: this.authService.tienePermiso(
-        ModuloSistema.DESTINOS,
-        AccionPermiso.CREAR
-      ),
-      editar: this.authService.tienePermiso(
-        ModuloSistema.DESTINOS,
-        AccionPermiso.EDITAR
-      ),
-      cambiarEstado:
-        this.authService.tienePermiso(
-          ModuloSistema.DESTINOS,
-          AccionPermiso.ELIMINAR
-        )
-    }).subscribe((permisos) => {
-      this.puedeCrear = permisos.crear;
-      this.puedeEditar = permisos.editar;
-      this.puedeCambiarEstado =
-        permisos.cambiarEstado;
-    });
-  }
-
-  private registrarEventoDestino(
-    accion: AccionBitacora,
-    destino: Destino,
-    detalle: string
-  ): void {
-    const sesion =
-      this.authService.obtenerSesionActual();
-
-    if (!sesion) {
-      return;
-    }
-
-    const evento: RegistroBitacoraCrearData = {
-      usuarioId: sesion.usuarioId,
-      nombreUsuario: sesion.nombreUsuario,
-      modulo: ModuloSistema.DESTINOS,
-      accion,
-      entidad: 'Destino',
-      registroId: destino.id,
-      detalle,
-      resultado: ResultadoBitacora.EXITO
-    };
-
-    this.bitacoraService
-      .registrar(evento)
-      .subscribe();
-  }
 }

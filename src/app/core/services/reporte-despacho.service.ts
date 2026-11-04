@@ -1,214 +1,54 @@
-import { Injectable } from '@angular/core';
-import type { Borders } from 'exceljs';
-import {
-  forkJoin,
-  map,
-  Observable
-} from 'rxjs';
+﻿import { Injectable } from '@angular/core';
+import type { Borders, Cell, Column } from 'exceljs';
+import { Observable, of, map } from 'rxjs';
+import { DespachoControllerService } from '../../api/api/services/despacho-controller.service';
+import { UnidadMedidaDespacho } from '../models/despacho.model';
+
 import {
   ReporteDespachoFilter,
   ReporteDespachoItem,
   ResumenReporteDespacho
 } from '../models/reporte-despacho.model';
-import { ClienteService } from './cliente.service';
-import { DestinoService } from './destino.service';
-import { NavieraService } from './naviera.service';
-import { OperadorLogisticoService } from './operador-logistico.service';
-import { ProductoService } from './producto.service';
-import { PuertoLlegadaService } from './puerto-llegada.service';
-import { DespachoService } from './despacho.service';
-import { SituacionService } from './situacion.service';
-import { VariedadService } from './variedad.service';
-import { ViaService } from './via.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReporteDespachoService {
-  constructor(
-    private despachoService: DespachoService,
-    private clienteService: ClienteService,
-    private navieraService: NavieraService,
-    private destinoService: DestinoService,
-    private operadorService: OperadorLogisticoService,
-    private puertoService: PuertoLlegadaService,
-    private productoService: ProductoService,
-    private variedadService: VariedadService,
-    private viaService: ViaService,
-    private situacionService: SituacionService
-  ) {}
+  constructor(private readonly api: DespachoControllerService) {}
 
   consultar(
     filtro: ReporteDespachoFilter
   ): Observable<ReporteDespachoItem[]> {
-    const consultaCatalogo = {
-      page: 1,
-      pageSize: 1000
-    };
-
-    return forkJoin({
-      despachos: this.despachoService.listar({
-        page: 1,
-        pageSize: 1000,
-        fechaDesde: filtro.fechaDesde,
-        fechaHasta: filtro.fechaHasta,
-        clienteId: filtro.clienteId,
-        productoId: filtro.productoId,
-        situacionId: filtro.situacionId,
-        estado: filtro.estado
-      }),
-      clientes:
-        this.clienteService.listar(consultaCatalogo),
-      navieras:
-        this.navieraService.listar(consultaCatalogo),
-      destinos:
-        this.destinoService.listar(consultaCatalogo),
-      operadores:
-        this.operadorService.listar(consultaCatalogo),
-      puertos:
-        this.puertoService.listar(consultaCatalogo),
-      productos:
-        this.productoService.listar(consultaCatalogo),
-      variedades:
-        this.variedadService.listar(consultaCatalogo),
-      vias:
-        this.viaService.listar(consultaCatalogo),
-      situaciones:
-        this.situacionService.listar(consultaCatalogo)
+    return this.api.listarReporte({
+      fechaDesde: filtro.fechaDesde,
+      fechaHasta: filtro.fechaHasta,
+      clienteId: filtro.clienteId,
+      productoId: filtro.productoId,
+      variedadId: filtro.variedadId,
+      viaId: filtro.viaId,
+      situacionId: filtro.situacionId,
+      activo: filtro.estado
     }).pipe(
-      map((respuesta) => {
-        const clientes = this.crearMapa(
-          respuesta.clientes.items
-        );
-        const navieras = this.crearMapa(
-          respuesta.navieras.items
-        );
-        const destinos = this.crearMapa(
-          respuesta.destinos.items
-        );
-        const operadores = this.crearMapa(
-          respuesta.operadores.items
-        );
-        const puertos = this.crearMapa(
-          respuesta.puertos.items
-        );
-        const productos = this.crearMapa(
-          respuesta.productos.items
-        );
-        const variedades = this.crearMapa(
-          respuesta.variedades.items
-        );
-        const vias = this.crearMapa(
-          respuesta.vias.items
-        );
-        const situaciones = this.crearMapa(
-          respuesta.situaciones.items
-        );
-
-        return respuesta.despachos.items
-          .filter((despacho) => {
-            if (
-              filtro.variedadId !== undefined &&
-              despacho.variedadId !==
-                filtro.variedadId
-            ) {
-              return false;
-            }
-
-            if (
-              filtro.viaId !== undefined &&
-              despacho.viaId !== filtro.viaId
-            ) {
-              return false;
-            }
-
-            return true;
-          })
-          .sort((a, b) =>
-            b.fechaDespacho.localeCompare(
-              a.fechaDespacho
-            )
-          )
-          .map(
-            (
-              despacho
-            ): ReporteDespachoItem => {
-              const cliente = clientes.get(
-                despacho.clienteId
-              );
-              const naviera = navieras.get(
-                despacho.navieraId
-              );
-              const destino = destinos.get(
-                despacho.destinoId
-              );
-              const operador = operadores.get(
-                despacho.operadorLogisticoId
-              );
-              const puerto = puertos.get(
-                despacho.puertoLlegadaId
-              );
-              const producto = productos.get(
-                despacho.productoId
-              );
-              const variedad = variedades.get(
-                despacho.variedadId
-              );
-              const via = vias.get(
-                despacho.viaId
-              );
-              const situacion = situaciones.get(
-                despacho.situacionId
-              );
-
-              return {
-                id: despacho.id,
-                codigo: despacho.codigo,
-                fechaDespacho:
-                  despacho.fechaDespacho,
-                fechaEstimadaLlegada:
-                  despacho.fechaEstimadaLlegada,
-                cliente:
-                  cliente?.nombreComercial ||
-                  cliente?.razonSocial ||
-                  'NO DISPONIBLE',
-                naviera:
-                  naviera?.nombre ??
-                  'NO DISPONIBLE',
-                destino: destino
-                  ? `${destino.ciudad}, ${destino.pais}`
-                  : 'NO DISPONIBLE',
-                operadorLogistico:
-                  operador?.nombreComercial ||
-                  operador?.razonSocial ||
-                  'NO DISPONIBLE',
-                puertoLlegada: puerto
-                  ? `${puerto.puerto}, ${puerto.pais}`
-                  : 'NO DISPONIBLE',
-                producto:
-                  producto?.nombre ??
-                  'NO DISPONIBLE',
-                variedad:
-                  variedad?.nombre ??
-                  'NO DISPONIBLE',
-                via:
-                  via?.descripcion ??
-                  'NO DISPONIBLE',
-                situacion:
-                  situacion?.descripcion ??
-                  'NO DISPONIBLE',
-                cantidad: despacho.cantidad,
-                unidadMedida:
-                  despacho.unidadMedida,
-                numeroContenedor:
-                  despacho.numeroContenedor,
-                observaciones:
-                  despacho.observaciones,
-                activo: despacho.activo
-              };
-            }
-          );
-      })
+      map((items) => items.map((item) => ({
+        id: item.despachoId ?? 0,
+        codigo: item.codigo ?? '',
+        fechaDespacho: item.fechaDespacho ?? '',
+        fechaEstimadaLlegada: item.fechaEstimadaLlegada ?? '',
+        cliente: item.cliente ?? 'NO DISPONIBLE',
+        naviera: item.naviera ?? 'NO DISPONIBLE',
+        destino: item.destino ?? 'NO DISPONIBLE',
+        operadorLogistico: item.operadorLogistico ?? 'NO DISPONIBLE',
+        puertoLlegada: item.puertoLlegada ?? 'NO DISPONIBLE',
+        producto: item.producto ?? 'NO DISPONIBLE',
+        variedad: item.variedad ?? 'NO DISPONIBLE',
+        via: item.via ?? 'NO DISPONIBLE',
+        situacion: item.situacion ?? 'NO DISPONIBLE',
+        cantidad: item.cantidad ?? 0,
+        unidadMedida: item.unidadMedida as UnidadMedidaDespacho,
+        numeroContenedor: item.numeroContenedor ?? '',
+        observaciones: item.observaciones ?? '',
+        activo: item.activo ?? true
+      })))
     );
   }
 
@@ -241,7 +81,10 @@ export class ReporteDespachoService {
   async exportarExcel(
     items: ReporteDespachoItem[]
   ): Promise<void> {
-    const ExcelJS = await import('exceljs');
+    const excelModule = await import('exceljs');
+    const ExcelJS =
+      (excelModule as any).default ??
+      excelModule;
 
     const workbook =
       new ExcelJS.Workbook();
@@ -345,7 +188,7 @@ export class ReporteDespachoService {
         rango: 'I3:K3',
         celda: 'I3',
         texto:
-          `EN TRÁNSITO: ${
+          `EN TRÃNSITO: ${
             resumen.totalEnTransito
           }`,
         color: 'FFF59E0B'
@@ -465,7 +308,7 @@ export class ReporteDespachoService {
       },
       columns: [
         {
-          name: 'Código',
+          name: 'CÃ³digo',
           filterButton: true
         },
         {
@@ -489,7 +332,7 @@ export class ReporteDespachoService {
           filterButton: true
         },
         {
-          name: 'Operador logístico',
+          name: 'Operador logÃ­stico',
           filterButton: true
         },
         {
@@ -505,11 +348,11 @@ export class ReporteDespachoService {
           filterButton: true
         },
         {
-          name: 'Vía',
+          name: 'VÃ­a',
           filterButton: true
         },
         {
-          name: 'Situación',
+          name: 'SituaciÃ³n',
           filterButton: true
         },
         {
@@ -542,7 +385,7 @@ export class ReporteDespachoService {
     filaEncabezado.height = 30;
 
     filaEncabezado.eachCell(
-      (cell) => {
+      (cell: Cell) => {
         cell.font = {
           bold: true,
           color: {
@@ -579,7 +422,7 @@ export class ReporteDespachoService {
 
       fila.height = 23;
 
-      fila.eachCell((cell) => {
+      fila.eachCell((cell: Cell) => {
         cell.alignment = {
           vertical: 'middle',
           wrapText: false
@@ -678,7 +521,7 @@ export class ReporteDespachoService {
     ];
 
     worksheet.columns.forEach(
-      (columna, indice) => {
+      (columna: Column, indice: number) => {
         columna.width =
           anchos[indice];
       }
@@ -889,3 +732,5 @@ export class ReporteDespachoService {
       .toUpperCase();
   }
 }
+
+

@@ -14,6 +14,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
+import { SoloNumerosDirective } from '../../../../shared/directives/dni.directive';
 import {
     Cliente,
     ClienteFormData,
@@ -43,7 +44,8 @@ interface TipoDocumentoOption {
         CommonModule,
         ReactiveFormsModule,
         NgSelectModule,
-        AgrihusaButtonComponent
+        AgrihusaButtonComponent,
+        SoloNumerosDirective
     ],
     templateUrl: './modal-cliente.component.html',
     styleUrls: ['./modal-cliente.component.scss']
@@ -117,8 +119,8 @@ export class ModalClienteComponent implements OnInit {
         telefono: new FormControl('', {
             nonNullable: true,
             validators: [
-                Validators.maxLength(20),
-                Validators.pattern(/^[0-9+\s()-]*$/)
+                Validators.maxLength(9),
+                Validators.pattern(/^[0-9]{9}$/)
             ]
         }),
         direccion: new FormControl('', {
@@ -142,6 +144,9 @@ export class ModalClienteComponent implements OnInit {
         this.formulario.controls.tipoDocumento
             .valueChanges
             .subscribe((tipoDocumento) => {
+                this.formulario.controls.numeroDocumento.setValue('', {
+                    emitEvent: false
+                });
                 this.actualizarValidadoresDocumento(
                     tipoDocumento
                 );
@@ -169,6 +174,28 @@ export class ModalClienteComponent implements OnInit {
 
     get modoEdicion(): boolean {
         return this.data !== null;
+    }
+
+    get longitudDocumento(): number {
+        switch (this.formulario.controls.tipoDocumento.value) {
+            case TipoDocumentoCliente.RUC:
+                return 11;
+            case TipoDocumentoCliente.DNI:
+                return 8;
+            default:
+                return 20;
+        }
+    }
+
+    get limiteNumericoDocumento(): number | null {
+        switch (this.formulario.controls.tipoDocumento.value) {
+            case TipoDocumentoCliente.RUC:
+                return 11;
+            case TipoDocumentoCliente.DNI:
+                return 8;
+            default:
+                return null;
+        }
     }
 
     onGuardar(): void {

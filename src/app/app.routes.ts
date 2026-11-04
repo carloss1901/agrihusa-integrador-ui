@@ -1,13 +1,9 @@
 import { Component, inject } from '@angular/core';
-import {
-  CanActivateFn,
-  Router,
-  Routes
-} from '@angular/router';
+import { CanActivateFn, Router, Routes } from '@angular/router';
 
 import { TokenService } from './core/services/token.service';
 import { LoginComponent } from './features/login/login.component';
-import { MantenimientoRolesComponent } from './features/roles/views/mantenimiento-roles/mantenimiento-roles.component';
+import { MantenimientoRolesHttpComponent } from './features/roles/views/mantenimiento-roles/mantenimiento-roles-http.component';
 import { MantenimientoUsuariosComponent } from './features/usuarios/views/mantenimiento-usuarios/mantenimiento-usuarios.component';
 import { MantenimientoDestinosComponent } from './features/destinos/views/mantenimiento-destinos/mantenimiento-destinos.component';
 import { MantenimientoViasComponent } from './features/vias/views/mantenimiento-vias/mantenimiento-vias.component';
@@ -45,97 +41,23 @@ export const authGuard: CanActivateFn = () => {
 };
 
 export const routes: Routes = [
-  {
-    path: 'login',
-    component: LoginComponent
-  },
-  {
-    path: 'inicio',
-    canActivate: [authGuard],
-    component: InicioComponent
-  },
-  {
-    path: 'roles',
-    canActivate: [authGuard],
-    component: MantenimientoRolesComponent
-  },
-  {
-    path: 'usuarios',
-    canActivate: [authGuard],
-    component: MantenimientoUsuariosComponent
-  },
-  {
-    path: 'clientes',
-    canActivate: [authGuard],
-    component: MantenimientoClientesComponent
-  },
-  {
-    path: 'destinos',
-    canActivate: [authGuard],
-    component: MantenimientoDestinosComponent
-  },
-  {
-    path: 'vias',
-    canActivate: [authGuard],
-    component: MantenimientoViasComponent
-  },
-  {
-    path: 'variedades',
-    canActivate: [authGuard],
-    component: MantenimientoVariedadesComponent
-  },
-  {
-    path: 'navieras',
-    canActivate: [authGuard],
-    component: MantenimientoNavierasComponent
-  },
-  {
-    path: 'puertos-llegada',
-    canActivate: [authGuard],
-    component: MantenimientoPuertosLlegadaComponent
-  },
-  {
-    path: 'operadores-logisticos',
-    canActivate: [authGuard],
-    component: MantenimientoOperadoresLogisticosComponent
-  },
-  {
-    path: 'productos',
-    canActivate: [authGuard],
-    component: MantenimientoProductosComponent
-  },
-  {
-    path: 'situaciones',
-    canActivate: [authGuard],
-    component: MantenimientoSituacionesComponent
-  },
-  {
-    path: 'registro-despacho',
-    canActivate: [authGuard],
-    component: RegistroDespachoComponent
-  },
-  {
-    path: 'reporte-despacho',
-    canActivate: [authGuard],
-    component: ReporteDespachoComponent
-  },
-  {
-    path: 'auditoria',
-    canActivate: [authGuard],
-    component: AuditoriaComponent
-  },
-  {
-    path: 'perfil-usuario',
-    canActivate: [authGuard],
-    component: PerfilUsuarioComponent
-  },
-  {
-    path: '',
-    pathMatch: 'full',
-    redirectTo: 'inicio'
-  },
-  {
-    path: '**',
-    redirectTo: 'inicio'
-  }
+  { path: 'login', component: LoginComponent },
+  { path: 'inicio', canActivate: [authGuard], component: InicioComponent },
+  { path: 'roles', canActivate: [authGuard], component: MantenimientoRolesHttpComponent },
+  { path: 'usuarios', canActivate: [authGuard], component: MantenimientoUsuariosComponent },
+  { path: 'destinos', canActivate: [authGuard], component: MantenimientoDestinosComponent },
+  { path: 'vias', canActivate: [authGuard], component: MantenimientoViasComponent },
+  { path: 'variedades', canActivate: [authGuard], component: MantenimientoVariedadesComponent },
+  { path: 'navieras', canActivate: [authGuard], component: MantenimientoNavierasComponent },
+  { path: 'puertos-llegada', canActivate: [authGuard], component: MantenimientoPuertosLlegadaComponent },
+  { path: 'auditoria', canActivate: [authGuard], component: AuditoriaComponent },
+  { path: 'perfil-usuario', canActivate: [authGuard], component: PerfilUsuarioComponent },
+  { path: 'clientes', canActivate: [authGuard], component: MantenimientoClientesComponent },
+  { path: 'operadores-logisticos', canActivate: [authGuard], component: MantenimientoOperadoresLogisticosComponent },
+  { path: 'productos', canActivate: [authGuard], component: MantenimientoProductosComponent },
+  { path: 'situaciones', canActivate: [authGuard], component: MantenimientoSituacionesComponent },
+  { path: 'registro-despacho', canActivate: [authGuard], component: RegistroDespachoComponent },
+  { path: 'reporte-despacho', canActivate: [authGuard], component: ReporteDespachoComponent },
+  { path: '', pathMatch: 'full', redirectTo: 'inicio' },
+  { path: '**', redirectTo: 'inicio' }
 ];

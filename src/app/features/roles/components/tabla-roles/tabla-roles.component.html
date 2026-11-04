@@ -40,9 +40,22 @@
         <td>{{ rol.id }}</td>
         <td>{{ rol.nombre }}</td>
         <td>{{ rol.descripcion }}</td>
-        <td>{{ rol.permisos.length }}</td>
         <td>
-          {{ rol.esSistema ? 'SISTEMA' : 'PERSONALIZADO' }}
+          <span *ngIf="rol.id === 1 || rol.nombre.toUpperCase() === 'ADMINISTRADOR'; else cantidadPermisos">
+            ACCESO TOTAL
+          </span>
+          <ng-template #cantidadPermisos>
+            {{ rol.cantidadPermisos ?? 0 }} permiso(s)
+          </ng-template>
+        </td>
+        <td>
+          <span
+            class="labels"
+            [ngClass]="rol.esSistema ? 'labels-activo' : 'labels-registrado'"
+          >
+            <span class="labels_circle" aria-hidden="true"></span>
+            <span>{{ rol.esSistema ? 'SISTEMA' : 'PERSONALIZADO' }}</span>
+          </span>
         </td>
         <td>
           <span

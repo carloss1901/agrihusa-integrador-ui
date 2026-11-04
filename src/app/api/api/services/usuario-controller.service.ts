@@ -11,10 +11,8 @@ import { map, filter } from 'rxjs/operators';
 
 import { CambiarContraseniaRequest } from '../models/cambiar-contrasenia-request';
 import { CustomPageUsuarioResponse } from '../models/custom-page-usuario-response';
-import { PerfilUsuarioActualizarRequest } from '../models/perfil-usuario-actualizar-request';
-import { UsuarioActualizarRequest } from '../models/usuario-actualizar-request';
+import { MessageResponse } from '../models/message-response';
 import { UsuarioRegistroRequest } from '../models/usuario-registro-request';
-import { UsuarioResponse } from '../models/usuario-response';
 
 @Injectable({
   providedIn: 'root',
@@ -40,7 +38,6 @@ export class UsuarioControllerService extends BaseService {
    */
   listarUsuarios$Response(params?: {
     texto?: string;
-    rolId?: number;
     activo?: boolean;
     pagina?: number;
     tamPagina?: number;
@@ -51,15 +48,14 @@ export class UsuarioControllerService extends BaseService {
     const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.ListarUsuariosPath, 'get');
     if (params) {
       rb.query('texto', params.texto, {});
-      rb.query('rolId', params.rolId, {});
       rb.query('activo', params.activo, {});
       rb.query('pagina', params.pagina, {});
       rb.query('tamPagina', params.tamPagina, {});
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
@@ -77,7 +73,6 @@ export class UsuarioControllerService extends BaseService {
    */
   listarUsuarios(params?: {
     texto?: string;
-    rolId?: number;
     activo?: boolean;
     pagina?: number;
     tamPagina?: number;
@@ -91,336 +86,209 @@ export class UsuarioControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation actualizar2
+   * Path part for operation actualizarUsuario
    */
-  static readonly Actualizar2Path = '/api/usuarios';
+  static readonly ActualizarUsuarioPath = '/api/usuarios';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizar2()` instead.
+   * To access only the response body, use `actualizarUsuario()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar2$Response(params: {
+  actualizarUsuario$Response(params: {
     context?: HttpContext
-    body: UsuarioActualizarRequest
+    body: UsuarioRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.Actualizar2Path, 'put');
+    const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.ActualizarUsuarioPath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizar2$Response()` instead.
+   * To access the full response (for headers, for example), `actualizarUsuario$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar2(params: {
+  actualizarUsuario(params: {
     context?: HttpContext
-    body: UsuarioActualizarRequest
+    body: UsuarioRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
-    return this.actualizar2$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+    return this.actualizarUsuario$Response(params).pipe(
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation registrar2
+   * Path part for operation registrarUsuario
    */
-  static readonly Registrar2Path = '/api/usuarios';
+  static readonly RegistrarUsuarioPath = '/api/usuarios';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `registrar2()` instead.
+   * To access only the response body, use `registrarUsuario()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar2$Response(params: {
+  registrarUsuario$Response(params: {
     context?: HttpContext
     body: UsuarioRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.Registrar2Path, 'post');
+    const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.RegistrarUsuarioPath, 'post');
     if (params) {
       rb.body(params.body, 'application/json');
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `registrar2$Response()` instead.
+   * To access the full response (for headers, for example), `registrarUsuario$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar2(params: {
+  registrarUsuario(params: {
     context?: HttpContext
     body: UsuarioRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
-    return this.registrar2$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+    return this.registrarUsuario$Response(params).pipe(
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation cambiarEstado2
+   * Path part for operation cambiarEstadoUsuario
    */
-  static readonly CambiarEstado2Path = '/api/usuarios';
+  static readonly CambiarEstadoUsuarioPath = '/api/usuarios';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarEstado2()` instead.
+   * To access only the response body, use `cambiarEstadoUsuario()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado2$Response(params: {
+  cambiarEstadoUsuario$Response(params: {
     usuarioId: number;
     activo: boolean;
     context?: HttpContext
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.CambiarEstado2Path, 'delete');
+    const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.CambiarEstadoUsuarioPath, 'delete');
     if (params) {
       rb.query('usuarioId', params.usuarioId, {});
       rb.query('activo', params.activo, {});
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarEstado2$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarEstadoUsuario$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado2(params: {
+  cambiarEstadoUsuario(params: {
     usuarioId: number;
     activo: boolean;
     context?: HttpContext
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
-    return this.cambiarEstado2$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+    return this.cambiarEstadoUsuario$Response(params).pipe(
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation actualizarPerfil
+   * Path part for operation cambiarContraseniaUsuario
    */
-  static readonly ActualizarPerfilPath = '/api/usuarios/perfil';
+  static readonly CambiarContraseniaUsuarioPath = '/api/usuarios/contrasenia';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizarPerfil()` instead.
+   * To access only the response body, use `cambiarContraseniaUsuario()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizarPerfil$Response(params: {
+  cambiarContraseniaUsuario$Response(params: {
     context?: HttpContext
-    body: PerfilUsuarioActualizarRequest
+    body: CambiarContraseniaRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.ActualizarPerfilPath, 'put');
+    const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.CambiarContraseniaUsuarioPath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizarPerfil$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarContraseniaUsuario$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizarPerfil(params: {
-    context?: HttpContext
-    body: PerfilUsuarioActualizarRequest
-  }
-): Observable<{
-}> {
-
-    return this.actualizarPerfil$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
-    );
-  }
-
-  /**
-   * Path part for operation cambiarContrasenia
-   */
-  static readonly CambiarContraseniaPath = '/api/usuarios/contrasenia';
-
-  /**
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarContrasenia()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  cambiarContrasenia$Response(params: {
+  cambiarContraseniaUsuario(params: {
     context?: HttpContext
     body: CambiarContraseniaRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<MessageResponse> {
 
-    const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.CambiarContraseniaPath, 'put');
-    if (params) {
-      rb.body(params.body, 'application/json');
-    }
-
-    return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
-      context: params?.context
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
-      })
-    );
-  }
-
-  /**
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarContrasenia$Response()` instead.
-   *
-   * This method sends `application/json` and handles request body of type `application/json`.
-   */
-  cambiarContrasenia(params: {
-    context?: HttpContext
-    body: CambiarContraseniaRequest
-  }
-): Observable<{
-}> {
-
-    return this.cambiarContrasenia$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
-    );
-  }
-
-  /**
-   * Path part for operation obtenerPorId
-   */
-  static readonly ObtenerPorIdPath = '/api/usuarios/{usuarioId}';
-
-  /**
-   * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `obtenerPorId()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  obtenerPorId$Response(params: {
-    usuarioId: number;
-    context?: HttpContext
-  }
-): Observable<StrictHttpResponse<UsuarioResponse>> {
-
-    const rb = new RequestBuilder(this.rootUrl, UsuarioControllerService.ObtenerPorIdPath, 'get');
-    if (params) {
-      rb.path('usuarioId', params.usuarioId, {});
-    }
-
-    return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
-      context: params?.context
-    })).pipe(
-      filter((r: any) => r instanceof HttpResponse),
-      map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<UsuarioResponse>;
-      })
-    );
-  }
-
-  /**
-   * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `obtenerPorId$Response()` instead.
-   *
-   * This method doesn't expect any request body.
-   */
-  obtenerPorId(params: {
-    usuarioId: number;
-    context?: HttpContext
-  }
-): Observable<UsuarioResponse> {
-
-    return this.obtenerPorId$Response(params).pipe(
-      map((r: StrictHttpResponse<UsuarioResponse>) => r.body as UsuarioResponse)
+    return this.cambiarContraseniaUsuario$Response(params).pipe(
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 

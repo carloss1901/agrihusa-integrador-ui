@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { CustomPageProductoResponse } from '../models/custom-page-producto-response';
+import { MessageResponse } from '../models/message-response';
 import { ProductoRegistroRequest } from '../models/producto-registro-request';
 
 @Injectable({
@@ -52,8 +53,8 @@ export class ProductoControllerService extends BaseService {
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
@@ -84,173 +85,158 @@ export class ProductoControllerService extends BaseService {
   }
 
   /**
-   * Path part for operation actualizar6
+   * Path part for operation actualizarProducto
    */
-  static readonly Actualizar6Path = '/api/productos';
+  static readonly ActualizarProductoPath = '/api/productos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `actualizar6()` instead.
+   * To access only the response body, use `actualizarProducto()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar6$Response(params: {
+  actualizarProducto$Response(params: {
     context?: HttpContext
     body: ProductoRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.Actualizar6Path, 'put');
+    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.ActualizarProductoPath, 'put');
     if (params) {
       rb.body(params.body, 'application/json');
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `actualizar6$Response()` instead.
+   * To access the full response (for headers, for example), `actualizarProducto$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  actualizar6(params: {
+  actualizarProducto(params: {
     context?: HttpContext
     body: ProductoRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
-    return this.actualizar6$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+    return this.actualizarProducto$Response(params).pipe(
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation registrar6
+   * Path part for operation registrarProducto
    */
-  static readonly Registrar6Path = '/api/productos';
+  static readonly RegistrarProductoPath = '/api/productos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `registrar6()` instead.
+   * To access only the response body, use `registrarProducto()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar6$Response(params: {
+  registrarProducto$Response(params: {
     context?: HttpContext
     body: ProductoRegistroRequest
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.Registrar6Path, 'post');
+    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.RegistrarProductoPath, 'post');
     if (params) {
       rb.body(params.body, 'application/json');
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `registrar6$Response()` instead.
+   * To access the full response (for headers, for example), `registrarProducto$Response()` instead.
    *
    * This method sends `application/json` and handles request body of type `application/json`.
    */
-  registrar6(params: {
+  registrarProducto(params: {
     context?: HttpContext
     body: ProductoRegistroRequest
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
-    return this.registrar6$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+    return this.registrarProducto$Response(params).pipe(
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 
   /**
-   * Path part for operation cambiarEstado6
+   * Path part for operation cambiarEstadoProducto
    */
-  static readonly CambiarEstado6Path = '/api/productos';
+  static readonly CambiarEstadoProductoPath = '/api/productos';
 
   /**
    * This method provides access to the full `HttpResponse`, allowing access to response headers.
-   * To access only the response body, use `cambiarEstado6()` instead.
+   * To access only the response body, use `cambiarEstadoProducto()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado6$Response(params: {
+  cambiarEstadoProducto$Response(params: {
     productoId: number;
     activo: boolean;
     context?: HttpContext
   }
-): Observable<StrictHttpResponse<{
-}>> {
+): Observable<StrictHttpResponse<MessageResponse>> {
 
-    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.CambiarEstado6Path, 'delete');
+    const rb = new RequestBuilder(this.rootUrl, ProductoControllerService.CambiarEstadoProductoPath, 'delete');
     if (params) {
       rb.query('productoId', params.productoId, {});
       rb.query('activo', params.activo, {});
     }
 
     return this.http.request(rb.build({
-      responseType: 'blob',
-      accept: '*/*',
+      responseType: 'json',
+      accept: 'application/json',
       context: params?.context
     })).pipe(
       filter((r: any) => r instanceof HttpResponse),
       map((r: HttpResponse<any>) => {
-        return r as StrictHttpResponse<{
-        }>;
+        return r as StrictHttpResponse<MessageResponse>;
       })
     );
   }
 
   /**
    * This method provides access to only to the response body.
-   * To access the full response (for headers, for example), `cambiarEstado6$Response()` instead.
+   * To access the full response (for headers, for example), `cambiarEstadoProducto$Response()` instead.
    *
    * This method doesn't expect any request body.
    */
-  cambiarEstado6(params: {
+  cambiarEstadoProducto(params: {
     productoId: number;
     activo: boolean;
     context?: HttpContext
   }
-): Observable<{
-}> {
+): Observable<MessageResponse> {
 
-    return this.cambiarEstado6$Response(params).pipe(
-      map((r: StrictHttpResponse<{
-}>) => r.body as {
-})
+    return this.cambiarEstadoProducto$Response(params).pipe(
+      map((r: StrictHttpResponse<MessageResponse>) => r.body as MessageResponse)
     );
   }
 

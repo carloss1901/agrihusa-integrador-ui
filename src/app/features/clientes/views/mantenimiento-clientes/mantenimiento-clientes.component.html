@@ -23,20 +23,19 @@
                 </span>
 
                 <div class="d-flex gap-2">
-                    <div title="Registrar cliente">
+                    <div *ngIf="puedeRegistrar" title="Registrar cliente">
                         <agrihusa-button color="primary" variant="outlined" icon="plus" [esIcono]="true"
-                            [disabled]="!puedeCrear" (click)="mostrarModalCrear()"></agrihusa-button>
+                            (click)="mostrarModalCrear()"></agrihusa-button>
                     </div>
 
-                    <div title="Editar cliente">
+                    <div *ngIf="puedeEditar" title="Editar cliente">
                         <agrihusa-button color="secondary" variant="outlined" icon="edit" [esIcono]="true" [disabled]="
-                !puedeEditar ||
                 !filaSeleccionada ||
                 !filaSeleccionada.activo
               " (click)="mostrarModalEditar()"></agrihusa-button>
                     </div>
 
-                    <div [title]="
+                    <div *ngIf="puedeEliminar" [title]="
               filaSeleccionada?.activo
                 ? 'Desactivar cliente'
                 : 'Activar cliente'
@@ -50,7 +49,6 @@
                   ? 'trash'
                   : 'refresh-ccw'
               " [esIcono]="true" [disabled]="
-                !puedeCambiarEstado ||
                 !filaSeleccionada
               " (click)="cambiarEstado()"></agrihusa-button>
                     </div>

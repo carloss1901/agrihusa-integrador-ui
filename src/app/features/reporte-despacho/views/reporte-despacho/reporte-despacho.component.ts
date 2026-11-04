@@ -9,7 +9,7 @@ import {
   AccionPermiso,
   ModuloSistema
 } from '../../../../core/models/permiso.model';
-import { AuthService } from '../../../../core/services/auth.service';
+import { TokenService } from '../../../../core/services/token.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import {
   IChangePaginate
@@ -77,8 +77,8 @@ export class ReporteDespachoComponent
   constructor(
     private reporteService:
       ReporteDespachoService,
-    private authService:
-      AuthService,
+    private tokenService:
+      TokenService,
     private bitacoraService:
       BitacoraService
   ) {}
@@ -211,34 +211,29 @@ export class ReporteDespachoComponent
   }
 
   private cargarPermisoExportar(): void {
-    this.authService
-      .tienePermiso(
+    this.puedeExportar =
+      this.tokenService.tienePermiso(
         ModuloSistema.REPORTE_DESPACHO,
         AccionPermiso.EXPORTAR
-      )
-      .subscribe((permitido) => {
-        this.puedeExportar =
-          permitido;
-      });
+      );
   }
 
   private registrarExportacion(
     cantidad: number
   ): void {
-    const sesion =
-      this.authService
-        .obtenerSesionActual();
+    const payload =
+      this.tokenService.obtenerPayload();
 
-    if (!sesion) {
+    if (!payload?.usuarioId) {
       return;
     }
 
     this.bitacoraService
       .registrar({
         usuarioId:
-          sesion.usuarioId,
+          payload.usuarioId,
         nombreUsuario:
-          sesion.nombreUsuario,
+          payload.sub ?? '',
         modulo:
           ModuloSistema.REPORTE_DESPACHO,
         accion:

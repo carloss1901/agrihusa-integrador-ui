@@ -6,10 +6,7 @@ export interface Destino extends BaseEntity {
   ciudad: string;
 }
 
-export type DestinoFormData = Pick<
-  Destino,
-  'pais' | 'ciudad'
->;
+export type DestinoFormData = Pick<Destino, 'pais' | 'ciudad'>;
 
 export interface DestinoQuery extends PaginationQuery {
   texto?: string;
@@ -17,7 +14,4 @@ export interface DestinoQuery extends PaginationQuery {
   estado?: boolean;
 }
 
-export type DestinoFilter = Omit<
-  DestinoQuery,
-  'page' | 'pageSize'
->;
+export type DestinoFilter = Omit<DestinoQuery, 'page' | 'pageSize'>;

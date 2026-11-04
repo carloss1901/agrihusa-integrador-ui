@@ -1,9 +1,4 @@
-import {
-  Directive,
-  ElementRef,
-  HostListener,
-  Input
-} from '@angular/core';
+import { Directive, ElementRef, HostListener, Input } from '@angular/core';
 
 @Directive({
   selector: '[appSoloNumeros]',
@@ -12,9 +7,7 @@ import {
 export class SoloNumerosDirective {
   @Input() appSoloNumeros: number | null = 8;
 
-  constructor(
-    private readonly elementRef: ElementRef<HTMLInputElement>
-  ) {}
+  constructor(private readonly elementRef: ElementRef<HTMLInputElement>) {}
 
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
@@ -22,25 +15,10 @@ export class SoloNumerosDirective {
       return;
     }
 
-    const teclasPermitidas = [
-      'Backspace',
-      'Delete',
-      'Tab',
-      'Escape',
-      'Enter',
-      'ArrowLeft',
-      'ArrowRight',
-      'Home',
-      'End'
-    ];
-
+    const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
     const input = this.elementRef.nativeElement;
 
-    if (
-      teclasPermitidas.includes(event.key) ||
-      event.ctrlKey ||
-      event.metaKey
-    ) {
+    if (allowedKeys.includes(event.key) || event.ctrlKey || event.metaKey) {
       return;
     }
 
@@ -49,13 +27,8 @@ export class SoloNumerosDirective {
       return;
     }
 
-    const tieneSeleccion =
-      input.selectionStart !== input.selectionEnd;
-
-    if (
-      input.value.length >= this.appSoloNumeros &&
-      !tieneSeleccion
-    ) {
+    const hasSelection = input.selectionStart !== input.selectionEnd;
+    if (input.value.length >= this.appSoloNumeros && !hasSelection) {
       event.preventDefault();
     }
   }
@@ -67,15 +40,11 @@ export class SoloNumerosDirective {
     }
 
     const input = this.elementRef.nativeElement;
-    const valorLimpio = input.value
-      .replace(/\D/g, '')
-      .slice(0, this.appSoloNumeros);
+    const sanitizedValue = input.value.replace(/\D/g, '').slice(0, this.appSoloNumeros);
 
-    if (input.value !== valorLimpio) {
-      input.value = valorLimpio;
-      input.dispatchEvent(
-        new Event('input', { bubbles: true })
-      );
+    if (input.value !== sanitizedValue) {
+      input.value = sanitizedValue;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
     }
   }
 }

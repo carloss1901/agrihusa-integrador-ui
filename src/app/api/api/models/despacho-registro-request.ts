@@ -3,7 +3,6 @@
 export interface DespachoRegistroRequest {
   cantidad: number;
   clienteId: number;
-  codigo: string;
   despachoId: number;
   destinoId: number;
   fechaDespacho: string;

@@ -10,44 +10,31 @@ import {
 @Injectable({ providedIn: 'root' })
 export class TokenService {
   obtenerPayload(): TokenPayload | null {
-  const token =
-    localStorage.getItem('token');
-
-  if (!token) {
-    return null;
-  }
-
-  try {
-    const partes = token.split('.');
-
-    if (partes.length !== 3) {
+    const token = localStorage.getItem('token');
+    if (!token) {
       return null;
     }
 
-    const contenidoBase64 = partes[1]
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-
-    const contenidoConRelleno =
-      contenidoBase64.padEnd(
-        contenidoBase64.length +
-          (4 - contenidoBase64.length % 4) % 4,
+    try {
+      const partes = token.split('.');
+      const payload = partes.length > 1 ? partes[1] : partes[0];
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(
+        base64.length + (4 - base64.length % 4) % 4,
         '='
       );
+      const json = decodeURIComponent(
+        atob(padded)
+          .split('')
+          .map((caracter) => `%${caracter.charCodeAt(0).toString(16).padStart(2, '0')}`)
+          .join('')
+      );
 
-    const bytes = Uint8Array.from(
-      atob(contenidoConRelleno),
-      (caracter) => caracter.charCodeAt(0)
-    );
-
-    const json =
-      new TextDecoder().decode(bytes);
-
-    return JSON.parse(json) as TokenPayload;
-  } catch {
-    return null;
+      return JSON.parse(json) as TokenPayload;
+    } catch {
+      return null;
+    }
   }
-}
 
   obtenerRoles(): TokenRol[] {
     return this.obtenerPayload()?.roles ?? [];

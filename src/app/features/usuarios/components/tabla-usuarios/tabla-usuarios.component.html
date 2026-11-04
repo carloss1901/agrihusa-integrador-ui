@@ -50,11 +50,20 @@
                 </td>
 
                 <td>
-                    {{
-                    usuario.esSistema
-                    ? 'SISTEMA'
-                    : 'REGULAR'
-                    }}
+                    <span class="labels" [ngClass]="{
+              'labels-activo': usuario.esSistema,
+              'labels-registrado': !usuario.esSistema
+            }">
+                        <span class="labels_circle" aria-hidden="true"></span>
+
+                        <span>
+                            {{
+                            usuario.esSistema
+                            ? 'SISTEMA'
+                            : 'PERSONALIZADO'
+                            }}
+                        </span>
+                    </span>
                 </td>
 
                 <td>

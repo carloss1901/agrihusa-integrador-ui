@@ -5,18 +5,11 @@ export interface Situacion extends BaseEntity {
   descripcion: string;
 }
 
-export type SituacionFormData = Pick<
-  Situacion,
-  'descripcion'
->;
+export type SituacionFormData = Pick<Situacion, 'descripcion'>;
 
-export interface SituacionQuery
-  extends PaginationQuery {
+export interface SituacionQuery extends PaginationQuery {
   texto?: string;
   estado?: boolean;
 }
 
-export type SituacionFilter = Omit<
-  SituacionQuery,
-  'page' | 'pageSize'
->;
+export type SituacionFilter = Omit<SituacionQuery, 'page' | 'pageSize'>;

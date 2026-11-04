@@ -1,0 +1,17 @@
+<div class="modal-header">
+  <div>
+    <p class="modal-eyebrow mb-1">Gestión de destinos</p>
+    <h5 class="modal-title">{{ titulo }}</h5>
+  </div>
+  <button type="button" class="btn-close" aria-label="Cerrar" title="Cerrar"
+    (click)="cancelar()"></button>
+</div>
+<div class="modal-body">
+  <p class="mb-0">{{ mensaje }}</p>
+</div>
+<div class="modal-footer">
+  <agrihusa-button texto="Cancelar" color="danger" icon="x"
+    (click)="cancelar()"></agrihusa-button>
+  <agrihusa-button texto="Confirmar" icon="check"
+    (click)="confirmar()"></agrihusa-button>
+</div>

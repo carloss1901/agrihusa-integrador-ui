@@ -156,28 +156,32 @@ export class TablaDespachosComponent {
 
   switch (descripcion) {
     case 'PROGRAMADO':
-      return 'situacion-programado';
+      return 'labels-programado';
 
     case 'EN PREPARACION':
-      return 'situacion-preparacion';
+    case 'EN ESPERA':
+      return 'labels-pendiente';
 
     case 'DESPACHADO':
-      return 'situacion-despachado';
+      return 'labels-enviadoopp';
 
     case 'EN TRANSITO':
-      return 'situacion-transito';
+      return 'labels-enproceso';
 
     case 'ENTREGADO':
-      return 'situacion-entregado';
+      return 'labels-culminado';
+
+    case 'A TIEMPO':
+      return 'labels-activo';
 
     case 'CANCELADO':
-      return 'situacion-cancelado';
+      return 'labels-inactivo';
 
     case 'OBSERVADO':
-      return 'situacion-observado';
+      return 'labels-observado';
 
     default:
-      return 'situacion-default';
+      return 'labels-verificado';
   }
 }
 }
