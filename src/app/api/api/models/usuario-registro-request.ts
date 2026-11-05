@@ -3,6 +3,7 @@
 export interface UsuarioRegistroRequest {
   apellidoMaterno: string;
   apellidoPaterno: string;
+  contraseniaTemporal?: string;
   correo: string;
   dni: string;
   nombres: string;

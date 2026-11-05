@@ -3,8 +3,15 @@
   [ngClass]="{ 'd-none': !totalItems }"
 >
   <div class="d-flex align-items-center">
-    <span class="label-regular me-2">Filas</span>
+    <label
+      class="label-regular me-2"
+      for="agrihusaFilasPorPagina"
+    >
+      Filas
+    </label>
     <select
+      id="agrihusaFilasPorPagina"
+      aria-label="Filas por página"
       class="form-control form-select"
       [(ngModel)]="localPageSize"
       (ngModelChange)="onChangePageSize($event)"

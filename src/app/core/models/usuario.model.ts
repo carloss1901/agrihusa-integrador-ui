@@ -14,7 +14,7 @@ export interface Usuario extends BaseEntity {
   ultimoAcceso: string | null;
 }
 
-export interface UsuarioCrearData {
+export interface UsuarioActualizarData {
   nombreUsuario: string;
   nombres: string;
   apellidoPaterno: string;
@@ -24,7 +24,9 @@ export interface UsuarioCrearData {
   rolId: number;
 }
 
-export type UsuarioActualizarData = UsuarioCrearData;
+export interface UsuarioCrearData extends UsuarioActualizarData {
+  contraseniaTemporal: string;
+}
 
 export interface UsuarioQuery extends PaginationQuery {
   texto?: string;

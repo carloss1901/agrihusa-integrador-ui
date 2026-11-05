@@ -36,6 +36,7 @@
         <div class="d-flex gap-2">
           <div title="Registrar despacho">
             <agrihusa-button
+              texto="Registrar despacho"
               color="primary"
               variant="outlined"
               icon="plus"
@@ -47,6 +48,7 @@
 
           <div title="Editar despacho">
             <agrihusa-button
+              texto="Editar despacho"
               color="secondary"
               variant="outlined"
               icon="edit"
@@ -68,6 +70,11 @@
             "
           >
             <agrihusa-button
+              [texto]="
+                filaSeleccionada?.activo
+                  ? 'Desactivar despacho'
+                  : 'Activar despacho'
+              "
               [color]="
                 filaSeleccionada?.activo
                   ? 'secondary'

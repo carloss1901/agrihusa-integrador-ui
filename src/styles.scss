@@ -19,3 +19,11 @@ body {
 
 * { box-sizing: border-box; }
 
+// El tema predeterminado de ng-select utiliza #999 para el placeholder,
+// cuyo contraste sobre blanco no alcanza WCAG AA.
+.ng-select .ng-select-container
+  .ng-value-container .ng-placeholder {
+  color: #5f6062;
+  opacity: 1;
+}
+

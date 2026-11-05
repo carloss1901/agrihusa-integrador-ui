@@ -9,21 +9,11 @@
     </h5>
   </div>
 
-  <button
-    type="button"
-    class="btn-close"
-    aria-label="Cerrar"
-    title="Cerrar"
-    (click)="onCerrarModal()"
-  ></button>
+  <button type="button" class="btn-close" aria-label="Cerrar" title="Cerrar" (click)="onCerrarModal()"></button>
 </div>
 
 <div class="modal-body">
-  <form
-    id="formularioDespacho"
-    [formGroup]="formulario"
-    (ngSubmit)="onGuardar()"
-  >
+  <form id="formularioDespacho" [formGroup]="formulario" (ngSubmit)="onGuardar()">
     <section class="form-section">
       <h6 class="form-section-title">
         Información general
@@ -32,23 +22,15 @@
       <div class="row gx-3">
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="fechaDespacho"
-            >
+            <label class="form-label" for="fechaDespacho">
               Fecha de despacho:
               <span class="text-danger">*</span>
             </label>
 
-            <input
-              id="fechaDespacho"
-              type="date"
-              class="form-control"
-              formControlName="fechaDespacho"
+            <input id="fechaDespacho" type="date" class="form-control" formControlName="fechaDespacho"
               [class.is-invalid]="
                 controlInvalido('fechaDespacho')
-              "
-            />
+              " />
 
             <div class="invalid-feedback">
               Selecciona la fecha de despacho.
@@ -58,25 +40,17 @@
 
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="fechaEstimadaLlegada"
-            >
+            <label class="form-label" for="fechaEstimadaLlegada">
               Llegada estimada:
               <span class="text-danger">*</span>
             </label>
 
-            <input
-              id="fechaEstimadaLlegada"
-              type="date"
-              class="form-control"
-              formControlName="fechaEstimadaLlegada"
+            <input id="fechaEstimadaLlegada" type="date" class="form-control" formControlName="fechaEstimadaLlegada"
               [class.is-invalid]="
                 controlInvalido(
                   'fechaEstimadaLlegada'
                 )
-              "
-            />
+              " />
 
             <div class="invalid-feedback">
               Selecciona la fecha estimada.
@@ -86,32 +60,18 @@
 
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="clienteDespacho"
-            >
+            <label class="form-label" for="clienteDespacho">
               Cliente:
               <span class="text-danger">*</span>
             </label>
 
-            <ng-select
-              inputId="clienteDespacho"
-              [items]="clientes"
-              bindLabel="razonSocial"
-              bindValue="id"
-              placeholder="-- SELECCIONAR --"
-              [clearable]="true"
-              [searchable]="true"
-              formControlName="clienteId"
+            <ng-select inputId="clienteDespacho" [items]="clientes" bindLabel="razonSocial" bindValue="id"
+              placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="true" formControlName="clienteId"
               [class.is-invalid]="
                 controlInvalido('clienteId')
-              "
-            ></ng-select>
+              "></ng-select>
 
-            <div
-              *ngIf="controlInvalido('clienteId')"
-              class="invalid-feedback d-block"
-            >
+            <div *ngIf="controlInvalido('clienteId')" class="invalid-feedback d-block">
               Selecciona un cliente.
             </div>
           </div>
@@ -119,38 +79,24 @@
 
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="operadorDespacho"
-            >
+            <label class="form-label" for="operadorDespacho">
               Operador logístico:
               <span class="text-danger">*</span>
             </label>
 
-            <ng-select
-              inputId="operadorDespacho"
-              [items]="operadores"
-              bindLabel="nombreComercial"
-              bindValue="id"
-              placeholder="-- SELECCIONAR --"
-              [clearable]="true"
-              [searchable]="true"
-              formControlName="operadorLogisticoId"
-              [class.is-invalid]="
+            <ng-select inputId="operadorDespacho" [items]="operadores" bindLabel="nombreComercial" bindValue="id"
+              placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="true"
+              formControlName="operadorLogisticoId" [class.is-invalid]="
                 controlInvalido(
                   'operadorLogisticoId'
                 )
-              "
-            ></ng-select>
+              "></ng-select>
 
-            <div
-              *ngIf="
+            <div *ngIf="
                 controlInvalido(
                   'operadorLogisticoId'
                 )
-              "
-              class="invalid-feedback d-block"
-            >
+              " class="invalid-feedback d-block">
               Selecciona un operador logístico.
             </div>
           </div>
@@ -166,32 +112,18 @@
       <div class="row gx-3">
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="viaDespacho"
-            >
+            <label class="form-label" for="viaDespacho">
               Vía:
               <span class="text-danger">*</span>
             </label>
 
-            <ng-select
-              inputId="viaDespacho"
-              [items]="vias"
-              bindLabel="descripcion"
-              bindValue="id"
-              placeholder="-- SELECCIONAR --"
-              [clearable]="true"
-              [searchable]="true"
-              formControlName="viaId"
+            <ng-select inputId="viaDespacho" [items]="vias" bindLabel="descripcion" bindValue="id"
+              placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="true" formControlName="viaId"
               [class.is-invalid]="
                 controlInvalido('viaId')
-              "
-            ></ng-select>
+              "></ng-select>
 
-            <div
-              *ngIf="controlInvalido('viaId')"
-              class="invalid-feedback d-block"
-            >
+            <div *ngIf="controlInvalido('viaId')" class="invalid-feedback d-block">
               Selecciona una vía.
             </div>
           </div>
@@ -199,32 +131,18 @@
 
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="navieraDespacho"
-            >
+            <label class="form-label" for="navieraDespacho">
               Naviera:
               <span class="text-danger">*</span>
             </label>
 
-            <ng-select
-              inputId="navieraDespacho"
-              [items]="navieras"
-              bindLabel="nombre"
-              bindValue="id"
-              placeholder="-- SELECCIONAR --"
-              [clearable]="true"
-              [searchable]="true"
-              formControlName="navieraId"
+            <ng-select inputId="navieraDespacho" [items]="navieras" bindLabel="nombre" bindValue="id"
+              placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="true" formControlName="navieraId"
               [class.is-invalid]="
                 controlInvalido('navieraId')
-              "
-            ></ng-select>
+              "></ng-select>
 
-            <div
-              *ngIf="controlInvalido('navieraId')"
-              class="invalid-feedback d-block"
-            >
+            <div *ngIf="controlInvalido('navieraId')" class="invalid-feedback d-block">
               Selecciona una naviera.
             </div>
           </div>
@@ -232,32 +150,18 @@
 
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="destinoDespacho"
-            >
+            <label class="form-label" for="destinoDespacho">
               Destino:
               <span class="text-danger">*</span>
             </label>
 
-            <ng-select
-              inputId="destinoDespacho"
-              [items]="destinos"
-              bindLabel="ciudad"
-              bindValue="id"
-              placeholder="-- SELECCIONAR --"
-              [clearable]="true"
-              [searchable]="true"
-              formControlName="destinoId"
+            <ng-select inputId="destinoDespacho" [items]="destinos" bindLabel="ciudad" bindValue="id"
+              placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="true" formControlName="destinoId"
               [class.is-invalid]="
                 controlInvalido('destinoId')
-              "
-            ></ng-select>
+              "></ng-select>
 
-            <div
-              *ngIf="controlInvalido('destinoId')"
-              class="invalid-feedback d-block"
-            >
+            <div *ngIf="controlInvalido('destinoId')" class="invalid-feedback d-block">
               Selecciona un destino.
             </div>
           </div>
@@ -265,38 +169,110 @@
 
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="puertoDespacho"
-            >
+            <label class="form-label" for="puertoDespacho">
               Puerto de llegada:
               <span class="text-danger">*</span>
             </label>
 
-            <ng-select
-              inputId="puertoDespacho"
-              [items]="puertos"
-              bindLabel="puerto"
-              bindValue="id"
-              placeholder="-- SELECCIONAR --"
-              [clearable]="true"
-              [searchable]="true"
-              formControlName="puertoLlegadaId"
+            <ng-select inputId="puertoDespacho" [items]="puertos" bindLabel="puerto" bindValue="id"
+              placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="true" formControlName="puertoLlegadaId"
               [class.is-invalid]="
                 controlInvalido('puertoLlegadaId')
-              "
-            ></ng-select>
+              "></ng-select>
 
-            <div
-              *ngIf="
+            <div *ngIf="
                 controlInvalido('puertoLlegadaId')
-              "
-              class="invalid-feedback d-block"
-            >
+              " class="invalid-feedback d-block">
               Selecciona un puerto de llegada.
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="clima-panel mt-3" aria-live="polite">
+        <div *ngIf="consultandoClima" class="clima-estado">
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+
+          Consultando condiciones meteorológicas...
+        </div>
+
+        <div *ngIf="!consultandoClima && mensajeClima" class="alert alert-warning clima-mensaje" role="alert">
+          {{ mensajeClima }}
+        </div>
+
+        <ng-container *ngIf="!consultandoClima">
+          <div *ngIf="clima as climaActual" class="clima-card">
+            <div class="clima-cabecera">
+              <div>
+                <span class="clima-titulo">
+                  Condiciones meteorológicas
+                </span>
+
+                <p class="clima-destino">
+                  {{ climaActual.destino }}
+                  <span *ngIf="climaActual.pais">
+                    · {{ climaActual.pais }}
+                  </span>
+                </p>
+              </div>
+
+              <span class="clima-cache">
+                {{
+                climaActual.desdeCache
+                ? 'Datos almacenados'
+                : 'Consulta actual'
+                }}
+              </span>
+            </div>
+
+            <div class="clima-metricas">
+              <div class="clima-metrica">
+                <span>Temperatura</span>
+                <strong>
+                  {{
+                  climaActual.temperaturaCelsius
+                  | number: '1.1-1'
+                  }}
+                  °C
+                </strong>
+              </div>
+
+              <div class="clima-metrica">
+                <span>Precipitación</span>
+                <strong>
+                  {{
+                  climaActual.precipitacionMm
+                  | number: '1.1-1'
+                  }}
+                  mm
+                </strong>
+              </div>
+
+              <div class="clima-metrica">
+                <span>Viento</span>
+                <strong>
+                  {{
+                  climaActual.velocidadVientoKmh
+                  | number: '1.1-1'
+                  }}
+                  km/h
+                </strong>
+              </div>
+
+              <div class="clima-metrica">
+                <span>Condición</span>
+                <strong>
+                  {{ climaActual.descripcion }}
+                </strong>
+              </div>
+            </div>
+
+            <small class="clima-fecha">
+              Actualización: {{ climaActual.fechaClima }}
+              · Zona horaria: {{ climaActual.zonaHoraria }}
+            </small>
+          </div>
+        </ng-container>
       </div>
     </section>
 
@@ -308,32 +284,18 @@
       <div class="row gx-3">
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="productoDespacho"
-            >
+            <label class="form-label" for="productoDespacho">
               Producto:
               <span class="text-danger">*</span>
             </label>
 
-            <ng-select
-              inputId="productoDespacho"
-              [items]="productos"
-              bindLabel="nombre"
-              bindValue="id"
-              placeholder="-- SELECCIONAR --"
-              [clearable]="true"
-              [searchable]="true"
-              formControlName="productoId"
+            <ng-select inputId="productoDespacho" [items]="productos" bindLabel="nombre" bindValue="id"
+              placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="true" formControlName="productoId"
               [class.is-invalid]="
                 controlInvalido('productoId')
-              "
-            ></ng-select>
+              "></ng-select>
 
-            <div
-              *ngIf="controlInvalido('productoId')"
-              class="invalid-feedback d-block"
-            >
+            <div *ngIf="controlInvalido('productoId')" class="invalid-feedback d-block">
               Selecciona un producto.
             </div>
           </div>
@@ -341,10 +303,7 @@
 
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="variedadDespacho"
-            >
+            <label class="form-label" for="variedadDespacho">
               Variedad:
               <span class="text-danger">*</span>
             </label>
@@ -357,17 +316,14 @@
               placeholder="-- SELECCIONAR --"
               [clearable]="true"
               [searchable]="true"
-              [readonly]="true"
+              [readonly]="variedades.length === 0"
               formControlName="variedadId"
               [class.is-invalid]="
-                controlInvalido('variedadId')
-              "
+                  controlInvalido('variedadId')
+                "
             ></ng-select>
 
-            <div
-              *ngIf="controlInvalido('variedadId')"
-              class="invalid-feedback d-block"
-            >
+            <div *ngIf="controlInvalido('variedadId')" class="invalid-feedback d-block">
               Selecciona una variedad del producto.
             </div>
           </div>
@@ -375,26 +331,15 @@
 
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="cantidadDespacho"
-            >
+            <label class="form-label" for="cantidadDespacho">
               Cantidad:
               <span class="text-danger">*</span>
             </label>
 
-            <input
-              id="cantidadDespacho"
-              type="number"
-              class="form-control"
-              formControlName="cantidad"
-              min="0.01"
-              step="0.01"
-              placeholder="0.00"
-              [class.is-invalid]="
+            <input id="cantidadDespacho" type="number" class="form-control" formControlName="cantidad" min="0.01"
+              step="0.01" placeholder="0.00" [class.is-invalid]="
                 controlInvalido('cantidad')
-              "
-            />
+              " />
 
             <div class="invalid-feedback">
               Ingresa una cantidad mayor que cero.
@@ -404,32 +349,18 @@
 
         <div class="col-12 col-md-6 col-xl-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="unidadDespacho"
-            >
+            <label class="form-label" for="unidadDespacho">
               Unidad:
               <span class="text-danger">*</span>
             </label>
 
-            <ng-select
-              inputId="unidadDespacho"
-              [items]="unidadesMedida"
-              bindLabel="descripcion"
-              bindValue="valor"
-              placeholder="-- SELECCIONAR --"
-              [clearable]="true"
-              [searchable]="false"
-              formControlName="unidadMedida"
+            <ng-select inputId="unidadDespacho" [items]="unidadesMedida" bindLabel="descripcion" bindValue="valor"
+              placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="false" formControlName="unidadMedida"
               [class.is-invalid]="
                 controlInvalido('unidadMedida')
-              "
-            ></ng-select>
+              "></ng-select>
 
-            <div
-              *ngIf="controlInvalido('unidadMedida')"
-              class="invalid-feedback d-block"
-            >
+            <div *ngIf="controlInvalido('unidadMedida')" class="invalid-feedback d-block">
               Selecciona una unidad de medida.
             </div>
           </div>
@@ -445,28 +376,18 @@
       <div class="row gx-3">
         <div class="col-12 col-md-6">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="contenedorDespacho"
-            >
+            <label class="form-label" for="contenedorDespacho">
               Número de contenedor:
               <span class="text-danger">*</span>
             </label>
 
-            <input
-              id="contenedorDespacho"
-              type="text"
-              class="form-control text-uppercase"
-              formControlName="numeroContenedor"
-              maxlength="20"
-              autocomplete="off"
-              placeholder="Ejemplo: MSKU1234567"
+            <input id="contenedorDespacho" type="text" class="form-control text-uppercase"
+              formControlName="numeroContenedor" maxlength="20" autocomplete="off" placeholder="Ejemplo: MSKU1234567"
               [class.is-invalid]="
                 controlInvalido(
                   'numeroContenedor'
                 )
-              "
-            />
+              " />
 
             <div class="invalid-feedback">
               Ingresa entre 4 y 20 letras, números o
@@ -477,32 +398,18 @@
 
         <div class="col-12 col-md-6">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="situacionDespacho"
-            >
+            <label class="form-label" for="situacionDespacho">
               Situación:
               <span class="text-danger">*</span>
             </label>
 
-            <ng-select
-              inputId="situacionDespacho"
-              [items]="situaciones"
-              bindLabel="descripcion"
-              bindValue="id"
-              placeholder="-- SELECCIONAR --"
-              [clearable]="true"
-              [searchable]="true"
-              formControlName="situacionId"
+            <ng-select inputId="situacionDespacho" [items]="situaciones" bindLabel="descripcion" bindValue="id"
+              placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="true" formControlName="situacionId"
               [class.is-invalid]="
                 controlInvalido('situacionId')
-              "
-            ></ng-select>
+              "></ng-select>
 
-            <div
-              *ngIf="controlInvalido('situacionId')"
-              class="invalid-feedback d-block"
-            >
+            <div *ngIf="controlInvalido('situacionId')" class="invalid-feedback d-block">
               Selecciona la situación del despacho.
             </div>
           </div>
@@ -510,24 +417,14 @@
 
         <div class="col-12 mt-3">
           <div class="form-group">
-            <label
-              class="form-label"
-              for="observacionesDespacho"
-            >
+            <label class="form-label" for="observacionesDespacho">
               Observaciones:
             </label>
 
-            <textarea
-              id="observacionesDespacho"
-              class="form-control text-uppercase"
-              formControlName="observaciones"
-              maxlength="500"
-              rows="3"
-              placeholder="Información adicional del despacho"
-              [class.is-invalid]="
+            <textarea id="observacionesDespacho" class="form-control text-uppercase" formControlName="observaciones"
+              maxlength="500" rows="3" placeholder="Información adicional del despacho" [class.is-invalid]="
                 controlInvalido('observaciones')
-              "
-            ></textarea>
+              "></textarea>
 
             <div class="invalid-feedback">
               Las observaciones no pueden superar
@@ -541,19 +438,8 @@
 </div>
 
 <div class="modal-footer">
-  <agrihusa-button
-    texto="Cancelar"
-    color="danger"
-    icon="x"
-    (click)="onCerrarModal()"
-  ></agrihusa-button>
+  <agrihusa-button texto="Cancelar" color="danger" icon="x" (click)="onCerrarModal()"></agrihusa-button>
 
-  <agrihusa-button
-    texto="Guardar"
-    icon="check"
-    [loading]="guardando"
-    loadingTexto="Guardando..."
-    [disabled]="guardando"
-    (click)="onGuardar()"
-  ></agrihusa-button>
+  <agrihusa-button texto="Guardar" icon="check" [loading]="guardando" loadingTexto="Guardando..." [disabled]="guardando"
+    (click)="onGuardar()"></agrihusa-button>
 </div>

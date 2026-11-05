@@ -111,3 +111,107 @@ textarea.form-control {
     margin-bottom: 0.85rem;
   }
 }
+
+.clima-panel {
+  min-height: 44px;
+}
+
+.clima-estado,
+.clima-mensaje {
+  margin-bottom: 0;
+  font-size: 0.8rem;
+}
+
+.clima-estado {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem;
+  border: 1px solid #cfe2d5;
+  border-radius: 6px;
+  color: #31533d;
+  background-color: #f1f8f3;
+}
+
+.clima-card {
+  padding: 0.9rem 1rem;
+  border: 1px solid #bcd9c5;
+  border-left: 4px solid #168148;
+  border-radius: 6px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(22, 129, 72, 0.08),
+      transparent 65%
+    ),
+    #ffffff;
+}
+
+.clima-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.clima-titulo {
+  color: #00632a;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.clima-destino {
+  margin: 0.15rem 0 0;
+  color: #26332a;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.clima-cache {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  color: #31533d;
+  background-color: #dcefe2;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.clima-metricas {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(125px, 1fr));
+  gap: 0.65rem;
+}
+
+.clima-metrica {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.clima-metrica span {
+  color: #65736a;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.clima-metrica strong {
+  color: #1e3024;
+  font-size: 0.82rem;
+}
+
+.clima-fecha {
+  display: block;
+  margin-top: 0.75rem;
+  color: #6a776f;
+  font-size: 0.68rem;
+}
+
+@media (max-width: 575.98px) {
+  .clima-cabecera {
+    flex-direction: column;
+  }
+}

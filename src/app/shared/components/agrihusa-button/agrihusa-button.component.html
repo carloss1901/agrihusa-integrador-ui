@@ -1,4 +1,10 @@
-<button type="button" [class]="getClasses()" [disabled]="isDisabled">
+<button
+  type="button"
+  [class]="getClasses()"
+  [disabled]="isDisabled"
+  [attr.aria-label]="accessibleLabel"
+  [attr.title]="esIcono ? accessibleLabel : null"
+>
   <span *ngIf="isIcon" [class]="['feather', 'icon-' + icon]"></span>
 
   <span [class]="{ 'ms-1': localTexto }">{{

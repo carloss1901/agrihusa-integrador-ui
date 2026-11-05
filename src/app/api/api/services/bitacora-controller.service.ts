@@ -36,12 +36,14 @@ export class BitacoraControllerService extends BaseService {
    * This method doesn't expect any request body.
    */
   listarBitacoras$Response(params?: {
-    usuarioId?: number;
+    usuario?: string;
     modulo?: string;
     accion?: string;
     entidad?: string;
     resultado?: string;
     activo?: boolean;
+    fechaDesde?: string;
+    fechaHasta?: string;
     pagina?: number;
     tamPagina?: number;
     context?: HttpContext
@@ -50,12 +52,14 @@ export class BitacoraControllerService extends BaseService {
 
     const rb = new RequestBuilder(this.rootUrl, BitacoraControllerService.ListarBitacorasPath, 'get');
     if (params) {
-      rb.query('usuarioId', params.usuarioId, {});
+      rb.query('usuario', params.usuario, {});
       rb.query('modulo', params.modulo, {});
       rb.query('accion', params.accion, {});
       rb.query('entidad', params.entidad, {});
       rb.query('resultado', params.resultado, {});
       rb.query('activo', params.activo, {});
+      rb.query('fechaDesde', params.fechaDesde, {});
+      rb.query('fechaHasta', params.fechaHasta, {});
       rb.query('pagina', params.pagina, {});
       rb.query('tamPagina', params.tamPagina, {});
     }
@@ -79,12 +83,14 @@ export class BitacoraControllerService extends BaseService {
    * This method doesn't expect any request body.
    */
   listarBitacoras(params?: {
-    usuarioId?: number;
+    usuario?: string;
     modulo?: string;
     accion?: string;
     entidad?: string;
     resultado?: string;
     activo?: boolean;
+    fechaDesde?: string;
+    fechaHasta?: string;
     pagina?: number;
     tamPagina?: number;
     context?: HttpContext

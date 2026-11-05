@@ -10,6 +10,7 @@ export interface BitacoraResponse {
   fechaCreacion?: string;
   fechaModificacion?: string;
   modulo?: string;
+  nombreUsuario?: string;
   registroId?: number;
   resultado?: string;
   usuarioId?: number;
