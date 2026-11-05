@@ -3,3 +3,13 @@
 /.angular
 /.vscode
 
+
+/database/agrihusa_sqlserver_2019.sql
+
+/database/agrihusa_sqlserver_2019.sql
+
+/playwright-report
+/test-results
+/blob-report
+/performance/results
+/jmeter.log

@@ -14,7 +14,8 @@ import {
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { finalize } from 'rxjs';
-
+import { Clima } from '../../../../core/models/clima.model';
+import { ClimaService } from '../../../../core/services/clima.service';
 import { AgrihusaButtonComponent } from '../../../../shared/components/agrihusa-button/agrihusa-button.component';
 import { ComunControllerService } from '../../../../api/api/services/comun-controller.service';
 import { Cliente } from '../../../../core/models/cliente.model';
@@ -98,6 +99,9 @@ export class ModalDespachoComponent
 
   submitted = false;
   guardando = false;
+  clima: Clima | null = null;
+  consultandoClima = false;
+  mensajeClima = '';
 
   readonly unidadesMedida: UnidadMedidaOption[] = [
     {
@@ -228,12 +232,14 @@ export class ModalDespachoComponent
     private viaService: ViaService,
     private situacionService: SituacionService,
     private despachoService: DespachoService,
-    private alertService: AlertService
+    private climaService: ClimaService,
+    private alertService: AlertService    
   ) {}
 
   ngOnInit(): void {
     this.variedadesCatalogo = this.catalogoVariedades;
     this.configurarCambioProducto();
+    this.configurarCambioDestino();
 
     if (!this.data) {
       return;
@@ -270,6 +276,7 @@ export class ModalDespachoComponent
         emitEvent: false
       }
     );
+    this.consultarClima(this.data.destinoId);
   }
 
   onGuardar(): void {
@@ -384,6 +391,56 @@ export class ModalDespachoComponent
         this.cargarVariedades(productoId);
       });
   }
+
+  private configurarCambioDestino(): void {
+  this.formulario.controls.destinoId
+    .valueChanges
+    .subscribe((destinoId) => {
+      this.consultarClima(destinoId);
+    });
+}
+
+private consultarClima(
+  destinoId: number | null
+): void {
+  this.clima = null;
+  this.mensajeClima = '';
+
+  if (destinoId === null) {
+    this.consultandoClima = false;
+    return;
+  }
+
+  const destino = this.destinos.find(
+    (item) => item.id === destinoId
+  );
+
+  if (!destino?.ciudad.trim()) {
+    this.mensajeClima =
+      'No se encontró información del destino.';
+    return;
+  }
+
+  this.consultandoClima = true;
+
+  this.climaService
+    .consultar(destino.ciudad)
+    .pipe(
+      finalize(() => {
+        this.consultandoClima = false;
+      })
+    )
+    .subscribe({
+      next: (clima) => {
+        this.clima = clima;
+      },
+      error: () => {
+        this.mensajeClima =
+          'Información meteorológica no disponible. ' +
+          'Puedes continuar con el despacho.';
+      }
+    });
+}
 
   private cargarVariedades(
     productoId: number | null,

@@ -129,7 +129,7 @@ export class AuditoriaComponent
     const query: BitacoraQuery = {
       ...this.filtro,
       page: 1,
-      pageSize: Number.MAX_SAFE_INTEGER
+      pageSize: 10000
     };
 
     this.bitacoraService
@@ -249,8 +249,9 @@ export class AuditoriaComponent
     enlace.download =
       `bitacora-${fecha}.csv`;
 
+    document.body.appendChild(enlace);
     enlace.click();
-    enlace.remove();
+    document.body.removeChild(enlace);
     URL.revokeObjectURL(url);
   }
 

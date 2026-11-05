@@ -35,6 +35,23 @@
                         <div *ngIf="controlInvalido('rolId')" class="invalid-feedback d-block">Selecciona un rol.</div>
                     </div>
                 </div>
+                <div *ngIf="!modoEdicion" class="col-12 col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="contraseniaTemporalUsuario">
+                            Contraseña temporal: <span class="text-danger">*</span>
+                        </label>
+                        <input id="contraseniaTemporalUsuario" type="password" class="form-control"
+                            formControlName="contraseniaTemporal" minlength="8" maxlength="100"
+                            autocomplete="new-password" placeholder="Mínimo 8 caracteres"
+                            [class.is-invalid]="controlInvalido('contraseniaTemporal')" />
+                        <div *ngIf="controlInvalido('contraseniaTemporal')" class="invalid-feedback">
+                            La contraseña temporal es obligatoria y debe tener entre 8 y 100 caracteres.
+                        </div>
+                        <div class="form-text">
+                            El usuario deberá cambiarla después de iniciar sesión.
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 

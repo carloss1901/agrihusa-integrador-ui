@@ -173,50 +173,61 @@ export class RegistroDespachoComponent
   }
 
   cambiarEstado(): void {
-    const despacho = this.filaSeleccionada;
+  const despacho = this.filaSeleccionada;
 
-    if (
-      !this.puedeCambiarEstado ||
-      !despacho
-    ) {
-      return;
-    }
-
-    const accion = despacho.activo
-      ? 'desactivar'
-      : 'activar';
-
-    const confirmado = window.confirm(
-      `Â¿Deseas ${accion} el despacho ` +
-      `"${despacho.codigo}"?`
-    );
-
-    if (!confirmado) {
-      return;
-    }
-
-    this.despachoService
-      .cambiarEstado(despacho.id)
-      .subscribe((resultado) => {
-        if (!resultado) {
-          return;
-        }
-
-        const accionBitacora = resultado.activo
-          ? AccionBitacora.ACTIVAR
-          : AccionBitacora.DESACTIVAR;
-
-        this.registrarEventoDespacho(
-          accionBitacora,
-          resultado,
-          resultado.activo
-            ? `Se activÃ³ el despacho ${resultado.codigo}.`
-            : `Se desactivÃ³ el despacho ${resultado.codigo}.`
-        );
-
-        this.cargarDespachos();
-      });
+  if (
+    !this.puedeCambiarEstado ||
+    !despacho
+  ) {
+    return;
   }
+
+  const nuevoEstado = !despacho.activo;
+
+  const accion = nuevoEstado
+    ? 'activar'
+    : 'desactivar';
+
+  const confirmado = window.confirm(
+    `¿Deseas ${accion} el despacho ` +
+    `"${despacho.codigo}"?`
+  );
+
+  if (!confirmado) {
+    return;
+  }
+
+  this.despachoService
+    .cambiarEstado(
+      despacho.id,
+      nuevoEstado
+    )
+    .subscribe((resultado) => {
+      if (!resultado) {
+        return;
+      }
+
+      const despachoActualizado: Despacho = {
+        ...despacho,
+        activo: nuevoEstado
+      };
+
+      const accionBitacora = nuevoEstado
+        ? AccionBitacora.ACTIVAR
+        : AccionBitacora.DESACTIVAR;
+
+      this.registrarEventoDespacho(
+        accionBitacora,
+        despachoActualizado,
+        nuevoEstado
+          ? `Se activó el despacho ${despacho.codigo}.`
+          : `Se desactivó el despacho ${despacho.codigo}.`
+      );
+
+      this.filaSeleccionada = null;
+      this.cargarDespachos();
+    });
+}
 
   private cargarCatalogosTabla(): void {
     forkJoin({

@@ -31,7 +31,7 @@
         }
     }
     &.labels-programado {
-        color: $nl-green;
+        color: #3f6b00;
         border-color: $nl-green;
         background-color: $nl-green-light;
         .labels_circle {
@@ -39,7 +39,7 @@
         }
     }
     &.labels-pendiente, &.labels-registrado {
-        color: $nl-blue;
+        color: #005f78;
         border-color: $nl-blue;
         background-color: $nl-blue-light;
         .labels_circle {
@@ -55,7 +55,7 @@
         }
     }
     &.labels-observado {
-        color: $nl-orange;
+        color: #8a4b00;
         border-color: $nl-orange;
         background-color: $nl-orange-light;
         .labels_circle {
@@ -71,7 +71,7 @@
         }
     }
     &.labels-enproceso {
-        color: #9398ec;
+        color: #4f559f;
         border-color: #9398ec;
         background-color: #E4E5FA;
         .labels_circle {
@@ -79,7 +79,7 @@
         }
     }
     &.labels-activo, &.labels-activado {
-        color: $nl-green;
+        color: #3f6b00;
         border-color: $nl-green;
         background-color: $nl-green-light;
         .labels_circle {
@@ -87,7 +87,7 @@
         }
     }
     &.labels-inactivo, &.labels-desactivado {
-        color: $nl-red;
+        color: #9c1f24;
         border-color: $nl-red;
         background-color: $nl-red-ligth;
         .labels_circle {

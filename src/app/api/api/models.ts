@@ -36,6 +36,7 @@ export { CustomPageOperadorLogisticoResponse } from './models/custom-page-operad
 export { OperadorLogisticoResponse } from './models/operador-logistico-response';
 export { CustomPageNavieraResponse } from './models/custom-page-naviera-response';
 export { NavieraResponse } from './models/naviera-response';
+export { ClimaResponse } from './models/clima-response';
 export { CustomPageDestinoResponse } from './models/custom-page-destino-response';
 export { DestinoResponse } from './models/destino-response';
 export { CustomPageDespachoResponse } from './models/custom-page-despacho-response';
