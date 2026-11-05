@@ -8,7 +8,7 @@ import { Despacho, DespachoFormData, DespachoQuery, UnidadMedidaDespacho } from 
 
 @Injectable({ providedIn: 'root' })
 export class DespachoService {
-  constructor(private readonly api: DespachoControllerService) {}
+  constructor(private readonly api: DespachoControllerService) { }
   listar(query: DespachoQuery): Observable<PaginatedResult<Despacho>> {
     return this.api.listarDespachos({ texto: query.texto?.trim() || undefined, clienteId: query.clienteId, situacionId: query.situacionId, activo: query.estado, pagina: query.page, tamPagina: query.pageSize }).pipe(
       map((response) => ({
@@ -23,7 +23,25 @@ export class DespachoService {
   }
   crear(data: DespachoFormData): Observable<MessageResponse> { return this.api.registrarDespacho({ body: this.request(data) }); }
   actualizar(id: number, data: DespachoFormData): Observable<MessageResponse> { return this.api.actualizarDespacho({ body: this.request(data, id) }); }
-  cambiarEstado(id: number, activo = true): Observable<Despacho> { return this.api.cambiarEstadoDespacho({ despachoId: id, activo }).pipe(map(() => ({ id, codigo: '', activo, fechaCreacion: '', fechaActualizacion: null } as Despacho))); }
+  cambiarEstado(
+  id: number,
+  activo: boolean
+): Observable<Despacho> {
+  return this.api
+    .cambiarEstadoDespacho({
+      despachoId: id,
+      activo
+    })
+    .pipe(
+      map(() => ({
+        id,
+        codigo: '',
+        activo,
+        fechaCreacion: '',
+        fechaActualizacion: null
+      } as Despacho))
+    );
+}
   relacionProductoVariedadValida(_productoId: number, _variedadId: number): Observable<boolean> { return of(true); }
   private request(data: DespachoFormData, despachoId = 0): DespachoRegistroRequest { return { despachoId, fechaDespacho: data.fechaDespacho, fechaEstimadaLlegada: data.fechaEstimadaLlegada, clienteId: data.clienteId, navieraId: data.navieraId, destinoId: data.destinoId, operadorLogisticoId: data.operadorLogisticoId, puertoLlegadaId: data.puertoLlegadaId, productoId: data.productoId, variedadId: data.variedadId, viaId: data.viaId, situacionId: data.situacionId, cantidad: data.cantidad, unidadMedida: data.unidadMedida, numeroContenedor: data.numeroContenedor.trim(), observaciones: data.observaciones.trim() }; }
 }

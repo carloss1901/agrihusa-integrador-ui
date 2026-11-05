@@ -29,7 +29,8 @@ type NombreControl =
     | 'apellidoMaterno'
     | 'correo'
     | 'telefono'
-    | 'rolId';
+    | 'rolId'
+    | 'contraseniaTemporal';
 
 export type UsuarioModalResult =
     | {
@@ -118,6 +119,14 @@ export class ModalUsuarioComponent implements OnInit {
         }),
         rolId: new FormControl<number | null>(null, {
             validators: [Validators.required]
+        }),
+        contraseniaTemporal: new FormControl('', {
+            nonNullable: true,
+            validators: [
+                Validators.required,
+                Validators.minLength(8),
+                Validators.maxLength(100)
+            ]
         })
     });
 
@@ -131,6 +140,11 @@ export class ModalUsuarioComponent implements OnInit {
         if (!this.data) {
             return;
         }
+
+        this.formulario.controls.contraseniaTemporal
+            .clearValidators();
+        this.formulario.controls.contraseniaTemporal
+            .updateValueAndValidity();
 
         this.formulario.patchValue({
             nombreUsuario: this.data.nombreUsuario,
@@ -184,7 +198,11 @@ export class ModalUsuarioComponent implements OnInit {
 
         const resultado: UsuarioModalResult = {
             modo: 'crear',
-            data: datosBase
+            data: {
+                ...datosBase,
+                contraseniaTemporal:
+                    value.contraseniaTemporal
+            }
         };
 
         this.activeModal.close(resultado);

@@ -1,5 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Observable, map, of, switchMap } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  Observable,
+  catchError,
+  map,
+  of,
+  switchMap
+} from 'rxjs';
 
 import { MessageResponse } from '../../api/api/models/message-response';
 import { CustomPageUsuarioResponse } from '../../api/api/models/custom-page-usuario-response';
@@ -84,7 +91,27 @@ export class UsuarioService {
       contraseniaActual: data.passwordActual,
       nuevaContrasenia: data.nuevaPassword,
       confirmarContrasenia: data.nuevaPassword
-    }}).pipe(map((response) => ({ success: true, message: response.message ?? '' })));
+    }}).pipe(
+      map((response) => ({
+        success: true,
+        message: response.message ??
+          'La contraseña se actualizó correctamente.'
+      })),
+      catchError((error: HttpErrorResponse) => {
+        const cuerpo = error.error as {
+          message?: string;
+          mensaje?: string;
+        } | null;
+
+        return of({
+          success: false,
+          message:
+            cuerpo?.message ??
+            cuerpo?.mensaje ??
+            'No fue posible cambiar la contraseña.'
+        });
+      })
+    );
   }
 
   registrarUltimoAcceso(id: number): Observable<Usuario | null> {
@@ -92,7 +119,7 @@ export class UsuarioService {
   }
 
   private request(data: UsuarioCrearData | UsuarioActualizarData, usuarioId = 0): UsuarioRegistroRequest {
-    return {
+    const request: UsuarioRegistroRequest = {
       usuarioId,
       dni: data.nombreUsuario.trim(),
       nombres: data.nombres.trim(),
@@ -102,6 +129,13 @@ export class UsuarioService {
       telefono: data.telefono?.trim() || undefined,
       rolId: data.rolId
     };
+
+    if ('contraseniaTemporal' in data) {
+      request.contraseniaTemporal =
+        data.contraseniaTemporal;
+    }
+
+    return request;
   }
 
   private mapUsuario(item: UsuarioResponse): Usuario {
@@ -111,7 +145,7 @@ export class UsuarioService {
       nombres: item.nombres ?? '',
       apellidos: item.apellidos ?? '',
       correo: item.correo ?? '',
-      telefono: '',
+      telefono: item.telefono ?? '',
       rolId: item.rolId ?? 0,
       passwordHash: '',
       esSistema: item.esSistema ?? false,

@@ -24,6 +24,7 @@ type ISize = 'small' | 'medium' | 'large';
 })
 export class AgrihusaButtonComponent {
   @Input() texto = 'Aceptar';
+  @Input() ariaLabel = '';
   @Input() disabled = false;
   @Input() loading = false;
   @Input() loadingTexto = 'Guardado...';
@@ -84,6 +85,12 @@ export class AgrihusaButtonComponent {
   get localTexto(): string {
     if (this.esIcono) return '';
     return this.texto;
+  }
+
+  get accessibleLabel(): string {
+    return this.ariaLabel.trim() ||
+      this.texto.trim() ||
+      'Acción';
   }
 
   get isDisabled(): boolean {

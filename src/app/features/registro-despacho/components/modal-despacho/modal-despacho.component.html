@@ -308,11 +308,20 @@
               <span class="text-danger">*</span>
             </label>
 
-            <ng-select inputId="variedadDespacho" [items]="variedades" bindLabel="nombre" bindValue="id"
-              placeholder="-- SELECCIONAR --" [clearable]="true" [searchable]="true" [readonly]="true"
-              formControlName="variedadId" [class.is-invalid]="
-                controlInvalido('variedadId')
-              "></ng-select>
+            <ng-select
+              inputId="variedadDespacho"
+              [items]="variedades"
+              bindLabel="nombre"
+              bindValue="id"
+              placeholder="-- SELECCIONAR --"
+              [clearable]="true"
+              [searchable]="true"
+              [readonly]="variedades.length === 0"
+              formControlName="variedadId"
+              [class.is-invalid]="
+                  controlInvalido('variedadId')
+                "
+            ></ng-select>
 
             <div *ngIf="controlInvalido('variedadId')" class="invalid-feedback d-block">
               Selecciona una variedad del producto.

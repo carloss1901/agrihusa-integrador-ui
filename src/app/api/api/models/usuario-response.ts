@@ -4,6 +4,7 @@ export interface UsuarioResponse {
   activo?: boolean;
   apellidos?: string;
   correo?: string;
+  telefono?: string;
   esSistema?: boolean;
   estadoDsc?: string;
   estadoId?: number;

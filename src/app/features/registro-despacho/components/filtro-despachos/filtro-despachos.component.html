@@ -87,7 +87,8 @@
                     </label>
 
                     <ng-select
-                      inputId="filtroDespachoCliente"
+                      labelForId="filtroDespachoCliente"
+                      ariaLabel="Cliente"
                       [items]="clientes"
                       bindLabel="razonSocial"
                       bindValue="id"
@@ -109,7 +110,8 @@
                     </label>
 
                     <ng-select
-                      inputId="filtroDespachoProducto"
+                      labelForId="filtroDespachoProducto"
+                      ariaLabel="Producto"
                       [items]="productos"
                       bindLabel="nombre"
                       bindValue="id"
@@ -131,7 +133,8 @@
                     </label>
 
                     <ng-select
-                      inputId="filtroDespachoSituacion"
+                      labelForId="filtroDespachoSituacion"
+                      ariaLabel="Situación"
                       [items]="situaciones"
                       bindLabel="descripcion"
                       bindValue="id"
@@ -153,7 +156,8 @@
                     </label>
 
                     <ng-select
-                      inputId="filtroDespachoEstado"
+                      labelForId="filtroDespachoEstado"
+                      ariaLabel="Estado"
                       class="text-uppercase"
                       [items]="estados"
                       bindLabel="descripcion"
