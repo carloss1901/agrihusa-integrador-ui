@@ -10,7 +10,8 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: Boolean(process.env['CI']),
   retries: process.env['CI'] ? 2 : 0,
-  workers: process.env['CI'] ? 1 : undefined,
+  workers: 1,
+  timeout: 60000,
 
   reporter: [
     ['list'],
@@ -26,7 +27,7 @@ export default defineConfig({
   use: {
     baseURL:
       process.env['E2E_BASE_URL'] ??
-      'http://127.0.0.1:4200',
+      'http://localhost:4200',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
@@ -51,8 +52,8 @@ export default defineConfig({
 
   webServer: {
     command:
-      'npm start -- --host 127.0.0.1 --port 4200',
-    url: 'http://127.0.0.1:4200',
+    'npm start -- --host localhost --port 4200',
+    url: 'http://localhost:4200',
     reuseExistingServer: true,
     timeout: 120000
   }
